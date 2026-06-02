@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="../bilder_und_videos/favicon.svg">
+    <title>Das Meer</title>
+    <style>
+        /* Einblend-Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 100px 20px 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* Hintergrund: Dunkles Blau-Verlauf (da externe Bilder oft blockiert werden) */
+            background: linear-gradient(135deg, #001a33 0%, #003366 100%);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #ffffff;
+        }
+
+        /* Fester Home-Button oben links */
+        .home-button {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            text-decoration: none;
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 24px;
+            border-radius: 30px;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .home-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 700px;
+            text-align: center;
+            background-color: rgba(0, 15, 30, 0.75);
+            padding: 60px;
+            border-radius: 40px;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 1.8s ease-out forwards;
+        }
+
+        h1.main-title {
+            font-size: clamp(3em, 8vw, 5.5em);
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        h2.sub-title {
+            font-size: 1.3em;
+            font-weight: 300;
+            color: #b0e0e6;
+            margin-bottom: 50px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+
+        p {
+            font-size: 1.2em;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            color: #f5f5f5;
+        }
+
+        .highlight-box {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 20px;
+            margin: 40px 0;
+            border-left: 4px solid #b0e0e6;
+            text-align: left;
+        }
+
+        .nature-protection {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 30px;
+            font-style: italic;
+            color: #d1eaee;
+        }
+    </style>
+</head>
+<body>
+
+<a href="index.html" class="home-button">← Zurück nach Hause</a>
+<a href="erde.html" class="home-button" style="left: 230px;">🌍 Zur Erde</a>
+<a href="Luft.html" class="home-button" style="left: 380px;">🌬️ Zur Luft</a>
+
+<div class="container">
+    <h1 class="main-title">Das Meer</h1>
+    <h2 class="sub-title">Unendliches Blau</h2>
+
+    <p>
+        Es gibt kaum einen Ort, der uns so unmittelbar zur Ruhe kommen lässt wie das Meer. Das rhythmische Rauschen der Wellen wirkt wie ein Herzschlag der Natur, der unseren eigenen Puls verlangsamt. Es ist weit mehr als nur Wasser – es ist ein Ort der Sehnsucht und ein unendlicher Raum für unsere Träume.
+    </p>
+
+    <p>
+        In den verborgenen Tiefen, weit unter der glitzernden Oberfläche, ruht eine Welt, die wir erst in Ansätzen verstehen. Dort unten, wo kein Sonnenstrahl mehr hingelangt, existieren Lebensformen, die wie aus einer anderen Welt wirken. Die Tiefsee ist das letzte große Mysterium unseres Planeten.
+    </p>
+
+    <div class="highlight-box">
+        Seit Anbeginn der Menschheit zieht uns das weite Blau magisch an. Es ernährt uns, es verbindet Kontinente und es fordert unseren Respekt. Wer einmal am Ufer stand und den Blick am Horizont verloren hat, weiß: Das Meer gibt uns das Gefühl von Freiheit zurück.
+    </div>
+
+    <p class="nature-protection">
+        Doch diese Unendlichkeit ist zerbrechlich. Unsere Meere sind die Lungen unseres Planeten. Plastikmüll und der Klimawandel bedrohen dieses kostbare Gleichgewicht. Es liegt in unserer Hand, diesen Lebensraum zu bewahren.
+    </p>
+</div>
+</body>
+</html>
