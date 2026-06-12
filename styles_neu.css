@@ -1,11 +1,11 @@
-.menu{
+.menu {
     width: 100%;
     display: flex;
     flex-wrap: wrap;
 }
 
 
-.menu div{
+.menu div {
     flex: 1;
     background-color: #ec831b;
     border: 0.1em solid black;
@@ -15,19 +15,32 @@
     border-radius: 0.5em;
 }
 
-.menu div a{
+.menu div a {
     text-decoration: none;
-    color:white;
+    color: white;
     font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
     text-align: center;
     display: block;
 }
 
-h1{
-    clear:left;
+h1 {
+    clear: left;
 }
-
-.absatz{
-
- background-color: gray;
+.inhalt{
+    display: flex;
+    flex-direction: column;
+}
+.absatz {
+    flex: 1;
+    margin: 0.5em;
+    padding: 1em;
+    background-color: #112f53;
+    color: white;
+    border-radius: 0.5em;
+    border: 0.1em solid #786d6d;
+    font-family: sans-serif;
+}
+.absatz a{
+    color: white;
 }
