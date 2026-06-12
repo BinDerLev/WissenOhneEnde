@@ -1,14 +1,16 @@
-body{
+body {
     margin: 0;
     padding: 0;
     font-size: 2vw;
     font-family: 'Courier New', Courier, monospace;
     color: white;
 }
-h1{
+
+h1 {
     font-family: 'Times New Roman', Times, serif;
     margin-top: 0;
 }
+
 .background {
     z-index: -1;
     margin: 0;
@@ -29,14 +31,15 @@ body.glow {
     background: linear-gradient(0deg, #12100c, #10152e);
 
 }
-body.glow .absatz{
+
+body.glow .absatz {
     box-shadow: 0 0 10px 5px rgb(40 58 69 / 0.26),
     0 0 30px 25px rgb(57 30 37 / 0.4);
 
     border: 5px solid red;
 }
 
-body.glow img{
+body.glow img {
     border-radius: 50%;
     box-shadow: 0 0 10px 5px rgb(255 255 255 / 0.26),
     0 0 30px 1em rgb(7 7 255 / 0.4);
