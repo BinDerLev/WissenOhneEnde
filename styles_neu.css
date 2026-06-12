@@ -1,13 +1,22 @@
+.start{
+    background: linear-gradient(
+            135deg,
+            #227ce4,
+            #00fff5);
+}
+
+
 .menu {
     width: 100%;
     display: flex;
     flex-wrap: wrap;
+    background-color: white;
 }
 
 
 .menu div {
     flex: 1;
-    background-color: #ec831b;
+    background-color: #eab88d;
     border: 0.1em solid black;
     width: 13em;
     margin: 0.5em;
