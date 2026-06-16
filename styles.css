@@ -1,4 +1,4 @@
-body{
+body {
     background: linear-gradient(
             135deg,
             #013a6e,
@@ -8,7 +8,7 @@ body{
 
 .menu {
     width: 100%;
-    display:flex;
+    display: flex;
     flex-wrap: wrap;
     background-color: transparent;
 }
@@ -41,12 +41,14 @@ h1 {
     color: #f6e8c9;
     text-shadow: 0 0 1em rgb(255 255 255 / 0.41);
 }
-.inhalt{
-    display:grid;
-   grid-template-columns:
-   repeat(auto-fit,minmax(20rem,1fr));
+
+.inhalt {
+    display: grid;
+    grid-template-columns:
+   repeat(auto-fit, minmax(20rem, 1fr));
 
 }
+
 .absatz {
     margin: 0.5em;
     padding: 1em;
@@ -102,11 +104,36 @@ h1 {
     border: 0.1em solid #ffffff;
 }
 
-.absatz a{
+.absatz a {
     color: white;
 }
 
-.rund{
+.rund {
     border-radius: 50%;
 }
+
+.diagramm {
+    border-radius: 0.5em;
+
+}
+
+.text_mit_bild {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+
+    grid-gap: 1em;
+}
+
+@media (min-width: 60em) {
+    .text_mit_bild {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.text_mit_bild img {
+    width: 100%;
+
+    height: auto;
+}
+
 
