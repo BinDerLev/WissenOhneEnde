@@ -16,8 +16,9 @@ body {
 
 .menu div {
     flex: 1;
-    background-color: rgb(234 184 141 / 0.65);
-    border: 0.1em solid black;
+   /* background-color: rgb(0 255 241 / 49%);*/
+    background: linear-gradient(-20deg, rgb(26 0 255 / 75%), rgb(0 255 241 / 49%));
+    border: 0.1em solid #71a7e4;
     width: 13em;
     margin: 0.5em;
     padding: 0.5em;
@@ -55,7 +56,7 @@ h1 {
     /*background-color: rgb(17 47 83 / 0.33);*/
     color: white;
     border-radius: 0.5em;
-    border: 0.1em solid #ef1313;
+    border: 0.1em solid #23ccd2b0;
     font-family: sans-serif;
     box-shadow: 0 0 1em rgb(255 255 255 / 0.41);
     background: linear-gradient(
@@ -112,10 +113,7 @@ h1 {
     border-radius: 50%;
 }
 
-.diagramm {
-    border-radius: 0.5em;
 
-}
 
 .quelle{
     color: rgb(255 255 255 / 0.8);
@@ -143,8 +141,17 @@ h1 {
 }
 
 .bild_container img {
+    height: 100%;
     width: 100%;
+    object-fit: cover;
+    border: .2em solid green;
+}
+
+.bild_container img.diagramm {
     height: auto;
+    border-radius: 0.5em;
+    object-fit: contain;
+    border: none;
 }
 
 
