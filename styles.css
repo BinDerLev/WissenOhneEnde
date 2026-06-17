@@ -129,7 +129,7 @@ h1 {
     border-radius: 0.5em;
 }
 
-.text_mit_bild {
+.bild_container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
 
@@ -137,12 +137,12 @@ h1 {
 }
 
 @media (min-width: 60em) {
-    .text_mit_bild {
+    .bild_container {
         grid-template-columns: 1fr 1fr;
     }
 }
 
-.text_mit_bild img {
+.bild_container img {
     width: 100%;
     height: auto;
 }
