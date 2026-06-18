@@ -1,4 +1,4 @@
-body{
+body {
     background: linear-gradient(
             135deg,
             #013a6e,
@@ -8,7 +8,7 @@ body{
 
 .menu {
     width: 100%;
-    display:flex;
+    display: flex;
     flex-wrap: wrap;
     background-color: transparent;
 }
@@ -16,8 +16,9 @@ body{
 
 .menu div {
     flex: 1;
-    background-color: rgb(234 184 141 / 0.65);
-    border: 0.1em solid black;
+   /* background-color: rgb(0 255 241 / 49%);*/
+    background: linear-gradient(-20deg, rgb(26 0 255 / 75%), rgb(0 255 241 / 49%));
+    border: 0.1em solid #71a7e4;
     width: 13em;
     margin: 0.5em;
     padding: 0.5em;
@@ -41,19 +42,21 @@ h1 {
     color: #f6e8c9;
     text-shadow: 0 0 1em rgb(255 255 255 / 0.41);
 }
-.inhalt{
-    display:grid;
-   grid-template-columns:
-   repeat(auto-fit,minmax(20rem,1fr));
+
+.inhalt {
+    display: grid;
+    grid-template-columns:
+   repeat(auto-fit, minmax(20rem, 1fr));
 
 }
+
 .absatz {
     margin: 0.5em;
     padding: 1em;
     /*background-color: rgb(17 47 83 / 0.33);*/
     color: white;
     border-radius: 0.5em;
-    border: 0.1em solid #ef1313;
+    border: 0.1em solid #23ccd2b0;
     font-family: sans-serif;
     box-shadow: 0 0 1em rgb(255 255 255 / 0.41);
     background: linear-gradient(
@@ -102,11 +105,53 @@ h1 {
     border: 0.1em solid #ffffff;
 }
 
-.absatz a{
+.absatz a {
     color: white;
 }
 
-.rund{
+.rund {
     border-radius: 50%;
 }
+
+
+
+.quelle{
+    color: rgb(255 255 255 / 0.8);
+    font-family: sans-serif;
+    font-size: 0.8em;
+    margin-left: 1em;
+}
+
+.foto {
+    border: 0.05em solid red;
+    border-radius: 0.5em;
+}
+
+.bild_container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+
+    grid-gap: 1em;
+}
+
+@media (min-width: 60em) {
+    .bild_container {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.bild_container img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    border: .2em solid green;
+}
+
+.bild_container img.diagramm {
+    height: auto;
+    border-radius: 0.5em;
+    object-fit: contain;
+    border: none;
+}
+
 
