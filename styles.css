@@ -16,7 +16,7 @@ body {
 .menu div {
     flex: 1;
    /* background-color: rgb(0 255 241 / 49%);*/
-    background: linear-gradient(-20deg, rgb(26 0 255 / 75%), rgb(0 255 241 / 49%));
+    background: linear-gradient(-15deg, rgb(26 0 255 / 75%), rgb(0 255 241 / 49%));
     border: 0.1em solid #71a7e4;
     width: 13em;
     margin: 0.5em;
