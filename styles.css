@@ -1,8 +1,50 @@
+/* Starfield Background */
+.starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000011;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 3s infinite;
+}
+
+/* Random sizes for stars */
+.star.size1 { width: 1px; height: 1px; }
+.star.size2 { width: 2px; height: 2px; }
+.star.size3 { width: 3px; height: 3px; }
+
+/* Blinking/Twinkling animation */
+@keyframes twinkle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+}
+
+/* Variation in animation timing */
+.star:nth-child(1) { animation-delay: 0s; }
+.star:nth-child(2) { animation-delay: 0.3s; }
+.star:nth-child(3) { animation-delay: 0.6s; }
+.star:nth-child(4) { animation-delay: 0.9s; }
+.star:nth-child(5) { animation-delay: 1.2s; }
+.star:nth-child(6) { animation-delay: 1.5s; }
+.star:nth-child(7) { animation-delay: 1.8s; }
+.star:nth-child(8) { animation-delay: 2.1s; }
+.star:nth-child(9) { animation-delay: 2.4s; }
+.star:nth-child(10) { animation-delay: 2.7s; }
+.star:nth-child(n+11) { 
+    animation-delay: calc((var(--index, 1) * 0.3s) % 3s);
+}
+
 body {
-    background: linear-gradient(
-            135deg,
-            #013a6e,
-            #00fff5);
+    background: #000011;
 }
 
 
@@ -157,5 +199,4 @@ h1 {
     object-fit: contain;
     border: none;
 }
-
 
