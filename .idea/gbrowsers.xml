@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GBrowserService"><![CDATA[{
+  "history": [
+    {
+      "name": "GBrowser - IntelliJ IDEs Plugin | Marketplace",
+      "url": "https://plugins.jetbrains.com/plugin/14458-gbrowser"
+    },
+    {
+      "name": "Gmail",
+      "url": "https://accounts.google.com/v3/signin/identifier?continue=https://mail.google.com/mail/u/0/&emr=1&followup=https://mail.google.com/mail/u/0/&osid=1&passive=1209600&service=mail&flowName=GlifWebSignIn&flowEntry=ServiceLogin&dsh=S-1707266585:1783859004250730#inbox"
+    },
+    {
+      "name": "Wikipedia",
+      "url": "https://www.wikipedia.org/"
+    },
+    {
+      "name": "Satrun",
+      "url": "http://localhost:63342/Wissen%20Ohne%20Ende/html/Saturn.html?_ijt=3821tvbpfialq4pqr4qp0td1dl"
+    },
+    {
+      "name": "Die Sonne",
+      "url": "http://localhost:63342/Wissen%20Ohne%20Ende/html/Sonne.html?_ijt=3821tvbpfialq4pqr4qp0td1dl"
+    },
+    {
+      "name": "GBrowser Plugin for JetBrains IDEs | JetBrains Marketplace",
+      "url": "https://plugins.jetbrains.com/plugin/14458-gbrowser/versions#tabs"
+    },
+    {
+      "name": "GBrowser Plugin for JetBrains IDEs | JetBrains Marketplace",
+      "url": "https://plugins.jetbrains.com/plugin/14458-gbrowser/versions"
+    },
+    {
+      "name": "Wissen Ohne Ende",
+      "url": "http://localhost:63342/Wissen%20Ohne%20Ende/html/Das%20Meer.html?_ijt=qpmdueemhig39oa54mtfbmu7vl"
+    }
+  ],
+  "bookmarks": [
+    {
+      "url": "https://plugins.jetbrains.com/plugin/14458-gbrowser/versions#tabs",
+      "name": "GBrowser Plugin for JetBrains IDEs | JetBrains Marketplace"
+    }
+  ]
+}]]></component>
+</project>
