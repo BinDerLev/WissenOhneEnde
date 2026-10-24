@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Background -->
+  <rect width="100" height="100" fill="#1a472a" rx="15"/>
+
+  <!-- Water waves -->
+  <path d="M 10 50 Q 20 45, 30 50 T 50 50 T 70 50 T 90 50" stroke="#3fa86f" stroke-width="2" fill="none"/>
+  <path d="M 10 60 Q 20 55, 30 60 T 50 60 T 70 60 T 90 60" stroke="#3fa86f" stroke-width="1.5" opacity="0.6" fill="none"/>
+
+  <!-- Sunken ship wheel -->
+  <circle cx="50" cy="35" r="12" fill="none" stroke="#d4af37" stroke-width="2"/>
+  <line x1="50" y1="23" x2="50" y2="47" stroke="#d4af37" stroke-width="1.5"/>
+  <line x1="38" y1="35" x2="62" y2="35" stroke="#d4af37" stroke-width="1.5"/>
+  <circle cx="50" cy="35" r="2" fill="#d4af37"/>
+
+  <!-- Treasure chest -->
+  <rect x="35" y="75" width="30" height="15" fill="#8b6914" rx="2"/>
+  <path d="M 35 75 Q 50 70, 65 75" fill="#a0771f"/>
+
+  <!-- Coins/treasure -->
+  <circle cx="45" cy="82" r="2" fill="#ffdd44"/>
+  <circle cx="55" cy="84" r="2" fill="#ffdd44"/>
+
+  <!-- Anchor -->
+  <path d="M 20 45 L 20 65" stroke="#696969" stroke-width="2"/>
+  <path d="M 15 65 L 25 65" stroke="#696969" stroke-width="2"/>
+  <circle cx="15" cy="65" r="2" fill="#696969"/>
+  <circle cx="25" cy="65" r="2" fill="#696969"/>
+</svg>

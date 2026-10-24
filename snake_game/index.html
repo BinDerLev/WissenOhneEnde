@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+</head>
+<body>
+    <div class="container">
+        <header class="topbar">
+            <div class="title-wrap">
+                <h1>🐍 Snake</h1>
+                <button id="settingsToggle" class="settings-toggle" type="button" aria-label="Einstellungen öffnen">⚙️</button>
+            </div>
+
+            <div class="score-row">
+                <div class="score-box">
+                    <span>Punkte</span>
+                    <strong id="score">0</strong>
+                </div>
+                <div class="score-box">
+                    <span>High Score</span>
+                    <strong id="highScore">0</strong>
+                </div>
+                <div class="score-box">
+                    <span>Münzen</span>
+                    <strong id="coinCount">0</strong>
+                </div>
+                <div class="score-box">
+                    <span>Level</span>
+                    <strong id="levelDisplay">1</strong>
+                </div>
+            </div>
+        </header>
+
+        <div id="recordBanner" class="record-banner hidden" aria-live="polite"></div>
+
+        <div id="settingsPanel" class="settings-panel hidden">
+            <div class="settings-block">
+                <h2>Obst wählen</h2>
+                <div class="fruit-grid">
+                    <button class="fruit-option active" type="button" data-fruit="apple" aria-pressed="true">🍎 Apfel (+10)</button>
+                    <button class="fruit-option" type="button" data-fruit="banana" aria-pressed="false">🍌 Banane (+20)</button>
+                    <button class="fruit-option" type="button" data-fruit="grape" aria-pressed="false">🍇 Traube (+30)</button>
+                    <button class="fruit-option" type="button" data-fruit="orange" aria-pressed="false">🍊 Orange (+40)</button>
+                </div>
+            </div>
+
+            <div class="settings-block">
+                <h2>Geschwindigkeit</h2>
+                <label class="speed-control" for="speedSlider">
+                    <span>Tempo</span>
+                    <input id="speedSlider" type="range" min="80" max="220" step="10" value="150">
+                </label>
+                <div class="speed-value"><span id="speedValue">150 ms</span></div>
+            </div>
+
+            <div class="settings-block">
+                <h2>Upgrades</h2>
+                <div class="upgrade-grid">
+                    <button class="upgrade-btn" data-upgrade="gold" type="button">Goldbonus <strong id="goldCost">25</strong></button>
+                    <button class="upgrade-btn" data-upgrade="shield" type="button">Schild <strong id="shieldCost">30</strong></button>
+                    <button class="upgrade-btn" data-upgrade="tempo" type="button">Tempo <strong id="tempoCost">20</strong></button>
+                </div>
+            </div>
+
+            <div class="settings-block">
+                <h2>Aktiv</h2>
+                <div id="activePowerUp" class="active-powerup">keine</div>
+            </div>
+        </div>
+
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+        <div class="controls">
+            <button id="startBtn" class="btn btn-start" type="button">Start Game</button>
+            <button id="pauseBtn" class="btn btn-pause" type="button" disabled>Pause</button>
+            <button id="resetBtn" class="btn btn-reset" type="button">Neustart</button>
+        </div>
+
+        <div class="instructions">
+            <h3>Anleitung:</h3>
+            <p>🎮 Verwende die <strong>Pfeiltasten</strong> oder <strong>WASD</strong>, um die Schlange zu steuern.</p>
+            <p>🍏 Iss das gewählte Obst, um Punkte zu sammeln.</p>
+            <p>⚡ Sammle Power-Ups für Schild, Langsamkeit oder Doppelpunkte.</p>
+            <p>⚠️ Triff nicht die Wand oder dich selbst.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

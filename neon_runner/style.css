@@ -1,0 +1,210 @@
+:root {
+    --bg-1: #050816;
+    --bg-2: #0d1634;
+    --panel: rgba(12, 19, 40, 0.9);
+    --panel-border: rgba(89, 196, 255, 0.8);
+    --cyan: #63e6ff;
+    --purple: #b77bff;
+    --pink: #ff52c2;
+    --green: #63ffb0;
+    --red: #ff5d7a;
+    --gold: #ffd166;
+    --text: #edf7ff;
+    --muted: #a7bad2;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(123, 123, 255, 0.25), transparent 30%),
+        radial-gradient(circle at 80% 10%, rgba(255, 82, 194, 0.18), transparent 28%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2) 50%, #080d1f);
+    color: var(--text);
+}
+
+.game-shell {
+    width: min(92vw, 980px);
+    background: rgba(11, 16, 35, 0.9);
+    border: 2px solid var(--panel-border);
+    border-radius: 22px;
+    box-shadow: 0 20px 50px rgba(10, 15, 33, 0.8), 0 0 30px rgba(99, 230, 255, 0.3);
+    padding: 20px 22px 24px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.logo-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    font-size: 1.7rem;
+    background: linear-gradient(135deg, rgba(99, 230, 255, 0.2), rgba(183, 123, 255, 0.2));
+    border: 2px solid rgba(99, 230, 255, 0.8);
+    box-shadow: 0 0 20px rgba(99, 230, 255, 0.25);
+}
+
+.eyebrow {
+    margin: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+h1 {
+    margin: 3px 0 0;
+    font-size: clamp(1.9rem, 3vw, 2.8rem);
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(99, 230, 255, 0.3);
+}
+
+.hud {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.stat-box {
+    min-width: 108px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: rgba(17, 27, 49, 0.8);
+    border: 1px solid rgba(99, 230, 255, 0.35);
+    text-align: center;
+    box-shadow: inset 0 0 12px rgba(99, 230, 255, 0.08);
+}
+
+.stat-box span {
+    display: block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 2px;
+}
+
+.stat-box strong {
+    font-size: 1.4rem;
+    color: var(--cyan);
+    text-shadow: 0 0 10px rgba(99, 230, 255, 0.5);
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: linear-gradient(180deg, #070d1d 0%, #111d3f 65%, #1d2a4a 100%);
+    border: 3px solid rgba(99, 230, 255, 0.6);
+    border-radius: 16px;
+    box-shadow: inset 0 0 25px rgba(99, 230, 255, 0.12);
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+.btn {
+    appearance: none;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-size: 0.98rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #08101d;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+.btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.btn-start {
+    background: linear-gradient(135deg, var(--green), #6cf0a9);
+    box-shadow: 0 8px 18px rgba(99, 255, 176, 0.35);
+}
+
+.btn-pause {
+    background: linear-gradient(135deg, #ffd166, #ffc243);
+    box-shadow: 0 8px 18px rgba(255, 209, 102, 0.35);
+}
+
+.btn-reset {
+    background: linear-gradient(135deg, #ff7aa2, #ff5d7a);
+    box-shadow: 0 8px 18px rgba(255, 93, 122, 0.35);
+}
+
+.instructions {
+    margin-top: 20px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    background: rgba(17, 24, 41, 0.82);
+    border: 1px solid rgba(183, 123, 255, 0.38);
+}
+
+.instructions h2 {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+    color: var(--cyan);
+}
+
+.instructions p {
+    margin: 6px 0;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+    .game-shell {
+        padding: 18px 14px 20px;
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .hud {
+        justify-content: space-between;
+    }
+
+    .stat-box {
+        flex: 1 1 30%;
+        min-width: 0;
+    }
+}
+

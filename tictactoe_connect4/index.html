@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe & Vier Gewinnt</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+</head>
+<body>
+    <div class="container">
+        <!-- Menü Screen -->
+        <div id="menuScreen" class="screen active">
+            <h1>🎮 Wähle dein Spiel</h1>
+            <div class="menu-buttons">
+                <button class="menu-btn" onclick="selectGame('tictactoe')">
+                    <div class="menu-title">❌ Tic-Tac-Toe</div>
+                    <div class="menu-desc">3x3 Gitter<br>Klassisches Spiel</div>
+                </button>
+                <button class="menu-btn" onclick="selectGame('connect4')">
+                    <div class="menu-title">🟡 Vier Gewinnt</div>
+                    <div class="menu-desc">6x7 Gitter<br>Strategisches Spiel</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen">
+            <div class="header">
+                <h1 id="gameTitle">Tic-Tac-Toe</h1>
+                <div class="game-stats">
+                    <div class="stat-box">
+                        <span id="currentPlayer">Spieler: X</span>
+                    </div>
+                    <div class="stat-box" id="scoreBox" style="display: none;">
+                        <span>Score - You: <span id="playerScore">0</span> | AI: <span id="aiScore">0</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-wrapper">
+                <div id="gameBoard" class="game-board"></div>
+            </div>
+
+            <div class="game-mode">
+                <label>
+                    <input type="radio" name="gameMode" value="pvp" checked onchange="changeGameMode('pvp')">
+                    👥 Spieler vs Spieler
+                </label>
+                <label>
+                    <input type="radio" name="gameMode" value="pva" onchange="changeGameMode('pva')">
+                    🤖 Spieler vs AI
+                </label>
+            </div>
+
+            <div class="controls">
+                <button id="newGameBtn" class="btn btn-new">Neues Spiel</button>
+                <button id="menuBtn" class="btn btn-menu">Menü</button>
+            </div>
+
+            <div class="instructions">
+                <p id="gameInstructions">Klicke auf ein Feld um deinen Zug zu machen. Wer 3 in einer Reihe hat, gewinnt!</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+    
+
+</body>
+</html>
+

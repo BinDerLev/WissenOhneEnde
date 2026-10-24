@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asteroids</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+</head>
+<body>
+    <div class="container">
+        <h1>⭐ ASTEROIDS</h1>
+        <div class="game-info">
+            <div class="score-box">
+                <span>Score:</span>
+                <div id="score">0</div>
+            </div>
+            <div class="wave-box">
+                <span>Wave:</span>
+                <div id="wave">1</div>
+            </div>
+            <div class="lives-box">
+                <span>Lives:</span>
+                <div id="lives">3</div>
+            </div>
+            <div class="coin-box">
+                <span>Münzen:</span>
+                <div id="coins">0</div>
+            </div>
+            <div class="best-box">
+                <span>Best:</span>
+                <div id="bestScore">0</div>
+            </div>
+        </div>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div class="controls">
+            <button id="startBtn" class="btn btn-start">Start Game</button>
+            <button id="pauseBtn" class="btn btn-pause" disabled>Pause</button>
+            <button id="resetBtn" class="btn btn-reset">Neustart</button>
+        </div>
+        <div class="upgrade-panel">
+            <button type="button" class="upgrade-btn" data-upgrade="ship">🚀 Schiff + 35</button>
+            <button type="button" class="upgrade-btn" data-upgrade="shot">🔫 Schuss + 40</button>
+            <button type="button" class="upgrade-btn" data-upgrade="shield">🛡️ Schild + 45</button>
+        </div>
+        <div class="instructions">
+            <h3>Anleitung:</h3>
+            <p>⬆️ <strong>Pfeiltaste UP / W</strong> - Raumschiff vorwärts bewegen</p>
+            <p>⬅️➡️ <strong>Pfeiltasten LEFT/RIGHT / A/D</strong> - Raumschiff drehen</p>
+            <p>🔫 <strong>Leerzeichen</strong> - Schießen</p>
+            <p>💥 Zerstöre alle Asteroiden um zur nächsten Wave zu gelangen</p>
+            <p>❤️ Du hast 3 Leben - Asteroiden zerstören das Schiff</p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

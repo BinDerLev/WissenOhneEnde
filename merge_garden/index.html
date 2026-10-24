@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Merge Garden Deluxe</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Süchtiges Browser-Spiel</p>
+          <h1>Merge Garden</h1>
+        </div>
+        <div class="header-actions">
+          <button id="soundBtn" class="secondary-btn" aria-label="Sound umschalten">🔊</button>
+          <button id="resetBtn" class="secondary-btn">Neustart</button>
+        </div>
+      </header>
+
+      <section class="stats-bar">
+        <div class="stat-box">
+          <span>Punkte</span>
+          <strong id="score">0</strong>
+        </div>
+        <div class="stat-box">
+          <span>Münzen</span>
+          <strong id="coins">0</strong>
+        </div>
+        <div class="stat-box">
+          <span>Runde</span>
+          <strong id="round">1</strong>
+        </div>
+        <div class="stat-box highlight">
+          <span>Aktuell</span>
+          <div id="nextTile" class="next-tile">🌱</div>
+        </div>
+        <div class="stat-box highlight">
+          <span>Combo</span>
+          <strong id="combo">x1</strong>
+        </div>
+      </section>
+
+      <div class="game-layout">
+        <main class="board-panel">
+          <div id="board" class="board" aria-label="Garden board"></div>
+        </main>
+
+        <aside class="shop-panel">
+          <h2>Upgrades</h2>
+          <div class="upgrade-list">
+            <button class="upgrade-btn" data-upgrade="expand">
+              <span>Mehr Platz</span>
+              <strong id="expandCost">20</strong>
+            </button>
+            <button class="upgrade-btn" data-upgrade="bonus">
+              <span>Goldbonus</span>
+              <strong id="bonusCost">25</strong>
+            </button>
+            <button class="upgrade-btn" data-upgrade="luck">
+              <span>Glücksboost</span>
+              <strong id="luckCost">30</strong>
+            </button>
+            <button class="upgrade-btn" data-upgrade="auto">
+              <span>Auto-Spawn</span>
+              <strong id="autoCost">35</strong>
+            </button>
+          </div>
+          <div class="shop-footer">
+            <p>Verbessere deinen Garten und halte den Flow am Leben.</p>
+          </div>
+        </aside>
+      </div>
+
+      <footer class="legend">
+        <p>1. Platziere die Pflanze auf ein leeres Feld.</p>
+        <p>2. Baue gleiche Pflanzen zu stärkeren Varianten zusammen.</p>
+        <p>3. Kaufe Upgrades und halte deinen Combo-Boost aktiv.</p>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f8f5">
+    <meta name="description" content="Deutsch und Mathe Schritt für Schritt verstehen und üben – passend für die Klassen 1 bis 10.">
+    <title>LernKompass – Deutsch und Mathe üben</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+       <header class="topbar">
+         <a class="brand" href="#" id="home-link" aria-label="LernKompass Startseite">
+           <span class="brand-mark" aria-hidden="true">∑</span>
+           <span>Lern<span class="brand-light"> Kompass</span></span>
+         </a>
+         <div class="topbar-actions">
+           <div class="topbar-note"><span class="status-dot"></span> Dein Lernplatz</div>
+           <button class="parent-button" id="parent-button" type="button">Elternansicht</button>
+         </div>
+       </header>
+
+      <main id="app" class="main-content">
+        <section id="dashboard" aria-labelledby="welcome-title">
+          <div class="welcome-row">
+            <div>
+              <p class="eyebrow" id="welcome-eyebrow">DEIN MATHE-LERNPLATZ</p>
+              <h1 id="welcome-title">Mathe, Schritt für Schritt.</h1>
+              <p class="intro">Wähle dein Fach und deine Klasse und finde passende Übungen.</p>
+            </div>
+            <div class="progress-card" aria-live="polite">
+              <span class="progress-icon" aria-hidden="true">✓</span>
+              <div>
+                <strong id="completed-count">0</strong>
+                <span>Einheiten geschafft</span>
+              </div>
+            </div>
+            <div class="progress-card" aria-live="polite">
+              <span class="progress-icon" aria-hidden="true">🪙</span>
+              <div>
+                <strong id="coin-count">0</strong>
+                <span>Münzen</span>
+              </div>
+            </div>
+
+          </div>
+
+          <section class="grade-panel" aria-labelledby="grade-heading">
+            <div>
+              <p class="eyebrow">DEIN NIVEAU</p>
+              <h2 id="grade-heading">Welche Klasse besuchst du?</h2>
+              <p class="section-copy">Die Themen passen sich deiner Auswahl an.</p>
+            </div>
+            <div class="select-controls">
+              <label class="select-wrap" for="subject-select">
+                <span class="sr-only">Fach auswählen</span>
+                <select id="subject-select" name="subject">
+                  <option value="math">Mathe</option>
+                  <option value="german">Deutsch</option>
+                </select>
+              </label>
+              <label class="select-wrap" for="grade-select">
+                <span class="sr-only">Klassenstufe auswählen</span>
+                <select id="grade-select" name="grade">
+                  <option value="1">Klasse 1</option>
+                  <option value="2">Klasse 2</option>
+                  <option value="3">Klasse 3</option>
+                  <option value="4">Klasse 4</option>
+                  <option value="5">Klasse 5</option>
+                  <option value="6">Klasse 6</option>
+                  <option value="7">Klasse 7</option>
+                  <option value="8">Klasse 8</option>
+                  <option value="9">Klasse 9</option>
+                  <option value="10">Klasse 10</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <div class="topics-heading">
+            <div>
+              <p class="eyebrow">LERNEN UND ÜBEN</p>
+              <h2 id="topics-title">Themen für Klasse 5</h2>
+            </div>
+            <span class="topic-count" id="topic-count">0 Themen</span>
+          </div>
+          <div id="topic-grid" class="topic-grid"></div>
+        </section>
+
+        <section id="lesson" class="lesson-view" hidden aria-live="polite"></section>
+        <section id="parent-report" class="parent-report" hidden aria-labelledby="parent-report-title" aria-live="polite"></section>
+      </main>
+
+      <footer class="footer">
+        <span>LernKompass</span>
+        <span>In deinem Tempo. Auf deinem Niveau.</span>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>2048</h1>
+                <p class="subtitle">Kombiniere Zahlen um 2048 zu erreichen!</p>
+            </div>
+            <div class="score-section">
+                <div class="score-box">
+                    <span>Score</span>
+                    <div id="score">0</div>
+                </div>
+                <div class="score-box">
+                    <span>Best</span>
+                    <div id="bestScore">0</div>
+                </div>
+                <div class="score-box">
+                    <span>Münzen</span>
+                    <div id="coins">0</div>
+                </div>
+                <div class="score-box">
+                    <span>Ziel</span>
+                    <div id="goal">2048</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-panel">
+            <div class="status-box">
+                <span>Combo</span>
+                <strong id="combo">x1</strong>
+            </div>
+            <div class="status-box">
+                <span>Level</span>
+                <strong id="level">1</strong>
+            </div>
+            <div class="status-box">
+                <span>Upgrade</span>
+                <strong id="upgradeState">Ready</strong>
+            </div>
+        </div>
+
+        <div class="game-wrapper">
+            <div id="gameBoard" class="game-board"></div>
+        </div>
+
+        <div class="controls">
+            <button id="newGameBtn" class="btn btn-new">Neues Spiel</button>
+            <button id="undoBtn" class="btn btn-undo">↶ Rückgängig</button>
+            <button id="boostBtn" class="btn btn-boost">⚡ Boost</button>
+        </div>
+
+        <div class="upgrade-panel">
+            <button class="upgrade-btn" data-upgrade="multiplier">
+                <span>Combo Bonus</span>
+                <strong id="multiplierCost">20</strong>
+            </button>
+            <button class="upgrade-btn" data-upgrade="undo">
+                <span>Mehr Rückgängig</span>
+                <strong id="undoCost">25</strong>
+            </button>
+            <button class="upgrade-btn" data-upgrade="bonus">
+                <span>Gold Bonus</span>
+                <strong id="bonusCost">30</strong>
+            </button>
+        </div>
+
+        <div class="instructions">
+            <h3>Anleitung:</h3>
+            <p>⬆️⬇️⬅️➡️ Verwende die <strong>Pfeiltasten</strong> oder <strong>WASD</strong> um Kacheln zu bewegen</p>
+            <p>➕ Zwei gleiche Zahlen kombinieren sich zu ihrer Summe</p>
+            <p>⚡ Nutze Boosts und Upgrades, um höhere Kombinationen zu erzielen</p>
+            <p>🎯 Erreiche die Kachel 2048 um zu gewinnen!</p>
+            <p>❌ Wenn keine Züge mehr möglich sind, ist das Spiel vorbei</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

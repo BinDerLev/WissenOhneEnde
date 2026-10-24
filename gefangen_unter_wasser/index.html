@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <!-- Zeichenkodierung und Meta-Informationen für das Spiel -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gefangen Unter Wasser - Schatzsuche</title>
+
+    <!-- Stylesheets laden -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Favicon (Browser-Tab-Icon) -->
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+</head>
+<body>
+    <!-- Hauptcontainer für das gesamte Spiel -->
+    <div class="container">
+        <!-- Kopfzeile mit Titel und Logo -->
+        <header>
+            <img src="logo.svg" alt="Logo Gefangen Unter Wasser" class="logo">
+            <h1>🏴‍☠️ Gefangen Unter Wasser 🏴‍☠️</h1>
+            <p class="subtitle">Ein Textabenteuer zur Schatzsuche</p>
+        </header>
+
+        <!-- Hauptbereich des Spiels -->
+        <main>
+            <div class="game-window">
+                <!-- Ausgabefenster: Hier werden Spieltexte und Nachrichten angezeigt -->
+                <div class="output" id="output">
+                    <p>Du wachst in einer dunklen Höhle unter Wasser auf. Deine Augen gewöhnen sich langsam an die Finsternis...</p>
+                    <p>Verwende Befehle wie: <strong>schaue</strong>, <strong>gehe [richtung]</strong>, <strong>nimm [gegenstand]</strong>, <strong>benutze [gegenstand]</strong>, <strong>inventar</strong>, <strong>hilfe</strong></p>
+                </div>
+
+                <!-- Eingabebereich: Hier gibt der Spieler Befehle ein -->
+                <div class="input-area">
+                    <!-- Eingabefeld für Befehle mit autofocus (setzt Fokus automatisch auf dieses Feld) -->
+                    <label for="command-input">Befehl:</label>
+                    <input type="text" id="command-input" placeholder="Gib einen Befehl ein..." autofocus>
+                    <!-- Button zum Ausführen des Befehls -->
+                    <button id="submit-btn">Ausführen</button>
+                </div>
+
+                <!-- Info-Panel mit Inventar und Status -->
+                <div class="info-panel">
+                    <!-- Inventar-Anzeige: Zeigt aufgesammelte Gegenstände an -->
+                    <div class="inventory">
+                        <h3>📦 Inventar</h3>
+                        <div id="inventory-list">Leer</div>
+                    </div>
+                    <!-- Status-Anzeige: Zeigt Gesundheit und gelöste Rätsel an -->
+                    <div class="status">
+                        <h3>📊 Status</h3>
+                        <p>Gesundheit: <span id="health">100</span>%</p>
+                        <p>Rätsel gelöst: <span id="puzzles">0</span>/3</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript-Dateien laden (in dieser Reihenfolge wichtig!) -->
+    <!-- game.js: Enthält die Spiel-Logik und Spielzustände -->
+    <script src="game.js"></script>
+    <!-- parse.js: Enthält den CommandParser für Befehlsverarbeitung -->
+    <script src="parse.js"></script>
+    <!-- main.js: Enthält die Event-Listener und UI-Aktualisierungen -->
+    <script src="main.js"></script>
+
+    
+
+</body>
+</html>
+

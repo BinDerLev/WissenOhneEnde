@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Einfaches Schach</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+</head>
+<body>
+	<main class="container">
+	<h1>♟ Schach ♟</h1>
+	<button id="toggle-rules" class="btn-rules">📖 Anleitung</button>
+
+	<div id="rules-container" class="rules-container hidden">
+	  <div class="rules-content">
+	    <h2>Schach Anleitung</h2>
+	    <button id="close-rules" class="close-btn">&times;</button>
+
+	    <div class="rules-section">
+	      <h3>📋 Ziel des Spiels</h3>
+	      <p>Schach ist ein Strategiespiel zwischen zwei Spielern. Das Ziel ist es, den gegnerischen König so unter Druck zu setzen, dass dieser nicht mehr entkommen kann (Schachmatt).</p>
+	    </div>
+
+	    <div class="rules-section">
+	      <h3>♖ Die Schachfiguren</h3>
+	      <ul>
+	        <li><strong>König (♔)</strong> - Die wichtigste Figur. Bewegt sich 1 Feld in jede Richtung.</li>
+	        <li><strong>Königin (♕)</strong> - Die mächtigste Figur. Bewegt sich beliebig viele Felder horizontal, vertikal oder diagonal.</li>
+	        <li><strong>Turm (♖)</strong> - Bewegt sich beliebig viele Felder horizontal oder vertikal.</li>
+	        <li><strong>Läufer (♗)</strong> - Bewegt sich beliebig viele Felder diagonal.</li>
+	        <li><strong>Pferd/Springer (♘)</strong> - Bewegt sich in einem L-Muster (2 Felder in eine Richtung, 1 Feld senkrecht).</li>
+	        <li><strong>Bauer (♙)</strong> - Bewegt sich 1 Feld vorwärts (am Anfang optional 2 Felder). Schlägt diagonal nach vorne.</li>
+	      </ul>
+	    </div>
+
+	    <div class="rules-section">
+	      <h3>🎮 Spielregeln</h3>
+	      <ul>
+	        <li>Du spielst mit den <strong>schwarzen Figuren</strong>, die KI mit den <strong>weißen Figuren</strong>.</li>
+	        <li>Schwarz beginnt das Spiel.</li>
+	        <li>Jeder Spieler macht abwechselnd einen Zug.</li>
+	        <li>Es ist nicht erlaubt, den eigenen König in Gefahr zu bringen.</li>
+	        <li><strong>Schach:</strong> Der König ist unter Angriff, muss aber geschützt werden.</li>
+	        <li><strong>Schachmatt:</strong> Der König ist unter Angriff und kann sich nicht retten - das Spiel ist vorbei!</li>
+	        <li><strong>Patt:</strong> Der König ist nicht unter Angriff, hat aber keinen legalen Zug - Unentschieden.</li>
+	      </ul>
+	    </div>
+
+	    <div class="rules-section">
+	      <h3>🎯 Spielanleitung</h3>
+	      <ol>
+	        <li>Klicke auf eine deiner schwarzen Figuren</li>
+	        <li>Die möglichen Züge werden grün hervorgehoben</li>
+	        <li>Klicke auf ein grünes Feld, um deine Figur dorthin zu bewegen</li>
+	        <li>Die KI macht automatisch ihren nächsten Zug</li>
+	        <li>Wähle deine Schwierigkeit aus: Leicht, Mittel oder Schwer</li>
+	      </ol>
+	    </div>
+
+	    <div class="rules-section">
+	      <h3>⚙️ Besondere Regeln</h3>
+	      <ul>
+						<li><strong>Bauernumwandlung:</strong> Wenn ein Bauer die letzte Reihe erreicht, wird er automatisch zur Königin.</li>
+						<li><strong>Rochade (kurz & lang):</strong> Die Rochade ist in dieser Version implementiert. Ist der König noch nicht gezogen und der entsprechende Turm ist an seinem Startplatz, kann rochiert werden, sofern dazwischen keine Figuren stehen und der König dabei nicht durch bedrohte Felder zieht.</li>
+						<li><strong>En passant:</strong> En-passant-Schläge sind jetzt ebenfalls implementiert: Schlägt ein Bauer im unmittelbar folgenden Zug einen gegnerischen Bauern, der zwei Felder gezogen ist, als wäre dieser nur ein Feld gezogen worden.</li>
+	      </ul>
+	    </div>
+
+					<div class="rules-section">
+					  <h3>🔎 Suche</h3>
+					  <p>Mit der Suchfunktion kannst du schnell Felder (z. B. <code>e4</code>) oder Figuren (z. B. <em>Bauer</em>, <em>Springer</em>) finden und hervorheben.</p>
+					</div>
+
+	    <div class="rules-section">
+	      <h3>💡 Tipps</h3>
+	      <ul>
+			  <li class="schwarze"><strong>Schütze deinen König!</strong></li>
+	        <li>Kontrolliere das Zentrum des Brettes</li>
+	        <li>Entwickle deine Figuren in der Eröffnung</li>
+	        <li>Achte auf Fallen deines Gegners</li>
+	        <li>Erhöhe die Schwierigkeit, um eine bessere Herausforderung zu bekommen</li>
+	      </ul>
+	    </div>
+	  </div>
+	</div>
+
+	<div class="player-info">
+	  <div class="player-human"><strong>Du:</strong> <span style="color:#f0e6d2; background:#2a2a2a; padding:2px 8px; border-radius:4px;">● Schwarz</span></div>
+	  <div class="player-ai"><strong>KI:</strong> <span style="color:#fff; background:#3d7028; padding:2px 8px; border-radius:4px;">● Weiß</span></div>
+	</div>
+	<p class="description">Klicke auf eine Figur, um mögliche Züge anzuzeigen. Die KI spielt mit Weiß.</p>
+
+	<div id="board" class="board" aria-label="Schachbrett"></div>
+
+	<div class="controls">
+	  <div id="status" class="status">Lade...</div>
+	  <label for="difficulty" style="margin-left:8px">Schwierigkeit:</label>
+	  <select id="difficulty" style="margin-left:6px">
+	    <option value="1">Level 1 (Leicht)</option>
+	    <option value="2" selected>Level 2 (Mittel)</option>
+	    <option value="3">Level 3 (Schwer)</option>
+	  </select>
+ 	  <button id="restart" class="btn">Neu starten</button>
+ 	  <input id="search" type="text" placeholder="Suche (z.B. e4 oder Springer)" style="padding:8px;border-radius:6px;border:1px solid #ccc;">
+ 	  <button id="search-btn" class="btn">Suchen</button>
+ 	  <button id="clear-search" class="btn" style="background:#888">Suche löschen</button>
+	</div>
+
+	<footer class="footer">Schachspiel mit KI</footer>
+  </main>
+
+  <script src="chess.js"></script>
+
+    
+
+</body>
+</html>

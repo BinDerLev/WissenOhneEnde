@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Runner</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+</head>
+<body>
+    <div class="game-shell">
+        <header class="topbar">
+            <div class="title-wrap">
+                <div class="logo-badge">⚡</div>
+                <div>
+                    <p class="eyebrow">Arcade Game</p>
+                    <h1>Neon Runner</h1>
+                </div>
+            </div>
+
+            <div class="hud">
+                <div class="stat-box">
+                    <span>Punkte</span>
+                    <strong id="score">0</strong>
+                </div>
+                <div class="stat-box">
+                    <span>Best</span>
+                    <strong id="bestScore">0</strong>
+                </div>
+                <div class="stat-box">
+                    <span>Leben</span>
+                    <strong id="lives">3</strong>
+                </div>
+            </div>
+        </header>
+
+        <canvas id="gameCanvas" width="900" height="420" aria-label="Neon Runner Spielbereich"></canvas>
+
+        <div class="controls">
+            <button id="startBtn" class="btn btn-start" type="button">Start</button>
+            <button id="pauseBtn" class="btn btn-pause" type="button" disabled>Pause</button>
+            <button id="resetBtn" class="btn btn-reset" type="button">Neustart</button>
+        </div>
+
+        <div class="instructions">
+            <h2>Anleitung</h2>
+            <p>⏫ Drücke <strong>W</strong>, <strong>↑</strong> oder <strong>Leertaste</strong>, um zu springen.</p>
+            <p>⚡ Sammle Energie-Kristalle für Bonuspunkte.</p>
+            <p>💥 Vermeide Hindernisse und bleib am Leben.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+    
+
+</body>
+</html>
+

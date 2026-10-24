@@ -1,0 +1,373 @@
+/* ===========================
+   GLOBALE STYLES (style.css)
+   =========================== */
+
+/* Entferne Standard-Browser-Margen und -Abstände */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ===========================
+   BODY STYLING - Hauptseite
+   =========================== */
+
+body {
+    /* Monospace-Schriftart für klassischen Terminal-Look */
+    font-family: 'Courier New', monospace;
+    /* Dunkler Hintergrund mit Gradient-Effekt (von dunkelblau zu dunkelblau-lila) */
+    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+    /* Grüner Text wie ein altes Terminal */
+    color: #00ff00;
+    /* Ganze Höhe des Fensters ausfüllen */
+    min-height: 100vh;
+    /* Etwas Platz rings herum */
+    padding: 20px;
+}
+
+/* ===========================
+   CONTAINER - Maximale Breite
+   =========================== */
+
+.container {
+    /* Maximale Breite für besseres Lesen */
+    max-width: 1000px;
+    /* Automatische Margen zentriert das Element */
+    margin: 0 auto;
+}
+
+/* ===========================
+   HEADER - Titel und Logo
+   =========================== */
+
+header {
+    /* Zentriere den Inhalt */
+    text-align: center;
+    /* Abstand nach unten */
+    margin-bottom: 30px;
+    /* Grüner Glow-Effekt unter dem Text */
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+header h1 {
+    /* Großer Titel */
+    font-size: 2.5em;
+    /* Grüne Farbe */
+    color: #00ff00;
+    /* Noch intensiverer Glow-Effekt */
+    text-shadow: 0 0 20px rgba(0, 255, 0, 0.7);
+    /* Abstand nach unten */
+    margin-bottom: 10px;
+}
+
+header .subtitle {
+    /* Leicht dunkeleres Grün für Untertitel */
+    color: #00cc00;
+    /* Normale Größe */
+    font-size: 1.1em;
+}
+
+/* ===========================
+   LOGO - Animiertes Symbol
+   =========================== */
+
+.logo {
+    /* Kleine Größe */
+    width: 20px;
+    height: 20px;
+    /* Abstand nach unten */
+    margin-bottom: 15px;
+    /* Grüner Drop-Shadow für Glow-Effekt */
+    filter: drop-shadow(0 0 15px rgba(0, 255, 0, 0.4));
+    /* Animation für pulsierendes Logo */
+    animation: logoPulse 3s ease-in-out infinite;
+}
+
+/* Animation: Logo pulsiert sanft */
+@keyframes logoPulse {
+    0%, 100% { opacity: 1; }    /* Sichtbar am Anfang und Ende */
+    50% { opacity: 0.8; }       /* Leicht transparenter in der Mitte */
+}
+
+/* ===========================
+   MAIN - Hauptbereich
+   =========================== */
+
+main {
+    /* Flexbox für Zentrierung */
+    display: flex;
+    justify-content: center;
+}
+
+/* ===========================
+   GAME-WINDOW - Hauptspielbereich
+   =========================== */
+
+.game-window {
+    /* Vollständige Breite des Containers */
+    width: 100%;
+    /* Halbtransparentes dunkles Hintergrund */
+    background: rgba(10, 14, 39, 0.9);
+    /* Dicke grüne Grenze */
+    border: 3px solid #00ff00;
+    /* Abgerundete Ecken */
+    border-radius: 10px;
+    /* Mehrere Schatten für Tiefenwirkung */
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.3), inset 0 0 20px rgba(0, 255, 0, 0.1);
+    /* Innerer Abstand */
+    padding: 20px;
+    /* Mindesthöhe */
+    min-height: 700px;
+    /* Flexbox für vertikale Anordnung */
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===========================
+   OUTPUT - Ausgabefenster (Text)
+   =========================== */
+
+.output {
+    /* Flexbox: Nimmt verfügbaren Platz */
+    flex: 1;
+    /* Sehr dunkler Hintergrund */
+    background: rgba(0, 20, 0, 0.8);
+    /* Grüne Grenze */
+    border: 2px solid #00cc00;
+    border-radius: 5px;
+    /* Innerer Abstand */
+    padding: 15px;
+    /* Abstand nach unten zum Eingabefeld */
+    margin-bottom: 20px;
+    /* Ermögliche Scrollen bei zu viel Text */
+    overflow-y: auto;
+    /* Maximale Höhe */
+    max-height: 350px;
+    /* Zeilenabstand für bessere Lesbarkeit */
+    line-height: 1.6;
+    /* Schriftgröße */
+    font-size: 0.95em;
+}
+
+.output p {
+    /* Abstand zwischen Absätzen */
+    margin-bottom: 10px;
+}
+
+/* Besondere Formatierung - Gelber Text für wichtige Informationen */
+.output .special {
+    color: #ffff00;
+    text-shadow: 0 0 5px rgba(255, 255, 0, 0.5);
+    font-weight: bold;
+}
+
+/* Warnung - Orange Text für Fehler/Warnungen */
+.output .warning {
+    color: #ff6600;
+    text-shadow: 0 0 5px rgba(255, 102, 0, 0.5);
+}
+
+/* Erfolg - Grüner Text für erfolgreiche Aktionen */
+.output .success {
+    color: #00ff00;
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+}
+
+/* ===========================
+   INPUT-AREA - Eingabefenster mit Button
+   =========================== */
+
+.input-area {
+    /* Flexbox für nebeneinander angeordnete Elemente */
+    display: flex;
+    /* Abstand zwischen Elementen */
+    gap: 10px;
+    /* Abstand nach unten */
+    margin-bottom: 20px;
+}
+
+/* Eingabefeld für Befehle */
+#command-input {
+    /* Nimmt verfügbaren Platz */
+    flex: 1;
+    /* Innerer Abstand */
+    padding: 12px;
+    /* Halbtransparenter dunkler Hintergrund */
+    background: rgba(0, 30, 0, 0.9);
+    /* Grüne Grenze */
+    border: 2px solid #00ff00;
+    /* Grüne Textfarbe */
+    color: #00ff00;
+    /* Monospace-Schriftart */
+    font-family: 'Courier New', monospace;
+    /* Normale Schriftgröße */
+    font-size: 1em;
+    border-radius: 5px;
+    /* Entferne Standard-Browser-Outline */
+    outline: none;
+    /* Grüner Cursor */
+    caret-color: #00ff00;
+}
+
+/* Fokus-Stil - wenn in das Inputfeld geklickt wird */
+#command-input:focus {
+    /* Grüner Glow-Effekt */
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+/* Placeholder-Text (Hinweistext) */
+#command-input::placeholder {
+    /* Dunkles Grün */
+    color: #006600;
+}
+
+/* Ausführen-Button */
+#submit-btn {
+    /* Innerer Abstand */
+    padding: 12px 25px;
+    /* Grüner Gradient-Hintergrund */
+    background: linear-gradient(135deg, #00ff00, #00cc00);
+    /* Schwarzer Text */
+    color: #000;
+    /* Grüne Grenze */
+    border: 2px solid #00ff00;
+    border-radius: 5px;
+    /* Monospace-Schriftart */
+    font-family: 'Courier New', monospace;
+    /* Fettgedruckter Text */
+    font-weight: bold;
+    /* Zeige Mauszeiger als Hand */
+    cursor: pointer;
+    /* Smooth Übergang bei Hover */
+    transition: all 0.3s;
+    /* Schriftgröße */
+    font-size: 1em;
+}
+
+/* Hover-Effekt - wenn Maus über den Button schwebt */
+#submit-btn:hover {
+    /* Grüner Glow */
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+    /* Leicht vergrößert */
+    transform: scale(1.05);
+}
+
+/* Active-Effekt - wenn Button geklickt wird */
+#submit-btn:active {
+    /* Leicht verkleinert für Feedback */
+    transform: scale(0.95);
+}
+
+/* ===========================
+   INFO-PANEL - Inventar und Status
+   =========================== */
+
+.info-panel {
+    /* Grid-Layout mit 2 Spalten */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* Abstand zwischen Spalten */
+    gap: 15px;
+}
+
+/* Gemeinsames Styling für beide Info-Panels */
+.inventory, .status {
+    /* Dunkler Hintergrund */
+    background: rgba(0, 30, 0, 0.8);
+    /* Grüne Grenze */
+    border: 2px solid #00cc00;
+    border-radius: 5px;
+    /* Innerer Abstand */
+    padding: 15px;
+}
+
+/* Überschriften in den Panels */
+.inventory h3, .status h3 {
+    /* Gelbe Überschriftsfarbe */
+    color: #ffff00;
+    /* Abstand nach unten */
+    margin-bottom: 10px;
+    /* Normale Größe */
+    font-size: 1em;
+}
+
+/* Inventar-Liste */
+#inventory-list {
+    /* Grüne Textfarbe */
+    color: #00ff00;
+    /* Kleinere Schrift */
+    font-size: 0.9em;
+    /* Zeilenabstand */
+    line-height: 1.5;
+}
+
+/* Status-Text */
+.status p {
+    /* Grüne Textfarbe */
+    color: #00ff00;
+    /* Kleinere Schrift */
+    font-size: 0.9em;
+    /* Abstand zwischen Zeilen */
+    margin-bottom: 5px;
+}
+
+/* Wichtige Werte im Status (z.B. die Zahlen) */
+.status span {
+    /* Gelbe Farbe für Hervorhebung */
+    color: #ffff00;
+}
+
+/* ===========================
+   RESPONSIVE DESIGN - Für kleinere Bildschirme
+   =========================== */
+
+@media (max-width: 768px) {
+    /* Kleinerer Titel auf mobilen Geräten */
+    header h1 {
+        font-size: 1.8em;
+    }
+
+    /* Statt 2 Spalten nur 1 Spalte auf Mobilgeräten */
+    .info-panel {
+        grid-template-columns: 1fr;
+    }
+
+    /* Weniger Mindesthöhe */
+    .game-window {
+        min-height: auto;
+    }
+
+    /* Kleineres Ausgabefenster */
+    .output {
+        max-height: 250px;
+    }
+}
+
+/* ===========================
+   SCROLLBAR STYLING - Angepasster Scrollbar-Look
+   =========================== */
+
+/* Scrollbar Größe */
+.output::-webkit-scrollbar {
+    width: 8px;
+}
+
+/* Scrollbar Hintergrund (Track) */
+.output::-webkit-scrollbar-track {
+    background: rgba(0, 20, 0, 0.5);
+}
+
+/* Scrollbar Button (Thumb) */
+.output::-webkit-scrollbar-thumb {
+    /* Grüne Farbe */
+    background: #00ff00;
+    border-radius: 4px;
+}
+
+/* Scrollbar Button bei Hover */
+.output::-webkit-scrollbar-thumb:hover {
+    /* Dunkleres Grün */
+    background: #00cc00;
+}
+

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Background -->
+  <rect width="100" height="100" fill="#1a472a" rx="15"/>
+
+  <!-- Snake body parts -->
+  <circle cx="25" cy="30" r="8" fill="#00ff99"/>
+  <circle cx="35" cy="30" r="8" fill="#00dd88"/>
+  <circle cx="45" cy="30" r="8" fill="#00bb77"/>
+  <circle cx="55" cy="30" r="8" fill="#009966"/>
+
+  <!-- Snake head with eyes -->
+  <circle cx="65" cy="30" r="9" fill="#00ff99"/>
+  <circle cx="62" cy="28" r="2" fill="#000"/>
+  <circle cx="68" cy="28" r="2" fill="#000"/>
+
+  <!-- Apple/Food -->
+  <circle cx="50" cy="65" r="10" fill="#ff6666"/>
+  <rect x="48" y="52" width="4" height="8" fill="#228822"/>
+
+  <!-- Decorative elements -->
+  <path d="M 30 50 L 70 50" stroke="#00ff99" stroke-width="1" opacity="0.3"/>
+  <path d="M 30 60 L 70 60" stroke="#00ff99" stroke-width="1" opacity="0.3"/>
+</svg>
