@@ -1,3 +1,11 @@
+.Fehler-Meldung{
+  color: red;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 0.5em;
+  margin: 1em;
+  padding: 0.5em;
+}
 :root {
   font-family: system-ui, sans-serif;
   color: #243329;

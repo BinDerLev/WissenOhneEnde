@@ -1,3 +1,4 @@
+//Hier gibt es einen Fehler er ist das:
 const curriculum = {
   1: [
     { title: "Plus und Minus bis 20", skill: "add", icon: "+", description: "Zahlen geschickt zusammenzählen und abziehen.", explanation: "Beim Plusrechnen gehst du vorwärts. Beim Minusrechnen gehst du zurück. Ein Rechenstrich kann dir helfen: Starte bei der ersten Zahl und springe so viele Schritte, wie die zweite Zahl angibt.", difficulty: "easy" },
@@ -812,7 +813,6 @@ function renderLesson() {
   const answerInputEl = document.querySelector("#answer-input");
   if (answerInputEl) answerInputEl.focus();
 }
-
 function parseAnswer(value) {
   const normalized = value.trim().replace(",", ".");
   if (/^-?\d+(?:\.\d+)?\s*\/\s*-?\d+(?:\.\d+)?$/.test(normalized)) {
