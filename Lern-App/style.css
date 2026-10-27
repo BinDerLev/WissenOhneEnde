@@ -2,9 +2,9 @@
   color: red;
   background-color: #f8d7da;
   border: 1px solid #f3b6bb;
-  border-radius: 2em;
-  margin: 1em;
-  padding: 0.5em;
+  border-radius: 20px;
+  margin: 15px;
+  padding: 30px;
   text-align: center;
 }
 
@@ -14,8 +14,7 @@
   cursor: pointer;
   background-color: #f3b6bb;
   border: 1px solid #f3b6bb;
-  border-radius: 0.8em;
-  margin: 1em;
+  border-radius: 30px;
   padding: 0.5em;
   text-align: center;
   text-decoration: none;
