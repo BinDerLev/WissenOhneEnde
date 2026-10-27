@@ -2,11 +2,12 @@
   color: red;
   background-color: #f8d7da;
   border: 1px solid #f3b6bb;
-  border-radius: 0.8em;
+  border-radius: 2em;
   margin: 1em;
   padding: 0.5em;
   text-align: center;
 }
+
 .Link-im-error{
   color: red;
   text-decoration: underline;
@@ -17,7 +18,9 @@
   margin: 1em;
   padding: 0.5em;
   text-align: center;
+  text-decoration: none;
 }
+
 :root {
   font-family: system-ui, sans-serif;
   color: #243329;
