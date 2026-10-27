@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+  <title>Neon Brick Breaker</title>
+</head>
+<body>
+
+<main class="game">
+  <header>
+    <h1>NEON <span>BRICK BREAKER</span></h1>
+    <div class="stats" aria-live="polite">
+      <div class="stat"><small>Punkte</small><strong id="score">0</strong></div>
+      <div class="stat"><small>Leben</small><strong id="lives">3</strong></div>
+    </div>
+  </header>
+
+  <div class="canvas-wrap">
+    <canvas id="canvas" width="720" height="480" aria-label="Brick-Breaker-Spielfeld"></canvas>
+    <div class="overlay" id="overlay">
+      <div class="message">
+        <h2 id="title">Bereit?</h2>
+        <p id="description">Zerstöre alle Steine und lass den Ball nicht fallen.</p>
+        <button id="startButton">Spiel starten</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="help">
+    <span>Steuerung: <kbd>←</kbd> <kbd>→</kbd> oder Maus</span>
+    <span>Auf Mobilgeräten: Finger über das Spielfeld bewegen</span>
+  </div>
+</main>
+</body>
+</html>

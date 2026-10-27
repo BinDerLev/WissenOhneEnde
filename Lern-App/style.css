@@ -1,10 +1,22 @@
-.Fehler-Meldung{
+.error{
   color: red;
   background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 0.5em;
+  border: 1px solid #f3b6bb;
+  border-radius: 0.8em;
   margin: 1em;
   padding: 0.5em;
+  text-align: center;
+}
+.Link-im-error{
+  color: red;
+  text-decoration: underline;
+  cursor: pointer;
+  background-color: #f3b6bb;
+  border: 1px solid #f3b6bb;
+  border-radius: 0.8em;
+  margin: 1em;
+  padding: 0.5em;
+  text-align: center;
 }
 :root {
   font-family: system-ui, sans-serif;
