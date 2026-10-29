@@ -18,6 +18,7 @@
   padding: 0.5em;
   text-align: center;
   text-decoration: none;
+  margin: 20px
 }
 
 :root {
@@ -26,6 +27,7 @@
   background: #f7f8f5;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  margin: ;
   --ink: #243329;
   --muted: #738076;
   --green: #39734f;
