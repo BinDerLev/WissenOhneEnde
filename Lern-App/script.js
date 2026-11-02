@@ -395,19 +395,19 @@ function renderParentReport() {
     <div class="report-stats">
       <article class="report-stat"><span>Einheiten insgesamt</span><strong>${progress.completed}</strong></article>
       <article class="report-stat"><span>Dokumentierte Einheiten</span><strong>${sessions.length}</strong></article>
-      <article class="report-stat"><span>Trefferquote in dokumentierten Aufgaben</span><strong>${accuracy === null ? "–" : `${accuracy} %`}</strong></article>
+      <article class="report-stat"><span>Trefferquote bei Erstversuchen</span><strong>${accuracy === null ? "–" : `${accuracy} %`}</strong></article>
     </div>
-    <p class="report-note">Die Trefferquote zeigt Übungsergebnisse und ist kein vollständiger oder sicherer Nachweis des Wissensstands. Bisherige Einheiten aus älteren App-Versionen bleiben in der Gesamtzahl enthalten; ihre Einzelergebnisse liegen nicht vor.</p>
+    <p class="report-note">Die Trefferquote zeigt Übungsergebnisse und ist kein vollständiger oder sicherer Nachweis des Wissensstands. Ergebnisse früher abgeschlossener Einheiten bleiben erhalten; ob Antworten beim ersten Versuch richtig waren, lässt sich für diese Einheiten nicht nachträglich feststellen. Ältere Einheiten ohne gespeicherte Einzelergebnisse erscheinen weiterhin nur in der Gesamtzahl.</p>
     <section class="report-section" aria-labelledby="topic-progress-title">
       <h2 id="topic-progress-title">Ergebnisse je Thema</h2>
       ${topicRows
-        ? `<div class="report-table-wrap"><table class="report-table"><thead><tr><th>Fach</th><th>Klasse</th><th>Thema</th><th>Einheiten</th><th>Richtig</th></tr></thead><tbody>${topicRows}</tbody></table></div>`
+        ? `<div class="report-table-wrap"><table class="report-table"><thead><tr><th>Fach</th><th>Klasse</th><th>Thema</th><th>Einheiten</th><th>Beim ersten Versuch richtig</th></tr></thead><tbody>${topicRows}</tbody></table></div>`
         : '<p class="report-empty">Nach der nächsten abgeschlossenen Einheit erscheinen hier die Ergebnisse je Thema.</p>'}
     </section>
     <section class="report-section" aria-labelledby="session-history-title">
       <h2 id="session-history-title">Letzte Übungsergebnisse</h2>
       ${historyRows
-        ? `<div class="report-table-wrap"><table class="report-table"><thead><tr><th>Datum</th><th>Fach</th><th>Klasse</th><th>Thema</th><th>Richtig</th></tr></thead><tbody>${historyRows}</tbody></table></div>`
+        ? `<div class="report-table-wrap"><table class="report-table"><thead><tr><th>Datum</th><th>Fach</th><th>Klasse</th><th>Thema</th><th>Beim ersten Versuch richtig</th></tr></thead><tbody>${historyRows}</tbody></table></div>`
         : '<p class="report-empty">Noch keine Ergebnisse dokumentiert. Sie werden nach jeder abgeschlossenen Übung hier angezeigt.</p>'}
     </section>
     <p class="report-privacy">Die Daten werden nur in diesem Browser auf diesem Gerät gespeichert. Sie sind nicht durch ein Elternkonto oder Passwort geschützt; wer Zugriff auf diesen Browser hat, kann die Elternansicht öffnen. Löschen der Browserdaten kann den Lernverlauf entfernen.</p>
@@ -738,7 +738,7 @@ function startLesson(topicIndex) {
     questions: makeUniqueQuestions(topic, count),
     position: 0,
     correct: 0,
-    attempts: 0,
+    firstAttempts: Array(count).fill(null),
     resolved: false
   };
   renderLesson();
@@ -749,8 +749,7 @@ function renderLesson() {
   lessonView.hidden = false;
   const { topic, questions, position } = activeLesson;
   const question = questions[position];
-  const completed = position;
-  const percent = Math.round(completed / questions.length * 100);
+  const answered = activeLesson.firstAttempts.filter((result) => result !== null).length;
   const subjectName = progress.subject === "german" ? "Deutsch" : "Mathe";
 
   lessonView.innerHTML = `
@@ -761,8 +760,13 @@ function renderLesson() {
       <p>Eine kurze Erklärung und dann übst du es Schritt für Schritt.</p>
     </header>
     <div class="lesson-progress" aria-label="Fortschritt">
-      <div class="lesson-progress-label"><span>Dein Fortschritt</span><span>${completed} von ${questions.length}</span></div>
-      <div class="progress-track"><div class="progress-fill" style="width: ${percent}%"></div></div>
+      <div class="lesson-progress-label"><span>Dein Fortschritt</span><span id="progress-count">${answered} von ${questions.length} Erstversuchen</span></div>
+      <div class="progress-track" id="progress-track" role="progressbar" aria-label="Beim ersten Versuch beantwortete Aufgaben" aria-valuemin="0" aria-valuemax="${questions.length}" aria-valuenow="${answered}">
+        ${activeLesson.firstAttempts.map((result, index) => {
+          const status = result === null ? "" : result ? " is-correct" : " is-incorrect";
+          return `<span class="progress-segment${status}" data-question="${index}" aria-hidden="true"></span>`;
+        }).join("")}
+      </div>
     </div>
     <article class="explanation-card">
       <p class="card-kicker">Kurz erklärt</p>
@@ -771,17 +775,17 @@ function renderLesson() {
     <article class="exercise-card">
       <p class="exercise-count">AUFGABE ${position + 1} VON ${questions.length}</p>
       <h2 class="question">${question.text}</h2>
-      ${question.options ? (
-        `<div class="options-list" id="options-list">
+      ${question.options ? `
+        <div class="options-list" id="options-list">
            ${question.options.map((o, i) => `<button class="option-button" data-choice="${escapeHtml(String(o))}">${String.fromCharCode(65+i)}) ${escapeHtml(String(o))}</button>`).join('')}
-         </div>`
-      ) : (`
-        `<form class="answer-form" id="answer-form">
+        </div>
+      ` : `
+        <form class="answer-form" id="answer-form">
            <label class="sr-only" for="answer-input">Deine Antwort</label>
            <input class="answer-input" id="answer-input" name="answer" type="text" inputmode="${progress.subject === "math" ? "decimal" : "text"}" autocomplete="off" placeholder="Deine Antwort" required>
            <button class="primary-button" type="submit">Prüfen</button>
-         </form>`
-      )}
+        </form>
+      `}
       <p class="feedback" id="feedback" aria-live="polite"></p>
       <div class="exercise-actions">
         <button class="hint-button" id="hint-button" type="button">Tipp ansehen</button>
@@ -829,7 +833,7 @@ function checkAnswer(event, submittedAnswer) {
   const input = document.querySelector("#answer-input");
   const feedback = document.querySelector("#feedback");
   const question = activeLesson.questions[activeLesson.position];
-  activeLesson.attempts += 1;
+  const firstAttempt = activeLesson.firstAttempts[activeLesson.position] === null;
 
   // determine submitted value
   let rawSubmitted;
@@ -853,11 +857,18 @@ function checkAnswer(event, submittedAnswer) {
     ? Number.isFinite(answer) && Math.abs(answer - question.answer) < 0.011
     : submitted === expected;
 
+  if (firstAttempt) {
+    activeLesson.firstAttempts[activeLesson.position] = isCorrect;
+    if (isCorrect) activeLesson.correct += 1;
+    updateLessonProgress();
+  }
+
   if (isCorrect) {
-    activeLesson.correct += 1;
     activeLesson.resolved = true;
     feedback.className = "feedback correct";
-    feedback.textContent = question.solution ? `Richtig! ${question.solution}` : "Richtig!";
+    feedback.textContent = firstAttempt
+      ? question.solution ? `Richtig! ${question.solution}` : "Richtig!"
+      : "Richtig gelöst! Für die Trefferquote zählt der erste Versuch.";
     // hide/disable input or option buttons
     const submitBtn = document.querySelector("#answer-form button");
     if (submitBtn) submitBtn.hidden = true;
@@ -879,6 +890,21 @@ function checkAnswer(event, submittedAnswer) {
   }
 }
 
+function updateLessonProgress() {
+  const { firstAttempts, position, questions } = activeLesson;
+  const answered = firstAttempts.filter((result) => result !== null).length;
+  const result = firstAttempts[position];
+  const segment = document.querySelector(`.progress-segment[data-question="${position}"]`);
+  segment.classList.toggle("is-correct", result === true);
+  segment.classList.toggle("is-incorrect", result === false);
+
+  const progressCount = document.querySelector("#progress-count");
+  progressCount.textContent = `${answered} von ${questions.length} Erstversuchen`;
+
+  const progressTrack = document.querySelector("#progress-track");
+  progressTrack.setAttribute("aria-valuenow", String(answered));
+}
+
 function nextQuestion() {
   const last = activeLesson.position === activeLesson.questions.length - 1;
   if (last) {
@@ -886,7 +912,6 @@ function nextQuestion() {
     return;
   }
   activeLesson.position += 1;
-  activeLesson.attempts = 0;
   activeLesson.resolved = false;
   renderLesson();
 }
@@ -923,7 +948,7 @@ function finishLesson() {
       <p class="eyebrow">EINHEIT ABGESCHLOSSEN</p>
       <h2>Das hast du gut gemacht!</h2>
       <p>${message}</p>
-      <div class="summary-score">${correct} von ${questions.length} Aufgaben richtig bei „${topic.title}“</div>
+      <div class="summary-score">${correct} von ${questions.length} Aufgaben beim ersten Versuch richtig bei „${topic.title}“</div>
       <button class="primary-button" id="finish-button" type="button">Zur Themenübersicht</button>
     </div>
   `;

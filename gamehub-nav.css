@@ -1,0 +1,44 @@
+.gamehub-back-link {
+  position: fixed;
+  z-index: 1000;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 999px;
+  background: rgb(20 30 48 / 92%);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 22%);
+  color: #fff;
+  font: 700 14px/1 system-ui, sans-serif;
+  text-decoration: none;
+  backdrop-filter: blur(8px);
+}
+
+.gamehub-back-link:hover {
+  background: #2f4568;
+}
+
+.gamehub-back-link:focus-visible {
+  outline: 3px solid #85d8ff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 520px) {
+  .gamehub-back-link {
+    top: 8px;
+    left: 8px;
+    min-height: 36px;
+    padding: 0 11px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 700px) {
+  body {
+    padding-block-start: 64px;
+  }
+}

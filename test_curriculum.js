@@ -23,6 +23,7 @@ function extractObjectLiteral(src, startToken) {
 try {
   const path = __dirname + '/Lern-App/script.js';
   const src = fs.readFileSync(path, 'utf8');
+  new vm.Script(src, { filename: path });
   const germanLiteral = extractObjectLiteral(src, 'const germanCurriculum =');
   const intermediate = extractObjectLiteral(src, 'const germanIntermediateTexts =');
   const advanced = extractObjectLiteral(src, 'const germanAdvancedTexts =');
@@ -61,4 +62,3 @@ try {
   console.error('ERROR:', e && e.stack ? e.stack : e);
   process.exit(3);
 }
-

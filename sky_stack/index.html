@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111a33">
+  <title>Sky Stack</title>
+  <link rel="stylesheet" href="../gamehub-nav.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="gamehub-back-link" href="../index.html">← Zurück zum GameHub</a>
+  <main class="game-shell">
+    <header class="game-header">
+      <div>
+        <p class="eyebrow">ARCADE · GESCHICKLICHKEIT</p>
+        <h1>Sky Stack</h1>
+        <p class="subtitle">Lass die Plattformen nicht wackeln!</p>
+      </div>
+      <div class="scoreboard" aria-live="polite">
+        <div><span>Höhe</span><strong id="score">0</strong></div>
+        <div><span>Rekord</span><strong id="best-score">0</strong></div>
+      </div>
+    </header>
+
+    <section class="game-panel" aria-label="Sky Stack Spiel">
+      <canvas id="game-canvas" width="640" height="460" aria-label="Spielfeld. Klicke oder drücke die Leertaste, um einen Block abzusetzen."></canvas>
+      <div class="game-controls">
+        <p id="game-message" aria-live="polite">Drücke „Spiel starten“ und setze die Blöcke passend aufeinander.</p>
+        <div class="button-row">
+          <button id="drop-button" class="button button-primary" type="button" disabled>Block absetzen</button>
+          <button id="start-button" class="button button-secondary" type="button">Spiel starten</button>
+        </div>
+      </div>
+    </section>
+
+    <p class="instructions">Klicke ins Spielfeld, drücke die <strong>Leertaste</strong> oder nutze den Button. Je genauer du triffst, desto höher wird dein Turm.</p>
+  </main>
+</body>
+</html>

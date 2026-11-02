@@ -1,0 +1,203 @@
+const canvas = document.querySelector("#game-canvas");
+const context = canvas.getContext("2d");
+const scoreDisplay = document.querySelector("#score");
+const bestScoreDisplay = document.querySelector("#best-score");
+const gameMessage = document.querySelector("#game-message");
+const dropButton = document.querySelector("#drop-button");
+const startButton = document.querySelector("#start-button");
+
+const WIDTH = canvas.width;
+const HEIGHT = canvas.height;
+const BLOCK_HEIGHT = 26;
+const FLOOR = HEIGHT - 34;
+const COLORS = ["#62d6ff", "#9d8aff", "#ff8db2", "#ffc36f", "#77e3b0"];
+
+let blocks = [];
+let movingBlock = null;
+let score = 0;
+let bestScore = loadBestScore();
+let gameState = "ready";
+let animationFrame = 0;
+
+bestScoreDisplay.textContent = String(bestScore);
+
+function loadBestScore() {
+  try {
+    const stored = Number.parseInt(localStorage.getItem("sky-stack-best") || "0", 10);
+    return Number.isFinite(stored) && stored >= 0 ? stored : 0;
+  } catch (error) {
+    console.warn("Sky-Stack-Rekord konnte nicht geladen werden.", error);
+    return 0;
+  }
+}
+
+function saveBestScore() {
+  try {
+    localStorage.setItem("sky-stack-best", String(bestScore));
+  } catch (error) {
+    console.warn("Sky-Stack-Rekord konnte nicht gespeichert werden.", error);
+  }
+}
+
+function startGame() {
+  cancelAnimationFrame(animationFrame);
+  score = 0;
+  blocks = [{ x: 200, width: 240, color: "#7185ff" }];
+  movingBlock = { x: 0, width: blocks[0].width, direction: 1, speed: 2.3 };
+  gameState = "playing";
+  scoreDisplay.textContent = "0";
+  gameMessage.textContent = "Setze den Block möglichst genau auf den Turm.";
+  dropButton.disabled = false;
+  startButton.textContent = "Neu starten";
+  draw();
+  animationFrame = requestAnimationFrame(tick);
+}
+
+function tick() {
+  if (gameState !== "playing") return;
+  movingBlock.x += movingBlock.speed * movingBlock.direction;
+  if (movingBlock.x + movingBlock.width >= WIDTH - 28) {
+    movingBlock.x = WIDTH - 28 - movingBlock.width;
+    movingBlock.direction = -1;
+  } else if (movingBlock.x <= 28) {
+    movingBlock.x = 28;
+    movingBlock.direction = 1;
+  }
+  draw();
+  animationFrame = requestAnimationFrame(tick);
+}
+
+function dropBlock() {
+  if (gameState !== "playing" || !movingBlock) return;
+
+  const previous = blocks[blocks.length - 1];
+  const left = Math.max(previous.x, movingBlock.x);
+  const right = Math.min(previous.x + previous.width, movingBlock.x + movingBlock.width);
+  const overlap = right - left;
+
+  if (overlap < 8) {
+    endGame();
+    return;
+  }
+
+  const accuracy = overlap / previous.width;
+  blocks.push({
+    x: left,
+    width: overlap,
+    color: COLORS[score % COLORS.length]
+  });
+  score += 1;
+  scoreDisplay.textContent = String(score);
+  gameMessage.textContent = accuracy > 0.94
+    ? "Perfekt! Dein Turm wächst weiter."
+    : "Gut getroffen! Weiter so.";
+
+  if (score > bestScore) {
+    bestScore = score;
+    bestScoreDisplay.textContent = String(bestScore);
+    saveBestScore();
+  }
+
+  const speed = Math.min(5.2, 2.3 + score * 0.12);
+  movingBlock = {
+    x: Math.random() < 0.5 ? 28 : WIDTH - 28 - overlap,
+    width: overlap,
+    direction: Math.random() < 0.5 ? 1 : -1,
+    speed
+  };
+  if (movingBlock.x <= 28) movingBlock.direction = 1;
+  if (movingBlock.x + movingBlock.width >= WIDTH - 28) movingBlock.direction = -1;
+  draw();
+}
+
+function endGame() {
+  gameState = "over";
+  movingBlock = null;
+  dropButton.disabled = true;
+  gameMessage.textContent = score
+    ? `Der Turm ist ${score} Blöcke hoch. Versuch es gleich noch einmal!`
+    : "Knapp daneben! Starte neu und versuche es noch einmal.";
+  draw();
+}
+
+function drawBackground() {
+  const sky = context.createLinearGradient(0, 0, 0, HEIGHT);
+  sky.addColorStop(0, "#263e68");
+  sky.addColorStop(1, "#17243f");
+  context.fillStyle = sky;
+  context.fillRect(0, 0, WIDTH, HEIGHT);
+
+  context.fillStyle = "rgb(255 255 255 / 70%)";
+  for (let index = 0; index < 38; index += 1) {
+    const x = (index * 173 + 41) % WIDTH;
+    const y = (index * 97 + 23) % 260;
+    context.globalAlpha = 0.35 + (index % 4) * 0.14;
+    context.beginPath();
+    context.arc(x, y, index % 5 === 0 ? 2 : 1, 0, Math.PI * 2);
+    context.fill();
+  }
+  context.globalAlpha = 1;
+
+  context.fillStyle = "rgb(120 163 226 / 12%)";
+  for (let index = 0; index < 5; index += 1) {
+    const x = index * 155 - 35;
+    const y = 330 + (index % 2) * 18;
+    context.beginPath();
+    context.ellipse(x, y, 100, 26, 0, 0, Math.PI * 2);
+    context.fill();
+  }
+}
+
+function drawBlock(block, y, isMoving = false) {
+  context.fillStyle = block.color;
+  context.shadowColor = isMoving ? "rgb(98 214 255 / 40%)" : "transparent";
+  context.shadowBlur = isMoving ? 18 : 0;
+  context.fillRect(block.x, y, block.width, BLOCK_HEIGHT);
+  context.shadowBlur = 0;
+  context.fillStyle = "rgb(255 255 255 / 20%)";
+  context.fillRect(block.x, y, block.width, 4);
+  context.fillStyle = "rgb(15 25 48 / 14%)";
+  context.fillRect(block.x, y + BLOCK_HEIGHT - 4, block.width, 4);
+}
+
+function draw() {
+  drawBackground();
+  const cameraOffset = Math.max(0, (blocks.length + 1) * BLOCK_HEIGHT - 290);
+
+  blocks.forEach((block, index) => {
+    const y = FLOOR - (index + 1) * BLOCK_HEIGHT + cameraOffset;
+    if (y < HEIGHT) drawBlock(block, y);
+  });
+
+  if (movingBlock && gameState === "playing") {
+    const y = FLOOR - (blocks.length + 1) * BLOCK_HEIGHT + cameraOffset;
+    drawBlock(movingBlock, y, true);
+  }
+
+  context.fillStyle = "rgb(10 17 34 / 35%)";
+  context.fillRect(0, FLOOR, WIDTH, HEIGHT - FLOOR);
+
+  if (gameState !== "playing") {
+    context.fillStyle = "rgb(10 17 34 / 55%)";
+    context.fillRect(0, 0, WIDTH, HEIGHT);
+    context.textAlign = "center";
+    context.fillStyle = "#fff";
+    context.font = "800 34px system-ui, sans-serif";
+    context.fillText(gameState === "over" ? "Turm eingestürzt!" : "Baue deinen Turm", WIDTH / 2, HEIGHT / 2 - 7);
+    context.fillStyle = "#c8d6f1";
+    context.font = "16px system-ui, sans-serif";
+    context.fillText(gameState === "over" ? `Höhe: ${score}` : "Präzision ist alles", WIDTH / 2, HEIGHT / 2 + 25);
+  }
+}
+
+dropButton.addEventListener("click", dropBlock);
+startButton.addEventListener("click", startGame);
+canvas.addEventListener("pointerdown", dropBlock);
+document.addEventListener("keydown", (event) => {
+  if (event.code === "Space" && gameState === "playing") {
+    event.preventDefault();
+    dropBlock();
+  }
+});
+
+draw();

@@ -99,6 +99,12 @@ a:focus-visible {
   font-weight: 700;
 }
 
+.games-button {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 .parent-button:hover {
   background: var(--green-pale);
 }
@@ -441,17 +447,29 @@ h1 {
 }
 
 .progress-track {
+  display: flex;
+  gap: 3px;
   overflow: hidden;
   height: 7px;
   border-radius: 10px;
   background: #e8ece7;
 }
 
-.progress-fill {
+.progress-segment {
+  min-width: 0;
+  flex: 1;
   height: 100%;
-  border-radius: inherit;
+  border-radius: 2px;
+  background: #e8ece7;
+  transition: background-color 180ms ease;
+}
+
+.progress-segment.is-correct {
   background: #5b956a;
-  transition: width 180ms ease;
+}
+
+.progress-segment.is-incorrect {
+  background: #d65b5b;
 }
 
 .explanation-card,
