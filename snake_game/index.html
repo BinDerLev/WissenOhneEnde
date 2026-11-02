@@ -76,6 +76,15 @@
 
         <canvas id="gameCanvas" width="400" height="400"></canvas>
 
+        <div class="touch-controls" aria-label="Snake-Richtung">
+            <span aria-hidden="true"></span>
+            <button type="button" data-direction="up" aria-label="Nach oben">↑</button>
+            <span aria-hidden="true"></span>
+            <button type="button" data-direction="left" aria-label="Nach links">←</button>
+            <button type="button" data-direction="down" aria-label="Nach unten">↓</button>
+            <button type="button" data-direction="right" aria-label="Nach rechts">→</button>
+        </div>
+
         <div class="controls">
             <button id="startBtn" class="btn btn-start" type="button">Start Game</button>
             <button id="pauseBtn" class="btn btn-pause" type="button" disabled>Pause</button>
@@ -84,7 +93,7 @@
 
         <div class="instructions">
             <h3>Anleitung:</h3>
-            <p>🎮 Verwende die <strong>Pfeiltasten</strong> oder <strong>WASD</strong>, um die Schlange zu steuern.</p>
+            <p>🎮 Nutze die Richtungstasten auf dem Bildschirm, die Pfeiltasten oder WASD.</p>
             <p>🍏 Iss das gewählte Obst, um Punkte zu sammeln.</p>
             <p>⚡ Sammle Power-Ups für Schild, Langsamkeit oder Doppelpunkte.</p>
             <p>⚠️ Triff nicht die Wand oder dich selbst.</p>

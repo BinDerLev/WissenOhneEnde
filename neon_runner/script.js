@@ -7,6 +7,7 @@ const livesEl = document.getElementById('lives');
 const startBtn = document.getElementById('startBtn');
 const pauseBtn = document.getElementById('pauseBtn');
 const resetBtn = document.getElementById('resetBtn');
+const touchJumpBtn = document.getElementById('touchJumpBtn');
 
 const groundY = canvas.height - 60;
 const gravity = 1750;
@@ -424,6 +425,23 @@ document.addEventListener('keyup', (event) => {
     }
 });
 
+function handleTouchJump(event) {
+    if (event.type === 'pointerdown' && event.pointerType !== 'touch') return;
+    if (event.pointerType === 'touch') event.preventDefault();
+    if (state.paused) return;
+    if (!state.running) {
+        if (state.over) resetState();
+        startGame();
+    }
+    jump();
+}
+
+canvas.addEventListener('pointerdown', handleTouchJump);
+touchJumpBtn.addEventListener('pointerdown', handleTouchJump);
+touchJumpBtn.addEventListener('click', (event) => {
+    if (event.detail === 0) handleTouchJump(event);
+});
+
 startBtn.addEventListener('click', () => {
     resetState();
     startGame();
@@ -437,4 +455,3 @@ resetBtn.addEventListener('click', () => {
 
 resetState();
 draw();
-

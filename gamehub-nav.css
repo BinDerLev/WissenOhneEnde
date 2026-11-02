@@ -4,7 +4,7 @@
   top: 12px;
   left: 12px;
   display: inline-flex;
-  min-height: 40px;
+  min-height: 44px;
   align-items: center;
   gap: 8px;
   padding: 0 14px;
@@ -31,7 +31,7 @@
   .gamehub-back-link {
     top: 8px;
     left: 8px;
-    min-height: 36px;
+    min-height: 44px;
     padding: 0 11px;
     font-size: 12px;
   }
@@ -40,5 +40,27 @@
 @media (max-width: 700px) {
   body {
     padding-block-start: 64px;
+  }
+
+  .controls .btn,
+  .btn-rules,
+  .upgrade-btn,
+  .secondary-btn,
+  #startButton,
+  .button,
+  select,
+  input[type="text"] {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 900px) {
+  button,
+  input[type="button"],
+  input[type="submit"],
+  input[type="text"],
+  input[type="search"],
+  select {
+    min-height: 44px !important;
   }
 }

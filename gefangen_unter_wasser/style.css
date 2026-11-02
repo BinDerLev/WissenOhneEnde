@@ -344,6 +344,33 @@ main {
     }
 }
 
+@media (max-width: 520px) {
+    body {
+        padding: 68px 12px 16px;
+    }
+
+    .game-window {
+        padding: 12px;
+    }
+
+    .input-area {
+        align-items: stretch;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    #command-input {
+        min-width: 0;
+        width: 100%;
+    }
+
+    #submit-btn {
+        min-height: 44px;
+        flex: 1;
+        padding: 10px 12px;
+    }
+}
+
 /* ===========================
    SCROLLBAR STYLING - Angepasster Scrollbar-Look
    =========================== */
@@ -370,4 +397,3 @@ main {
     /* Dunkleres Grün */
     background: #00cc00;
 }
-

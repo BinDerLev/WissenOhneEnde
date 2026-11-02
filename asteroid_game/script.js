@@ -10,6 +10,7 @@ const startBtn = document.getElementById('startBtn');
 const pauseBtn = document.getElementById('pauseBtn');
 const resetBtn = document.getElementById('resetBtn');
 const upgradeButtons = [...document.querySelectorAll('.upgrade-btn')];
+const touchControlTimers = new WeakMap();
 
 const upgradeCosts = {
     ship: 35,
@@ -60,6 +61,37 @@ upgradeButtons.forEach((button) => {
 
 document.addEventListener('keydown', handleKeyDown);
 document.addEventListener('keyup', handleKeyUp);
+document.querySelectorAll('.touch-controls button').forEach((button) => {
+    button.addEventListener('pointerdown', (event) => {
+        event.preventDefault();
+        if (!gameRunning || gamePaused) return;
+        if (button.dataset.action === 'shoot') {
+            shoot();
+            touchControlTimers.set(button, setInterval(shoot, 140));
+        } else {
+            keys[button.dataset.key] = true;
+        }
+    });
+
+    const releaseControl = () => {
+        if (button.dataset.key) keys[button.dataset.key] = false;
+        const timer = touchControlTimers.get(button);
+        if (timer) {
+            clearInterval(timer);
+            touchControlTimers.delete(button);
+        }
+    };
+    button.addEventListener('pointerup', releaseControl);
+    button.addEventListener('pointercancel', releaseControl);
+    button.addEventListener('lostpointercapture', releaseControl);
+    button.addEventListener('click', (event) => {
+        if (event.detail === 0 && button.dataset.action === 'shoot') shoot();
+        if (event.detail === 0 && button.dataset.key && gameRunning && !gamePaused) {
+            keys[button.dataset.key] = true;
+            setTimeout(() => { keys[button.dataset.key] = false; }, 120);
+        }
+    });
+});
 startBtn.addEventListener('click', startGame);
 pauseBtn.addEventListener('click', togglePause);
 resetBtn.addEventListener('click', resetGame);

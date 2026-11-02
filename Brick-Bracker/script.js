@@ -248,6 +248,11 @@ function movePaddle(event) {
 }
 
 canvas.addEventListener("pointermove", movePaddle);
+canvas.addEventListener("pointerdown", event => {
+    if (event.pointerType !== "touch") return;
+    event.preventDefault();
+    movePaddle(event);
+});
 startButton.addEventListener("click", startGame);
 
 // Das Spielfeld bereits vor Spielbeginn anzeigen.

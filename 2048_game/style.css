@@ -14,6 +14,7 @@ body {
 }
 
 .container {
+    width: min(100%, 900px);
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     border-radius: 15px;
     padding: 30px;
@@ -21,6 +22,16 @@ body {
                 0 0 40px rgba(200, 100, 255, 0.2);
     text-align: center;
     border: 2px solid rgba(200, 100, 255, 0.3);
+}
+
+.touch-hint {
+    margin: 10px 0 0;
+    color: #b19cd9;
+    font-size: 0.85rem;
+}
+
+.game-board {
+    touch-action: none;
 }
 
 .header {
@@ -290,10 +301,21 @@ h1 {
 }
 
 @media (max-width: 600px) {
-    .container { padding: 15px; }
+    body {
+        align-items: flex-start;
+        padding: 64px 8px 16px;
+    }
+
+    .container { padding: 12px; }
     h1 { font-size: 2em; }
-    .game-board { width: 280px; height: 280px; gap: 8px; padding: 10px; }
-    .game-tile { font-size: 1.5em; }
+    .game-board {
+        width: min(340px, calc(100vw - 64px));
+        height: auto;
+        aspect-ratio: 1;
+        gap: clamp(5px, 2vw, 8px);
+        padding: clamp(8px, 3vw, 12px);
+    }
+    .game-tile { font-size: clamp(1.15em, 6vw, 1.5em); }
     .header { flex-direction: column; align-items: center; }
     .score-section { width: 100%; justify-content: center; }
     .status-panel, .upgrade-panel { grid-template-columns: 1fr; }

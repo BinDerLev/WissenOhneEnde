@@ -97,6 +97,9 @@ upgradeButtons.forEach((button) => {
 });
 
 document.addEventListener('keydown', handleKeyPress);
+document.querySelectorAll('.touch-controls [data-direction]').forEach((button) => {
+    button.addEventListener('click', () => setDirection(button.dataset.direction));
+});
 startBtn.addEventListener('click', startGame);
 pauseBtn.addEventListener('click', togglePause);
 resetBtn.addEventListener('click', resetGame);
@@ -105,17 +108,32 @@ function handleKeyPress(event) {
     if (!gameRunning) return;
 
     const key = event.key.toLowerCase();
-
-    if (event.key === 'ArrowUp' && direction.y === 0) nextDirection = { x: 0, y: -1 };
-    else if (event.key === 'ArrowDown' && direction.y === 0) nextDirection = { x: 0, y: 1 };
-    else if (event.key === 'ArrowLeft' && direction.x === 0) nextDirection = { x: -1, y: 0 };
-    else if (event.key === 'ArrowRight' && direction.x === 0) nextDirection = { x: 1, y: 0 };
-    else if (key === 'w' && direction.y === 0) nextDirection = { x: 0, y: -1 };
-    else if (key === 's' && direction.y === 0) nextDirection = { x: 0, y: 1 };
-    else if (key === 'a' && direction.x === 0) nextDirection = { x: -1, y: 0 };
-    else if (key === 'd' && direction.x === 0) nextDirection = { x: 1, y: 0 };
-
+    const directions = {
+        ArrowUp: 'up',
+        ArrowDown: 'down',
+        ArrowLeft: 'left',
+        ArrowRight: 'right',
+        w: 'up',
+        s: 'down',
+        a: 'left',
+        d: 'right'
+    };
+    const selectedDirection = directions[event.key] || directions[key];
+    if (!selectedDirection) return;
     event.preventDefault();
+    setDirection(selectedDirection);
+}
+
+function setDirection(selectedDirection) {
+    if (!gameRunning) return;
+    const next = {
+        up: { x: 0, y: -1 },
+        down: { x: 0, y: 1 },
+        left: { x: -1, y: 0 },
+        right: { x: 1, y: 0 }
+    }[selectedDirection];
+    if (next.x !== 0 && direction.x === 0) nextDirection = next;
+    if (next.y !== 0 && direction.y === 0) nextDirection = next;
 }
 
 function updateSpeedLabel() {

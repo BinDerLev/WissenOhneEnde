@@ -90,6 +90,9 @@ h1 {
 }
 
 canvas {
+    display: block;
+    width: min(100%, 800px);
+    height: auto;
     border: 4px solid #ffbb00;
     background: linear-gradient(135deg, #0a0e27 0%, #1a2a4a 100%);
     margin: 20px 0;
@@ -98,6 +101,31 @@ canvas {
     box-shadow: 0 0 30px rgba(255, 187, 0, 0.5),
                 0 10px 40px rgba(0, 0, 0, 0.5),
                 inset 0 0 20px rgba(255, 187, 0, 0.1);
+}
+
+.touch-controls {
+    display: none;
+}
+
+.touch-controls button {
+    min-height: 48px;
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 187, 0, 0.5);
+    border-radius: 12px;
+    background: #222b46;
+    color: #fff3c4;
+    font: 700 14px/1.2 system-ui, sans-serif;
+    touch-action: none;
+    user-select: none;
+}
+
+.touch-controls button:active {
+    background: #4a3b1b;
+}
+
+.touch-controls button:focus-visible {
+    outline: 3px solid #ffdd44;
+    outline-offset: 2px;
 }
 
 .controls {
@@ -203,5 +231,16 @@ canvas {
     .btn {
         padding: 10px 15px;
         font-size: 0.9em;
+    }
+
+}
+
+@media (max-width: 700px), (pointer: coarse) {
+    .touch-controls {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        width: min(100%, 420px);
+        margin: 0 auto 14px;
     }
 }

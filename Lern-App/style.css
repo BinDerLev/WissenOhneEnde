@@ -88,7 +88,7 @@ a:focus-visible {
 }
 
 .parent-button {
-  min-height: 38px;
+  min-height: 44px;
   padding: 0 13px;
   border: 1px solid #dce4da;
   border-radius: 9px;
@@ -101,8 +101,14 @@ a:focus-visible {
 
 .games-button {
   display: inline-flex;
+  min-height: 44px;
   align-items: center;
   text-decoration: none;
+}
+
+.games-button-short,
+.parent-button-short {
+  display: none;
 }
 
 .parent-button:hover {
@@ -111,6 +117,7 @@ a:focus-visible {
 
 .brand {
   display: inline-flex;
+  min-height: 44px;
   align-items: center;
   gap: 10px;
   color: var(--ink);
@@ -288,6 +295,7 @@ h1 {
 
 .select-wrap select {
   width: 100%;
+  min-height: 44px;
   appearance: none;
   padding: 12px 38px 12px 14px;
   border: 1px solid #dce4da;
@@ -823,7 +831,7 @@ h1 {
   }
 
   .parent-button {
-    min-height: 34px;
+    min-height: 44px;
     padding: 0 9px;
     font-size: 11px;
   }
@@ -887,6 +895,27 @@ h1 {
 
   .report-stat {
     min-height: 82px;
+  }
+}
+
+@media (max-width: 380px) {
+  .topbar {
+    gap: 6px;
+  }
+
+  .topbar-note,
+  .games-button-label,
+  .parent-button-label {
+    display: none;
+  }
+
+  .games-button-short,
+  .parent-button-short {
+    display: inline;
+  }
+
+  .topbar-actions {
+    gap: 6px;
   }
 }
 

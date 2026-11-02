@@ -48,6 +48,26 @@ upgradeButtons.forEach((button) => {
   button.addEventListener('click', () => buyUpgrade(button.dataset.upgrade));
 });
 document.addEventListener('keydown', handleKeyPress);
+let swipeStart = null;
+gameBoard.addEventListener('pointerdown', (event) => {
+  if (event.pointerType !== 'touch') return;
+  swipeStart = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
+  event.preventDefault();
+});
+gameBoard.addEventListener('pointerup', (event) => {
+  if (!swipeStart || swipeStart.pointerId !== event.pointerId) return;
+  const deltaX = event.clientX - swipeStart.x;
+  const deltaY = event.clientY - swipeStart.y;
+  swipeStart = null;
+  if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < 24) return;
+  const direction = Math.abs(deltaX) > Math.abs(deltaY)
+    ? deltaX > 0 ? 'right' : 'left'
+    : deltaY > 0 ? 'down' : 'up';
+  applyMove(direction);
+});
+gameBoard.addEventListener('pointercancel', () => {
+  swipeStart = null;
+});
 
 function saveProgress() {
   localStorage.setItem('2048_coins', String(coins));
@@ -115,30 +135,38 @@ function handleKeyPress(e) {
   if (gameOver || gameWon) return;
 
   const key = e.key.toLowerCase();
-  let moved = false;
+  const direction = {
+    ArrowUp: 'up',
+    w: 'up',
+    ArrowDown: 'down',
+    s: 'down',
+    ArrowLeft: 'left',
+    a: 'left',
+    ArrowRight: 'right',
+    d: 'right'
+  }[e.key] || ({ w: 'up', s: 'down', a: 'left', d: 'right' }[key]);
+  if (!direction) return;
+  e.preventDefault();
+  applyMove(direction);
+}
 
-  if (e.key === 'ArrowUp' || key === 'w') {
-    e.preventDefault();
-    moved = moveUp();
-  } else if (e.key === 'ArrowDown' || key === 's') {
-    e.preventDefault();
-    moved = moveDown();
-  } else if (e.key === 'ArrowLeft' || key === 'a') {
-    e.preventDefault();
-    moved = moveLeft();
-  } else if (e.key === 'ArrowRight' || key === 'd') {
-    e.preventDefault();
-    moved = moveRight();
-  }
+function applyMove(direction) {
+  if (gameOver || gameWon) return;
+  const moveFunctions = {
+    up: moveUp,
+    down: moveDown,
+    left: moveLeft,
+    right: moveRight
+  };
+  const moved = moveFunctions[direction]();
+  if (!moved) return;
 
-  if (moved) {
-    setTimeout(() => {
-      addRandomTile();
-      updateLevel();
-      checkGameState();
-      render();
-    }, 100);
-  }
+  setTimeout(() => {
+    addRandomTile();
+    updateLevel();
+    checkGameState();
+    render();
+  }, 100);
 }
 
 function moveLeft() { return move('left'); }

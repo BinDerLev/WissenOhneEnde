@@ -247,7 +247,31 @@ canvas {
     line-height: 1.6;
 }
 
-@media (max-width: 600px) {
+.touch-controls {
+    display: none;
+}
+
+.touch-controls button {
+    min-width: 48px;
+    min-height: 48px;
+    border: 1px solid #d9cdbd;
+    border-radius: 12px;
+    background: #f8f5f2;
+    color: #1f2a2f;
+    font: 700 22px/1 system-ui, sans-serif;
+    touch-action: manipulation;
+}
+
+.touch-controls button:active {
+    background: #e8dfd5;
+}
+
+.touch-controls button:focus-visible {
+    outline: 3px solid #53a9d8;
+    outline-offset: 2px;
+}
+
+@media (max-width: 600px), (pointer: coarse) {
     .title-wrap {
         align-items: flex-start;
     }
@@ -256,5 +280,18 @@ canvas {
     .upgrade-grid,
     .score-row {
         grid-template-columns: 1fr;
+    }
+
+    .touch-controls {
+        display: grid;
+        grid-template-columns: repeat(3, 48px);
+        justify-content: center;
+        gap: 6px;
+        margin: 12px 0;
+        touch-action: manipulation;
+    }
+
+    .instructions p {
+        font-size: 13px;
     }
 }

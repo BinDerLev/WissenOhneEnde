@@ -30,6 +30,15 @@ body {
     color: var(--text);
 }
 
+.touch-jump-button {
+    display: none;
+}
+
+.touch-jump-button:focus-visible {
+    outline: 3px solid var(--cyan);
+    outline-offset: 3px;
+}
+
 .game-shell {
     width: min(92vw, 980px);
     background: rgba(11, 16, 35, 0.9);
@@ -193,6 +202,25 @@ canvas {
         padding: 18px 14px 20px;
     }
 
+    @media (max-width: 720px), (pointer: coarse) {
+        .touch-jump-button {
+            display: block;
+            width: min(100%, 300px);
+            min-height: 48px;
+            margin: 12px auto;
+            border: 0;
+            border-radius: 12px;
+            background: var(--cyan);
+            color: #081321;
+            font: 800 16px/1 system-ui, sans-serif;
+            touch-action: manipulation;
+        }
+
+        canvas {
+            touch-action: manipulation;
+        }
+    }
+
     .topbar {
         flex-direction: column;
         align-items: stretch;
@@ -207,4 +235,3 @@ canvas {
         min-width: 0;
     }
 }
-

@@ -35,6 +35,12 @@
             </div>
         </div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div class="touch-controls" aria-label="Asteroids-Steuerung">
+            <button type="button" data-key="arrowleft" aria-label="Nach links drehen">↶ Drehen</button>
+            <button type="button" data-key="arrowup" aria-label="Beschleunigen">↑ Schub</button>
+            <button type="button" data-action="shoot" aria-label="Schießen">● Schießen</button>
+            <button type="button" data-key="arrowright" aria-label="Nach rechts drehen">↷ Drehen</button>
+        </div>
         <div class="controls">
             <button id="startBtn" class="btn btn-start">Start Game</button>
             <button id="pauseBtn" class="btn btn-pause" disabled>Pause</button>
@@ -47,6 +53,7 @@
         </div>
         <div class="instructions">
             <h3>Anleitung:</h3>
+            <p>📱 Nutze auf dem Handy die Steuerflächen für Drehen, Schub und Schießen.</p>
             <p>⬆️ <strong>Pfeiltaste UP / W</strong> - Raumschiff vorwärts bewegen</p>
             <p>⬅️➡️ <strong>Pfeiltasten LEFT/RIGHT / A/D</strong> - Raumschiff drehen</p>
             <p>🔫 <strong>Leerzeichen</strong> - Schießen</p>

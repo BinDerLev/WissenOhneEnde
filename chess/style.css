@@ -153,7 +153,13 @@ h1{
 }
 
 @media (max-width:480px){
-  .square{width:44px;height:44px;font-size:22px}
+  body{padding:72px 12px 20px}
+  .container{padding:12px}
+  .square{
+    width:min(44px, calc((100vw - 80px) / 8));
+    height:min(44px, calc((100vw - 80px) / 8));
+    font-size:clamp(16px, 5.6vw, 22px)
+  }
 }
 
 /* Anleitung Styles */
@@ -306,5 +312,4 @@ h1{
     font-size:0.85em;
   }
 }
-
 
