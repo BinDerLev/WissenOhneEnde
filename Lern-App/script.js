@@ -17,7 +17,7 @@ const curriculum = {
     { title: "Einmaleins vorbereiten", skill: "multiply", icon: "×", description: "Gleich große Gruppen zusammenfassen.", explanation: "Wiederholte Plusaufgaben kannst du als Malaufgabe schreiben: drei Gruppen mit vier Dingen sind 3 × 4.", difficulty: "easy" }
   ],
   3: [
-    { title: "Das Einmaleins", skill: "multiply", icon: "×", description: "Malaufgaben sicher lösen und nutzen.", explanation: "Beim Malnehmen hilft Tauschaufgabe: 3 · 7 ist genauso viel wie 7 · 3. Wenn du eine Aufgabe kennst, kannst du oft auch die passende Geteiltaufgabe lösen.", difficulty: "easy" },
+    { title: "Das Einmaleins", skill: "multiply", icon: "×", description: "Malaufgaben sicher lösen und nutzen.", explanation: "Beim Malnehmen hilft die Tauschaufgabe: 3 · 7 ist genauso viel wie 7 · 3. Wenn du eine Aufgabe kennst, kannst du oft auch die passende Geteiltaufgabe lösen.", difficulty: "easy" },
     { title: "Schriftlich addieren", skill: "add", icon: "＋", description: "Größere Zahlen ordentlich zusammenzählen.", explanation: "Schreibe Einer unter Einer und Zehner unter Zehner. Addiere von rechts nach links. Wenn eine Spalte mehr als 9 ergibt, überträgst du den Zehner in die nächste Spalte.", difficulty: "hard" },
     { title: "Brüche kennenlernen", skill: "fractions", icon: "½", description: "Einfache Bruchteile von Mengen bestimmen.", explanation: "Der Nenner zeigt, in wie viele gleich große Teile das Ganze geteilt wird. Der Zähler sagt, wie viele dieser Teile du nimmst. Ein Viertel von 20 bedeutet also 20 geteilt durch 4.", difficulty: "easy" },
     { title: "Schriftlich subtrahieren", skill: "add", icon: "−", description: "Größere Zahlen sicher voneinander abziehen.", explanation: "Schreibe gleiche Stellenwerte untereinander und rechne von rechts nach links.", difficulty: "hard" },
@@ -30,7 +30,7 @@ const curriculum = {
     { title: "Umfang und Fläche", skill: "geometry", icon: "□", description: "Umfang und Fläche von Rechtecken berechnen.", explanation: "Der Umfang ist die Strecke einmal außen herum: alle Seiten addieren. Die Fläche eines Rechtecks berechnest du mit Länge mal Breite.", difficulty: "hard" },
     { title: "Schriftlich addieren", skill: "add", icon: "＋", description: "Mehrstellige Zahlen addieren und überschlagen.", explanation: "Addiere von rechts nach links und übertrage Zehner in die nächste Spalte.", difficulty: "hard" },
     { title: "Längen umrechnen", skill: "units", icon: "↔", description: "Meter und Zentimeter sicher ineinander umwandeln.", explanation: "Ein Meter sind 100 Zentimeter. Multipliziere mit 100, um Meter in Zentimeter umzuwandeln.", difficulty: "easy" },
-    { title: "Bruchteile bestimmen", skill: "fractions", icon: "¼", description: "Einfache Bruchteile von Zahlen und Mengen berechnen.", explanation: "Teile die Menge durch den Nenner, um einen Teil zu erhalten.", difficulty: "easy" }
+    { title: "Bruchteile bestimmen", skill: "fractions", icon: "¼", description: "Einfache Bruchteile von Zahlen und Mengen berechnen.", explanation: "Teile die Menge durch den Nenner und multipliziere das Ergebnis mit dem Zähler.", difficulty: "easy" }
   ],
   5: [
     { title: "Natürliche Zahlen", skill: "add", icon: "＋", description: "Mit großen Zahlen sicher rechnen.", explanation: "Beim schriftlichen Rechnen stehen gleiche Stellenwerte untereinander. Überschlage vorher, damit du merkst, ob dein Ergebnis ungefähr passen kann.", difficulty: "easy" },
@@ -40,46 +40,6 @@ const curriculum = {
     { title: "Flächen berechnen", skill: "geometry", icon: "□", description: "Flächeninhalte von Rechtecken bestimmen.", explanation: "Die Fläche eines Rechtecks ist Länge mal Breite. Die Einheit wird dabei quadriert.", difficulty: "hard" },
     { title: "Prozent im Alltag", skill: "percent", icon: "%", description: "Einfache Prozente von Mengen berechnen.", explanation: "10 % ist ein Zehntel und 50 % die Hälfte. Nutze bekannte Anteile, um Prozente zu finden.", difficulty: "easy" }
   ],
-  6: [
-    { title: "Brüche addieren", skill: "fractions", icon: "½", description: "Brüche mit gleichem Nenner zusammenzählen.", explanation: "Wenn die Nenner gleich sind, addierst oder subtrahierst du nur die Zähler. Der Nenner bleibt gleich. Kürze das Ergebnis, wenn Zähler und Nenner einen gemeinsamen Teiler haben.", difficulty: "hard" },
-    { title: "Dezimalzahlen", skill: "decimal", icon: ",", description: "Kommazahlen addieren, subtrahieren und runden.", explanation: "Achte beim schriftlichen Rechnen darauf, dass die Kommas untereinander stehen. Zum Runden schaust du auf die Stelle rechts neben der Stelle, auf die du runden sollst.", difficulty: "easy" },
-    { title: "Prozent verstehen", skill: "percent", icon: "%", description: "Einfache Prozente von einer Zahl berechnen.", explanation: "Prozent bedeutet „von hundert“. 10 % findest du, indem du durch 10 teilst; 25 % sind ein Viertel. Nutze diese einfachen Anteile, um weiterzurechnen.", difficulty: "hard" },
-    { title: "Brüche subtrahieren", skill: "fractions", icon: "−", description: "Brüche mit gleichen Nennern voneinander abziehen.", explanation: "Bei gleichem Nenner ziehst du die Zähler ab; der Nenner bleibt gleich.", difficulty: "hard" },
-    { title: "Dreisatz im Alltag", skill: "ratio", icon: "↗", description: "Proportionale Zusammenhänge berechnen.", explanation: "Berechne erst den Wert für eine Einheit und multipliziere dann mit der gesuchten Anzahl.", difficulty: "easy" },
-    { title: "Negative Zahlen", skill: "negative", icon: "−", description: "Erste Rechenaufgaben mit negativen Zahlen lösen.", explanation: "Auf dem Zahlenstrahl gehst du bei einer negativen Zahl nach links und bei einer positiven nach rechts.", difficulty: "hard" }
-  ],
-  7: [
-    { title: "Negative Zahlen", skill: "negative", icon: "−", description: "Mit positiven und negativen Zahlen rechnen.", explanation: "Auf dem Zahlenstrahl liegen negative Zahlen links von null. Beim Addieren einer negativen Zahl gehst du nach links; beim Subtrahieren einer negativen Zahl nach rechts.", difficulty: "hard" },
-    { title: "Terme und Gleichungen", skill: "equation", icon: "x", description: "Unbekannte mit Umkehroperationen bestimmen.", explanation: "Eine Gleichung bleibt im Gleichgewicht, wenn du auf beiden Seiten dieselbe Rechenoperation ausführst. Mache die Rechenschritte rückwärts, um x allein zu bekommen.", difficulty: "hard" },
-    { title: "Proportionalität", skill: "ratio", icon: "↗", description: "Zusammenhänge mit Dreisatz lösen.", explanation: "Bei einem proportionalen Zusammenhang werden beide Größen mit demselben Faktor vervielfacht. Rechne zuerst auf eine Einheit herunter und dann auf die gesuchte Menge hoch.", difficulty: "easy" },
-    { title: "Prozentrechnung", skill: "percent", icon: "%", description: "Grundwerte und Prozentwerte berechnen.", explanation: "Berechne einen Prozentwert, indem du den Grundwert mit dem Prozentsatz multiplizierst und durch 100 teilst.", difficulty: "hard" },
-    { title: "Brüche und Dezimalzahlen", skill: "fractions", icon: "¾", description: "Bruchteile von Zahlen sicher bestimmen.", explanation: "Teile zuerst durch den Nenner und multipliziere anschließend mit dem Zähler.", difficulty: "hard" },
-    { title: "Wahrscheinlichkeit", skill: "probability", icon: "◌", description: "Einfache Zufallsexperimente auswerten.", explanation: "Die Wahrscheinlichkeit ist der Anteil günstiger Ergebnisse an allen möglichen Ergebnissen.", difficulty: "easy" }
-  ],
-  8: [
-    { title: "Lineare Gleichungen", skill: "equation", icon: "x", description: "Gleichungen Schritt für Schritt lösen.", explanation: "Bringe zuerst alle x-Terme auf eine Seite und die Zahlen auf die andere. Fasse gleichartige Terme zusammen und teile zuletzt durch den Faktor vor x.", difficulty: "hard" },
-    { title: "Potenzen und Wurzeln", skill: "powers", icon: "²", description: "Quadratzahlen und ihre Wurzeln erkennen.", explanation: "Eine Potenz wie 5² bedeutet 5 · 5. Die Quadratwurzel ist die Umkehroperation: √25 = 5, denn 5² = 25.", difficulty: "hard" },
-    { title: "Satz des Pythagoras", skill: "pythagoras", icon: "△", description: "Fehlende Seiten im rechtwinkligen Dreieck finden.", explanation: "Im rechtwinkligen Dreieck gilt a² + b² = c². Die längste Seite c liegt gegenüber dem rechten Winkel. Ziehe am Ende die Wurzel, um die Seitenlänge zu erhalten.", difficulty: "hard" },
-    { title: "Lineare Funktionen", skill: "linear", icon: "y", description: "Funktionswerte linearer Funktionen berechnen.", explanation: "Setze den gegebenen x-Wert in y = mx + b ein und berechne y.", difficulty: "hard" },
-    { title: "Prozent und Zinsen", skill: "percent", icon: "%", description: "Prozentwerte und einfache Zinsen bestimmen.", explanation: "Berechne den Prozentwert mit Grundwert mal Prozentsatz geteilt durch 100.", difficulty: "hard" },
-    { title: "Dreisatz und Verhältnis", skill: "ratio", icon: "↗", description: "Proportionale Zuordnungen sicher lösen.", explanation: "Bestimme den Wert für eine Einheit und rechne danach auf die gesuchte Menge hoch.", difficulty: "easy" }
-  ],
-  9: [
-    { title: "Quadratische Gleichungen", skill: "quadratic", icon: "x²", description: "Einfache quadratische Gleichungen lösen.", explanation: "Bei x² = a suchst du die Zahl, deren Quadrat a ergibt. Für positive a gibt es zwei Lösungen: die positive und die negative Wurzel.", difficulty: "hard" },
-    { title: "Funktionen und Geraden", skill: "linear", icon: "↗", description: "Steigung und Funktionswerte untersuchen.", explanation: "In y = mx + b gibt m die Steigung und b den Startwert an. Um einen Funktionswert zu berechnen, setzt du den gegebenen x-Wert ein.", difficulty: "hard" },
-    { title: "Wahrscheinlichkeit", skill: "probability", icon: "◌", description: "Einfache Wahrscheinlichkeiten berechnen.", explanation: "Bei gleich wahrscheinlichen Ergebnissen gilt: Wahrscheinlichkeit = günstige Ergebnisse geteilt durch alle möglichen Ergebnisse. Für Prozent multiplizierst du den Bruch mit 100.", difficulty: "easy" },
-    { title: "Potenzen und Wurzeln", skill: "powers", icon: "√", description: "Quadratwurzeln und Quadratzahlen zuordnen.", explanation: "Die Quadratwurzel macht das Quadrieren rückgängig: √a ist die Zahl, die mit sich selbst multipliziert a ergibt.", difficulty: "hard" },
-    { title: "Flächen im Koordinatensystem", skill: "geometry", icon: "□", description: "Umfang und Fläche einfacher Figuren berechnen.", explanation: "Für ein Rechteck berechnest du die Fläche mit Länge mal Breite und den Umfang mit der Summe seiner Seiten.", difficulty: "hard" },
-    { title: "Terme vereinfachen", skill: "equation", icon: "x", description: "Einfache Gleichungen mit einer Unbekannten lösen.", explanation: "Führe auf beiden Seiten dieselbe Rechenoperation aus, bis die Unbekannte allein steht.", difficulty: "hard" }
-  ],
-  10: [
-    { title: "Quadratische Funktionen", skill: "quadratic", icon: "x²", description: "Quadrate, Nullstellen und Lösungen üben.", explanation: "Quadratische Zusammenhänge enthalten x². Bei x² = a erhältst du durch Wurzelziehen zwei Lösungen: √a und −√a. Setze die Lösungen zur Kontrolle wieder ein.", difficulty: "hard" },
-    { title: "Trigonometrie", skill: "trig", icon: "△", description: "Seitenverhältnisse im rechtwinkligen Dreieck nutzen.", explanation: "Sinus eines Winkels = Gegenkathete geteilt durch Hypotenuse. Cosinus = Ankathete geteilt durch Hypotenuse. Achte darauf, den Taschenrechner auf Grad einzustellen.", difficulty: "hard" },
-    { title: "Prozent- und Zinsrechnung", skill: "percent", icon: "%", description: "Prozentwerte und einfache Zinsen bestimmen.", explanation: "Der Prozentwert ist Grundwert mal Prozentsatz geteilt durch 100. Bei einfachen Jahreszinsen kannst du die Zinsen für ein Jahr genauso berechnen.", difficulty: "easy" },
-    { title: "Lineare Funktionen", skill: "linear", icon: "↗", description: "Steigung und Funktionswerte berechnen.", explanation: "In y = mx + b beschreibt m die Steigung und b den Schnittpunkt mit der y-Achse.", difficulty: "hard" },
-    { title: "Wahrscheinlichkeit", skill: "probability", icon: "◌", description: "Wahrscheinlichkeiten als Prozentwerte angeben.", explanation: "Teile günstige durch mögliche Ergebnisse und multipliziere mit 100.", difficulty: "easy" },
-    { title: "Bruchterme und Anteile", skill: "fractions", icon: "¾", description: "Bruchteile und proportionale Anteile berechnen.", explanation: "Teile zuerst durch den Nenner und multipliziere dann mit dem Zähler.", difficulty: "hard" }
-  ]
 };
 
 // Zusätzliche Mathe‑Übungen: erweitere das bestehende Curriculum um mehr Themen pro Klassenstufe
@@ -87,43 +47,33 @@ const curriculum = {
   const extras = {
     1: [
       { title: "Zahlenrätsel", skill: "compare", icon: "→", description: "Kleine Rätsel mit Zahlenfolgen und Lücken lösen.", explanation: "Finde das Muster und setze die Reihe fort. Nutze Zählen oder Rechenregeln.", difficulty: "easy" },
-      { title: "Formen legen", skill: "shapes", icon: "◇", description: "Formen zusammensetzen und wiedererkennen.", explanation: "Setze aus einfachen Formen neue Formen zusammen und zähle Ecken und Seiten.", difficulty: "easy" }
+      { title: "Formen legen", skill: "shapes", icon: "◇", description: "Formen zusammensetzen und wiedererkennen.", explanation: "Setze aus einfachen Formen neue Formen zusammen und zähle Ecken und Seiten.", difficulty: "easy" },
+      { title: "Zehnerfreunde", skill: "add", icon: "+", description: "Zahlen finden, die zusammen zehn ergeben.", explanation: "Ergänze jede Zahl bis zehn. Zerlege dafür die Zahlen in passende Teile.", difficulty: "easy" },
+      { title: "Größer oder kleiner?", skill: "compare", icon: "≷", description: "Zahlen bis 20 vergleichen und ordnen.", explanation: "Vergleiche die Zahlen und achte darauf, welche auf dem Zahlenstrahl weiter rechts liegt.", difficulty: "easy" }
     ],
     2: [
       { title: "Münzen zählen", skill: "money", icon: "€", description: "Kleine Aufgaben mit Euro und Cent rechnen.", explanation: "Rechne Preise zusammen und löse kleine Wechselgeldaufgaben.", difficulty: "easy" },
-      { title: "Tauschaufgaben", skill: "add", icon: "+", description: "Aufgaben zum Umkehren (z. B. 5 + ? = 12).", explanation: "Löse Aufgaben durch Überlegen, welche Zahl fehlt, und übe Kopfrechnen.", difficulty: "easy" }
+      { title: "Tauschaufgaben", skill: "add", icon: "+", description: "Aufgaben zum Umkehren (z. B. 5 + ? = 12).", explanation: "Löse Aufgaben durch Überlegen, welche Zahl fehlt, und übe Kopfrechnen.", difficulty: "easy" },
+      { title: "Malaufgaben mit Reihen", skill: "multiply", icon: "×", description: "Kleine Malaufgaben mit wiederholtem Zählen lösen.", explanation: "Zähle in gleichen Schritten weiter, um Gruppen mit derselben Anzahl zu berechnen.", difficulty: "easy" },
+      { title: "Längen messen", skill: "units", icon: "↔", description: "Einfache Längen vergleichen und umrechnen.", explanation: "Merke dir: 100 Zentimeter sind ein Meter. Vergleiche Längen zuerst in derselben Einheit.", difficulty: "easy" }
     ],
     3: [
       { title: "Einmaleins‑Training", skill: "multiply", icon: "×", description: "Schnelle Übungen zum Einmaleins vertiefen.", explanation: "Trainiere kleine Reihen (2er, 3er, 5er, 10er) mit kurzen Aufgaben und Wiederholungen.", difficulty: "easy" },
-      { title: "Sachtextaufgaben", skill: "money", icon: "€", description: "Texte lesen und passende Rechenwege finden.", explanation: "Lies die Aufgabe genau, markiere Zahlen und entscheide, ob du addieren, multiplizieren oder teilen musst.", difficulty: "easy" }
+      { title: "Sachtextaufgaben", skill: "money", icon: "€", description: "Texte lesen und passende Rechenwege finden.", explanation: "Lies die Aufgabe genau, markiere Zahlen und entscheide, ob du addieren, multiplizieren oder teilen musst.", difficulty: "easy" },
+      { title: "Kopfrechnen bis 100", skill: "add", icon: "+", description: "Plus- und Minusaufgaben im Kopf lösen.", explanation: "Zerlege Zahlen in Zehner und Einer und rechne Schritt für Schritt.", difficulty: "easy" },
+      { title: "Bruchteile kennenlernen", skill: "fractions", icon: "½", description: "Einfache Anteile von kleinen Mengen bestimmen.", explanation: "Teile eine Menge in gleich große Gruppen und zähle die gesuchten Teile.", difficulty: "easy" }
     ],
     4: [
       { title: "Kommazahlen vertiefen", skill: "decimal", icon: ",", description: "Addition und Subtraktion mit einer Nachkommastelle.", explanation: "Richte die Kommas aus und rechne wie bei ganzen Zahlen, runde bei Bedarf.", difficulty: "easy" },
-      { title: "Längen schätzen", skill: "units", icon: "m", description: "Schätze Längen und vergleiche Einheiten.", explanation: "Übe Abschätzungen und kontrolliere mit Messungen; rechne zwischen cm, m und km um.", difficulty: "easy" }
+      { title: "Längen schätzen", skill: "units", icon: "m", description: "Schätze Längen und vergleiche Einheiten.", explanation: "Übe Abschätzungen und kontrolliere mit Messungen; rechne zwischen cm, m und km um.", difficulty: "easy" },
+      { title: "Brüche ordnen", skill: "fractions", icon: "¼", description: "Einfache Brüche vergleichen und sortieren.", explanation: "Bei gleich großen Ganzen zeigt ein größerer Zähler mehr Teile an, wenn die Nenner gleich sind.", difficulty: "easy" },
+      { title: "Einmaleins im Kopf", skill: "multiply", icon: "×", description: "Malaufgaben sicher aus dem Kopf lösen.", explanation: "Nutze bekannte Reihen und Tauschaufgaben, um neue Ergebnisse zu finden.", difficulty: "easy" }
     ],
     5: [
       { title: "Bruchteile anwenden", skill: "fractions", icon: "½", description: "Brüche in Sachaufgaben verwenden.", explanation: "Berechne Teile einer Menge und setze Brüche in Kontextaufgaben um.", difficulty: "easy" },
-      { title: "Prozentaufgaben", skill: "percent", icon: "%", description: "Prozentrechnung bei einfachen Beispielen.", explanation: "Berechne Rabatte und Teile eines Ganzen mit Prozentangaben.", difficulty: "easy" }
-    ],
-    6: [
-      { title: "Brüche kürzen", skill: "fractions", icon: "½", description: "Brüche vereinfachen und kürzen.", explanation: "Teile Zähler und Nenner durch gemeinsame Teiler, um den Bruch zu vereinfachen.", difficulty: "hard" },
-      { title: "Proportionale Aufgaben", skill: "ratio", icon: "↗", description: "Anwendungsaufgaben mit Verhältnissen lösen.", explanation: "Nutze den Dreisatz, um proportionale Mengen umzurechnen und anzuwenden.", difficulty: "hard" }
-    ],
-    7: [
-      { title: "Terme üben", skill: "equation", icon: "x", description: "Umformen und Einsetzen in Termen üben.", explanation: "Fasse gleichartige Terme zusammen und löse einfache Gleichungen durch Umformen.", difficulty: "hard" },
-      { title: "Negative Aufgaben vertiefen", skill: "negative", icon: "−", description: "Aufgaben mit Vorzeichen sicher rechnen.", explanation: "Nutze den Zahlenstrahl oder Regeln für Plus/Minus, um Vorzeichenaufgaben zu lösen.", difficulty: "hard" }
-    ],
-    8: [
-      { title: "Lineare Funktionen Übung", skill: "linear", icon: "y", description: "Mehr Übungen zu Steigung und Schnittpunkt.", explanation: "Untersuche Funktionswerte und zeichne einfache lineare Funktionen in ein Koordinatensystem.", difficulty: "hard" },
-      { title: "Potenzen anwenden", skill: "powers", icon: "²", description: "Mit Quadratzahlen und kleinen Potenzen rechnen.", explanation: "Übe Rechenregeln für Potenzen und einfache Wurzelaufgaben.", difficulty: "hard" }
-    ],
-    9: [
-      { title: "Quadratische Anwendungen", skill: "quadratic", icon: "x²", description: "Anwendungsaufgaben mit Quadraten und Formeln.", explanation: "Setze Werte in einfache quadratische Formeln ein und löse praktische Aufgaben.", difficulty: "hard" },
-      { title: "Wahrscheinlichkeiten vertiefen", skill: "probability", icon: "◌", description: "Kombinatorische Fragestellungen und Prozentangaben.", explanation: "Analysiere mehrere Ereignisse und berechne zusammengesetzte Wahrscheinlichkeiten.", difficulty: "hard" }
-    ],
-    10: [
-      { title: "Trigonometrie Aufgaben", skill: "trig", icon: "△", description: "Praktische Anwendungen von sin/cos in Dreiecken.", explanation: "Berechne fehlende Seiten oder Winkel mithilfe bekannter Seitenverhältnisse und trigonometrischer Funktionen.", difficulty: "hard" },
-      { title: "Anwendungsaufgaben", skill: "linear", icon: "y", description: "Komplexere Aufgaben mit mehreren Rechenschritten.", explanation: "Zerlege die Aufgabe in einzelne Schritte, löse Teilaufgaben und setze die Ergebnisse zusammen.", difficulty: "hard" }
+      { title: "Prozentaufgaben", skill: "percent", icon: "%", description: "Prozentrechnung bei einfachen Beispielen.", explanation: "Berechne Rabatte und Teile eines Ganzen mit Prozentangaben.", difficulty: "easy" },
+      { title: "Rechenmix mit großen Zahlen", skill: "add", icon: "＋", description: "Große Zahlen addieren und voneinander abziehen.", explanation: "Ordne gleiche Stellenwerte untereinander und prüfe dein Ergebnis mit einem Überschlag.", difficulty: "easy" },
+      { title: "Umfang und Fläche üben", skill: "geometry", icon: "□", description: "Umfang und Fläche einfacher Rechtecke berechnen.", explanation: "Addiere alle Seiten für den Umfang und multipliziere Länge und Breite für die Fläche.", difficulty: "easy" }
     ]
   };
 
@@ -140,7 +90,7 @@ const germanTopicTemplates = [
   { title: "Satzbau", skill: "de-wordorder", icon: "S", description: "Wörter zu verständlichen Sätzen ordnen.", explanation: "Im Aussagesatz steht das gebeugte Verb meistens an zweiter Stelle. Achte auch auf Großschreibung und Satzzeichen." },
   { title: "Wortschatz", skill: "de-vocabulary", icon: "↔", description: "Bedeutungen, Synonyme und passende Wörter finden.", explanation: "Synonyme haben eine ähnliche Bedeutung. Lies die Antwortmöglichkeiten genau und suche das passende Wort." },
   { title: "Grammatik", skill: "de-grammar", icon: "G", description: "Verben passend zu Person und Zeitform verwenden.", explanation: "Die Verbform passt sich an die Person und die Zeitform an. Achte auf die Endung des Verbs." },
-  { title: "Zeichensetzung", skill: "de-punctuation", icon: ".,", description: "Satzzeichen sicher setzen.", explanation: "Aussagesätze enden mit einem Punkt, Fragen mit einem Fragezeichen. In längeren Sätzen trennen Kommas Satzteile." },
+  { title: "Zeichensetzung", skill: "de-punctuation", icon: ".,", description: "Satzzeichen sicher setzen.", explanation: "Aussagesätze enden mit einem Punkt, Fragen mit einem Fragezeichen. Kommas trennen zum Beispiel Aufzählungen und Nebensätze." },
   { title: "Lesen mit Verständnis", skill: "de-reading", icon: "📖", description: "Kurze Texte lesen und Fragen zum Inhalt beantworten.", explanation: "Lies den Text aufmerksam, markiere wichtige Informationen und beantworte die Fragen mit vollständigen Sätzen." },
   { title: "Komposita & Wortbildung", skill: "de-words", icon: "🔗", description: "Wörter zusammensetzen und Wortteile erkennen.", explanation: "Untersuche zusammengesetzte Wörter (Komposita) und finde Bedeutungsteile wie Vorsilben oder Endungen." },
   { title: "Groß‑ und Kleinschreibung", skill: "de-capitalization", icon: "A", description: "Regeln zur Großschreibung üben.", explanation: "Nomen werden im Deutschen großgeschrieben. Achte außerdem auf Satzanfänge und Eigennamen." },
@@ -151,56 +101,41 @@ const germanTopicTemplates = [
 const germanCurriculum = {
   1: [
     { title: "Rechtschreibung (Grundlagen)", skill: "de-spelling", icon: "Ä", description: "Einfache Wörter richtig schreiben.", explanation: "Lies das Wort langsam und höre die Silben. Merke dir schwierige Buchstabenverbindungen.", difficulty: "easy" },
-    { title: "Wortarten (Einführung)", skill: "de-wordclass", icon: "W", description: "Nomen, Verben und Adjektive kennenlernen.", explanation: "Erkenne, ob ein Wort eine Sache (Nomen), eine Tätigkeit (Verb) oder eine Eigenschaft (Adjektiv) benennt.", difficulty: "easy" },
-    { title: "Satzbau (einfach)", skill: "de-wordorder", icon: "S", description: "Einfache Sätze bilden und ordnen.", explanation: "Baue einen Satz aus Subjekt, Prädikat und Objekt. Achte auf die Reihenfolge.", difficulty: "easy" },
-    { title: "Lesen mit Verständnis (Kurztexte)", skill: "de-reading", icon: "📖", description: "Kurze Texte lesen und Fragen beantworten.", explanation: "Lies den Text und beantworte einfache Fragen zum Inhalt.", difficulty: "easy" }
+    { title: "Wortarten (Einführung)", skill: "de-wordclass", icon: "W", description: "Nomen, Verben und Adjektive kennenlernen.", explanation: "Nomen benennen Dinge, Menschen oder Tiere. Verben sagen, was jemand tut, und Adjektive beschreiben, wie etwas ist.", difficulty: "easy" },
+    { title: "Satzbau (einfach)", skill: "de-wordorder", icon: "S", description: "Einfache Sätze bilden und ordnen.", explanation: "Bilde einfache Sätze aus Wörtern und achte darauf, dass sie in der richtigen Reihenfolge stehen.", difficulty: "easy" },
+    { title: "Lesen mit Verständnis (Kurztexte)", skill: "de-reading", icon: "📖", description: "Kurze Texte lesen und Fragen beantworten.", explanation: "Lies den Text und beantworte einfache Fragen zum Inhalt.", difficulty: "easy" },
+    { title: "Silben und Reime", skill: "de-spelling", icon: "♪", description: "Wörter in Silben zerlegen und Reimwörter erkennen.", explanation: "Sprich Wörter langsam und klatsche ihre Silben. Reimwörter klingen am Ende ähnlich.", difficulty: "easy" },
+    { title: "Tunwörter erkennen", skill: "de-wordclass", icon: "W", description: "Verben in einfachen Sätzen finden.", explanation: "Verben sagen, was jemand tut. Frage: Was macht die Person oder das Tier?", difficulty: "easy" }
   ],
   2: [
     { title: "Rechtschreibung: Dehnungs‑ und Verdoppelungsregeln", skill: "de-spelling", icon: "Ä", description: "Wörter mit doppelten Buchstaben und Dehnungszeichen üben.", explanation: "Achte auf Lautfolgen und typische Schreibmuster (z. B. 'ss' vs. 'ß').", difficulty: "easy" },
-    { title: "Wortarten (übungen)", skill: "de-wordclass", icon: "W", description: "Wortarten erkennen in kurzen Sätzen.", explanation: "Finde Nomen, Verben und Adjektive im Satz und benenne sie.", difficulty: "easy" },
-    { title: "Satzbau: Fragen & Antworten", skill: "de-wordorder", icon: "S", description: "Fragen bilden und beantworten.", explanation: "Formuliere Fragen zu einer Aussage und achte auf das Verb an zweiter Stelle.", difficulty: "easy" },
-    { title: "Wortschatz: Gegenstände & Orte", skill: "de-vocabulary", icon: "↔", description: "Begriffe für Alltagssituationen lernen.", explanation: "Ordne Wörter Themen zu (z. B. Schule, Küche, Natur).", difficulty: "easy" }
+    { title: "Wortarten (Übungen)", skill: "de-wordclass", icon: "W", description: "Wortarten in kurzen Sätzen erkennen.", explanation: "Finde Nomen, Verben und Adjektive im Satz und benenne sie.", difficulty: "easy" },
+    { title: "Satzbau: Fragen & Antworten", skill: "de-wordorder", icon: "S", description: "Fragen bilden und beantworten.", explanation: "Formuliere Fragen zu einer Aussage. Bei W-Fragen steht das Verb meistens an zweiter Stelle, bei Ja-/Nein-Fragen an erster Stelle.", difficulty: "easy" },
+    { title: "Wortschatz: Gegenstände & Orte", skill: "de-vocabulary", icon: "↔", description: "Begriffe für Alltagssituationen lernen.", explanation: "Ordne Wörter Themen zu (z. B. Schule, Küche, Natur).", difficulty: "easy" },
+    { title: "Nomen und Verben", skill: "de-wordclass", icon: "W", description: "Nomen und Verben in kurzen Sätzen unterscheiden.", explanation: "Nomen benennen Menschen, Tiere oder Dinge. Verben beschreiben, was sie tun.", difficulty: "easy" },
+    { title: "Wörter richtig schreiben", skill: "de-spelling", icon: "Ä", description: "Häufige Wörter sicher schreiben.", explanation: "Sprich ein Wort langsam und prüfe, ob alle Laute und Buchstaben enthalten sind.", difficulty: "easy" }
   ],
   3: [
     { title: "Rechtschreibung: Großschreibung", skill: "de-capitalization", icon: "A", description: "Nomen und Satzanfänge richtig großschreiben.", explanation: "Erkenne Nomen und setze Großbuchstaben am Satzanfang ein.", difficulty: "easy" },
     { title: "Satzbau: Nebensätze (einfach)", skill: "de-wordorder", icon: "S", description: "Einfache Nebensätze verstehen und bilden.", explanation: "Füge Nebensätze an Hauptsätze an und achte auf die Verbposition.", difficulty: "easy" },
     { title: "Lesen mit Verständnis: kurze Geschichten", skill: "de-reading", icon: "📖", description: "Kurzgeschichten lesen und Fragen beantworten.", explanation: "Finde die Hauptpersonen, Handlungen und den Schluss im Text.", difficulty: "easy" },
-    { title: "Wortschatz & Komposita", skill: "de-words", icon: "🔗", description: "Wörter zusammensetzen (Komposita) üben.", explanation: "Bilde zusammengesetzte Wörter und erkenne Bedeutungsanteile.", difficulty: "easy" }
+    { title: "Wortschatz & Komposita", skill: "de-words", icon: "🔗", description: "Wörter zusammensetzen (Komposita) üben.", explanation: "Bilde zusammengesetzte Wörter und erkenne Bedeutungsanteile.", difficulty: "easy" },
+    { title: "Wortfamilien", skill: "de-words", icon: "🔗", description: "Zusammengesetzte Wörter und ihre Bestandteile entdecken.", explanation: "Verbinde passende Wörter und achte darauf, wie sich ihre Bedeutung zusammensetzt.", difficulty: "easy" },
+    { title: "Satzzeichen setzen", skill: "de-punctuation", icon: ".,", description: "Punkte und Fragezeichen am Satzende ergänzen.", explanation: "Aussagesätze enden meist mit einem Punkt, Fragen mit einem Fragezeichen.", difficulty: "easy" }
   ],
   4: [
     { title: "Zeichensetzung: Komma & Fragezeichen", skill: "de-punctuation", icon: ".,", description: "Kommas bei Aufzählungen und einfache Fragen setzen.", explanation: "Setze Kommas in Aufzählungen und Fragezeichen bei Fragesätzen.", difficulty: "easy" },
-    { title: "Rechtschreibung: schwierige Laute", skill: "de-spelling", icon: "Ä", description: "Wörter mit äu/ei, äu/ei und ähnlichen Lauten üben.", explanation: "Erkenne häufige Stolperstellen in der Schreibweise und übe sie.", difficulty: "easy" },
-    { title: "Lesen: Hauptaussage finden", skill: "de-reading", icon: "📖", description: "Die Hauptaussage eines kurzen Textes bestimmen.", explanation: "Fasse in einem Satz zusammen, worum es im Text geht.", difficulty: "easy" }
+    { title: "Rechtschreibung: schwierige Laute", skill: "de-spelling", icon: "Ä", description: "Wörter mit schwierigen Lauten und Schreibungen, zum Beispiel äu und ei, üben.", explanation: "Erkenne häufige Stolperstellen in der Schreibweise und übe sie.", difficulty: "easy" },
+    { title: "Lesen: Hauptaussage finden", skill: "de-reading", icon: "📖", description: "Die Hauptaussage eines kurzen Textes bestimmen.", explanation: "Fasse in einem Satz zusammen, worum es im Text geht.", difficulty: "easy" },
+    { title: "Wortschatz: ähnliche Wörter", skill: "de-vocabulary", icon: "↔", description: "Wörter mit ähnlicher Bedeutung finden.", explanation: "Synonyme bedeuten ungefähr dasselbe. Suche das Wort, das am besten passt.", difficulty: "easy" },
+    { title: "Wortarten wiederholen", skill: "de-wordclass", icon: "W", description: "Nomen, Verben und Adjektive unterscheiden.", explanation: "Nomen benennen, Verben handeln und Adjektive beschreiben.", difficulty: "easy" }
   ],
   5: [
     { title: "Grammatik: Zeiten (Präsens, Präteritum)", skill: "de-grammar", icon: "G", description: "Verben in verschiedenen Zeiten verwenden.", explanation: "Setze Verben korrekt in Präsens und Präteritum ein.", difficulty: "medium" },
     { title: "Lesen: Information entnehmen", skill: "de-reading", icon: "📖", description: "Texte lesen und Informationen gezielt entnehmen.", explanation: "Markiere wichtige Fakten und beantworte gezielte Fragen.", difficulty: "medium" },
-    { title: "Komposita & Wortbildung (erweitert)", skill: "de-words", icon: "🔗", description: "Längere zusammengesetzte Wörter analysieren.", explanation: "Zerlege Komposita in ihre Bestandteile und erkläre die Bedeutung.", difficulty: "medium" }
-  ],
-  6: [
-    { title: "Zeichensetzung: Kommas bei Nebensätzen", skill: "de-punctuation", icon: ".,", description: "Kommas bei Nebensätzen korrekt setzen.", explanation: "Erkenne Nebensätze und setze Kommas zur Abtrennung.", difficulty: "medium" },
-    { title: "Synonyme & Antonyme", skill: "de-vocabulary", icon: "↔", description: "Wortfelder und Gegenteile erkennen.", explanation: "Finde passende Synonyme und Antonyme zu vorgegebenen Wörtern.", difficulty: "medium" },
-    { title: "Lesen: Textstruktur erkennen", skill: "de-reading", icon: "📖", description: "Einleitung, Hauptteil, Schluss unterscheiden.", explanation: "Analysiere kurze Texte nach Aufbau und Absichten des Autors.", difficulty: "medium" }
-  ],
-  7: [
-    { title: "Grammatik: Satzglieder und Fälle", skill: "de-grammar", icon: "G", description: "Subjekt, Objekt, Fälle (Nominativ, Akkusativ) erkennen.", explanation: "Unterscheide Satzglieder und bestimme den Fall von Nomen.", difficulty: "hard" },
-    { title: "Argumentation: Meinung begründen (einfach)", skill: "de-reading", icon: "💬", description: "Kurze Texte lesen und eine eigene Meinung formulieren.", explanation: "Formuliere eine kurze Begründung mit Einleitung, Argument und Schluss.", difficulty: "hard" },
-    { title: "Rechtschreibung: Wortstamm & Ableitungen", skill: "de-spelling", icon: "Ä", description: "Stammbildungen erkennen und ableiten.", explanation: "Leite neue Wörter von bekannten Stammwörtern ab.", difficulty: "hard" }
-  ],
-  8: [
-    { title: "Textanalyse: Stilmittel erkennen", skill: "de-reading", icon: "🔎", description: "Metaphern, Vergleiche und Wiederholungen identifizieren.", explanation: "Finde sprachliche Mittel im Text und erkläre ihre Wirkung.", difficulty: "hard" },
-    { title: "Grammatik: Konjunktiv & indirekte Rede (Einführung)", skill: "de-grammar", icon: "G", description: "Indirekte Rede und Konjunktiv kennenlernen.", explanation: "Unterscheide direkte und indirekte Rede und übe einfache Umformulierungen.", difficulty: "hard" },
-    { title: "Textproduktion: kurzer Erörterungstext", skill: "de-writing", icon: "✍️", description: "Eine kurze, strukturierte Stellungnahme schreiben.", explanation: "Formuliere eine These, zwei Argumente und ein kurzes Fazit.", difficulty: "hard" }
-  ],
-  9: [
-    { title: "Textinterpretation: Kurztexte analysieren", skill: "de-reading", icon: "🔎", description: "Intensivere Analyse von Erzähltexten und Sachtexten.", explanation: "Untersuche Perspektive, Zeitstruktur und Motivik im Text.", difficulty: "hard" },
-    { title: "Rhetorik: Argumentationsstrukturen", skill: "de-writing", icon: "💬", description: "Argumente strukturieren und Gegenargumente berücksichtigen.", explanation: "Baue eine differenzierte Argumentation mit Beispielen auf.", difficulty: "hard" },
-    { title: "Sprachgebrauch & Stil", skill: "de-words", icon: "✒️", description: "Formeller vs. informeller Sprachgebrauch erkennen.", explanation: "Unterscheide Sprachstile und passe Ton und Wortwahl an die Zielgruppe an.", difficulty: "hard" }
-  ],
-  10: [
-    { title: "Literaturanalyse (eingeführt)", skill: "de-reading", icon: "📚", description: "Analyse von Kurzprosa und Auszügen aus längeren Werken.", explanation: "Arbeite mit Textstellen, interpretiere Symbolik und Form.", difficulty: "hard" },
-    { title: "Erörterung & Argumentation (erweitert)", skill: "de-writing", icon: "✍️", description: "Komplexe Erörterungen schreiben und sprachlich gestalten.", explanation: "Führe mehrere Argumentationsschritte aus und formuliere ein begründetes Schlussurteil.", difficulty: "hard" },
-    { title: "Stilmittel & Sprachkritik", skill: "de-reading", icon: "🔎", description: "Tiefere Analyse sprachlicher Mittel und deren Wirkung.", explanation: "Bewerte, wie Stilmittel Leser lenken und welche Wirkung sie erzielen.", difficulty: "hard" }
+    { title: "Komposita & Wortbildung (erweitert)", skill: "de-words", icon: "🔗", description: "Längere zusammengesetzte Wörter analysieren.", explanation: "Zerlege Komposita in ihre Bestandteile und erkläre die Bedeutung.", difficulty: "medium" },
+    { title: "Groß- und Kleinschreibung", skill: "de-capitalization", icon: "A", description: "Nomen und Satzanfänge richtig schreiben.", explanation: "Nomen und Satzanfänge werden großgeschrieben. Prüfe jeden Satz auf diese Stellen.", difficulty: "easy" },
+    { title: "Satzzeichen im Text", skill: "de-punctuation", icon: ".,", description: "Punkte, Fragezeichen und einfache Kommas setzen.", explanation: "Achte darauf, ob ein Satz eine Aussage, eine Frage oder eine Aufzählung enthält.", difficulty: "easy" }
   ]
 };
 
@@ -231,13 +166,58 @@ const parentButton = document.querySelector("#parent-button");
 const welcomeEyebrow = document.querySelector("#welcome-eyebrow");
 const welcomeTitle = document.querySelector("#welcome-title");
 
+const storageStatus = document.querySelector("#storage-status") ||
+  (typeof document.createElement === "function" ? document.createElement("div") : null);
+let storageFailureMessages = [];
+if (storageStatus) {
+  storageStatus.id = "storage-status";
+  storageStatus.setAttribute?.("role", "alert");
+  storageStatus.setAttribute?.("aria-live", "assertive");
+  storageStatus.setAttribute?.("aria-atomic", "true");
+  storageStatus.hidden = true;
+  Object.assign(storageStatus.style, {
+    marginBottom: "1rem",
+    padding: "0.75rem 1rem",
+    border: "1px solid #b42318",
+    borderRadius: "0.5rem",
+    backgroundColor: "#fef3f2",
+    color: "#7a271a"
+  });
+  if (dashboard.parentElement) {
+    dashboard.parentElement.insertBefore(storageStatus, dashboard);
+  }
+}
+
+function reportStorageFailure(message) {
+  if (!storageStatus) return;
+  if (!storageFailureMessages.includes(message)) {
+    storageFailureMessages.push(message);
+  }
+  storageStatus.textContent = storageFailureMessages.join(" ");
+  storageStatus.hidden = false;
+}
+
+function clearStorageFailure() {
+  if (!storageStatus) return;
+  storageFailureMessages = [];
+  storageStatus.textContent = "";
+  storageStatus.hidden = true;
+}
+
 let saved = {};
+let savedRaw = null;
 try {
-  const savedRaw = localStorage.getItem("mathekompass-progress");
-  saved = savedRaw ? JSON.parse(savedRaw) : {};
+  savedRaw = localStorage.getItem("mathekompass-progress");
 } catch (error) {
-  console.warn("Ungültige Lern-App-Daten in localStorage – Standardwerte werden geladen.", error);
-  saved = {};
+  reportStorageFailure("Dein gespeicherter Lernfortschritt konnte nicht geladen werden. Änderungen lassen sich möglicherweise nicht dauerhaft speichern.");
+}
+if (savedRaw) {
+  try {
+    saved = JSON.parse(savedRaw);
+  } catch (error) {
+    console.warn("Ungültige Lern-App-Daten in localStorage – Standardwerte werden geladen.", error);
+    saved = {};
+  }
 }
 
 if (!saved || typeof saved !== "object") {
@@ -246,8 +226,8 @@ if (!saved || typeof saved !== "object") {
 
 const savedSessions = Array.isArray(saved.sessions) ? saved.sessions : [];
 const progress = {
-  // Default to grade 1 for new users (was 5) so the UI shows Klasse 1 by default
-  grade: Number.isInteger(saved.grade) && saved.grade >= 1 && saved.grade <= 10 ? saved.grade : 1,
+  // Saved progress outside the supported grade range falls back to grade 1.
+  grade: Number.isInteger(saved.grade) && saved.grade >= 1 && saved.grade <= 5 ? saved.grade : 1,
   subject: saved.subject === "german" ? "german" : "math",
   completed: Number.isInteger(saved.completed) && saved.completed >= 0 ? saved.completed : 0,
   topics: saved.topics && typeof saved.topics === "object" ? saved.topics : {},
@@ -265,19 +245,48 @@ syncPlatformUnlock();
 
 let activeLesson = null;
 
-function persistProgress() {
-  localStorage.setItem("mathekompass-progress", JSON.stringify(progress));
-  syncPlatformUnlock();
+function persistProgress(coinBalance) {
+  let progressSaved = true;
+  try {
+    localStorage.setItem("mathekompass-progress", JSON.stringify(progress));
+  } catch (error) {
+    progressSaved = false;
+    reportStorageFailure("Dein Lernfortschritt konnte nicht gespeichert werden. Deine Änderungen sind möglicherweise nur vorübergehend.");
+  }
+  const platformSaved = syncPlatformUnlock(coinBalance);
+  if (progressSaved && platformSaved) {
+    clearStorageFailure();
+  }
+  return progressSaved && platformSaved;
 }
 
-function syncPlatformUnlock() {
-  const coinBalance = getCoinBalance();
-  localStorage.setItem("gamehub-coin-balance", String(coinBalance));
-  localStorage.setItem("gamehub-plays-left", String(coinBalance));
-  localStorage.setItem("gamehub-lern-app-unlocked", String(coinBalance > 0));
-  if (coinCount) {
-    coinCount.textContent = String(coinBalance);
+function syncPlatformUnlock(coinBalance) {
+  const balance = coinBalance === undefined ? getCoinBalance() : coinBalance;
+  if (balance === null) {
+    return false;
   }
+
+  const failedKeys = [];
+  [
+    ["gamehub-coin-balance", String(balance)],
+    ["gamehub-plays-left", String(balance)],
+    ["gamehub-lern-app-unlocked", String(balance > 0)]
+  ].forEach(([key, value]) => {
+    try {
+      localStorage.setItem(key, value);
+    } catch (error) {
+      failedKeys.push(key);
+    }
+  });
+
+  if (failedKeys.length) {
+    reportStorageFailure(`Münzen und Freischaltung konnten nicht vollständig gespeichert werden (${failedKeys.join(", ")}).`);
+    return false;
+  }
+  if (coinCount) {
+    coinCount.textContent = String(balance);
+  }
+  return true;
 }
 
 function renderDashboard() {
@@ -288,7 +297,10 @@ function renderDashboard() {
   subjectSelect.value = progress.subject;
   completedCount.textContent = String(progress.completed);
   if (coinCount) {
-    coinCount.textContent = String(getCoinBalance());
+    const balance = getCoinBalance();
+    if (balance !== null) {
+      coinCount.textContent = String(balance);
+    }
   }
   const subjectName = progress.subject === "german" ? "Deutsch" : "Mathe";
   welcomeEyebrow.textContent = `DEIN ${subjectName.toLocaleUpperCase("de-DE")}-LERNPLATZ`;
@@ -919,8 +931,8 @@ function nextQuestion() {
 function finishLesson() {
   const { topic, topicIndex, questions, correct } = activeLesson;
   progress.completed += 1;
-  const coinBalance = getCoinBalance() + 1;
-  setCoinBalance(coinBalance);
+  const currentCoinBalance = getCoinBalance();
+  const coinBalance = currentCoinBalance === null ? null : currentCoinBalance + 1;
   const key = progress.subject === "math"
     ? `${progress.grade}-${topicIndex}`
     : `german-${progress.grade}-${topicIndex}`;
@@ -933,7 +945,7 @@ function finishLesson() {
     total: questions.length,
     completedAt: new Date().toISOString()
   });
-  persistProgress();
+  persistProgress(coinBalance);
 
   dashboard.hidden = true;
   lessonView.hidden = false;
@@ -982,17 +994,10 @@ function getCoinBalance() {
     const value = Number.parseInt(localStorage.getItem("gamehub-coin-balance") || "0", 10);
     return Number.isFinite(value) && value >= 0 ? value : 0;
   } catch (error) {
-    return 0;
+    if (coinCount) {
+      coinCount.textContent = "—";
+    }
+    reportStorageFailure("Dein Münzestand konnte nicht aus dem Browserspeicher geladen werden. Die Münzen und Freischaltungen sind möglicherweise nicht verfügbar.");
+    return null;
   }
-}
-
-function setCoinBalance(value) {
-  const safeValue = Number.isFinite(Number(value)) ? Math.max(0, Number(value)) : 0;
-  try {
-    localStorage.setItem("gamehub-coin-balance", String(safeValue));
-    localStorage.setItem("gamehub-plays-left", String(safeValue));
-  } catch (error) {
-    // ignore storage write issues in restricted environments
-  }
-  return safeValue;
 }

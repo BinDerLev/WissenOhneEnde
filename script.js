@@ -14,20 +14,169 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         }
     });
 });
+
+const gameCatalog = [
+    {
+        href: 'gefangen_unter_wasser/index.html',
+        image: 'gefangen_unter_wasser/logo_creepy.svg',
+        imageAlt: 'Gefangen Unter Wasser',
+        title: 'Gefangen Unter Wasser',
+        type: 'Abenteuer • Puzzle',
+        description: 'Tauche in eine mysteriöse Unterwasserwelt ein, löse Rätsel und find den Schatz!',
+        rating: '⭐⭐⭐⭐⭐',
+        score: '5/5',
+        categories: ['adventure'],
+        tags: ['Abenteuer', 'Rätsel']
+    },
+    {
+        href: 'chess/index.html',
+        image: 'chess/logo.svg',
+        imageAlt: 'Schach',
+        title: 'Schach',
+        type: 'Strategie',
+        description: 'Spiele gegen eine intelligente KI in drei verschiedenen Schwierigkeitsstufen!',
+        rating: '⭐⭐⭐⭐⭐',
+        score: '5/5',
+        categories: ['strategy'],
+        tags: ['Strategie', 'KI']
+    },
+    {
+        href: 'snake_game/index.html',
+        image: 'snake_game/logo.svg',
+        imageAlt: 'Snake Game',
+        title: 'Snake Game',
+        type: 'Action • Klassiker',
+        description: 'Das legendäre Snake-Spiel! Lenke die Schlange und sammle so viel Futter wie möglich.',
+        rating: '⭐⭐⭐⭐',
+        score: '4/5',
+        categories: ['action'],
+        tags: ['Klassiker', 'Action']
+    },
+    {
+        href: 'Brick-Bracker/index.html',
+        image: 'breakout_game/logo.svg',
+        imageAlt: 'Breakout',
+        title: 'Breakout - Brick Breaker',
+        type: 'Action',
+        description: 'Zerstöre alle Blöcke mit dem Ball! Mehrere Level mit steigender Schwierigkeit.',
+        rating: '⭐⭐⭐⭐',
+        score: '4/5',
+        categories: ['action'],
+        tags: ['Action', 'Arcade']
+    },
+    {
+        href: '2048_game/index.html',
+        image: '2048_game/logo.svg',
+        imageAlt: '2048',
+        title: '2048',
+        type: 'Puzzle • Strategie',
+        description: 'Kombiniere Zahlen um 2048 zu erreichen! Ein süchtig machendes Zahlenpuzzle.',
+        rating: '⭐⭐⭐⭐⭐',
+        score: '5/5',
+        categories: ['puzzle'],
+        tags: ['Puzzle', 'Zahlen']
+    },
+    {
+        href: 'asteroid_game/index.html',
+        image: 'asteroid_game/logo.svg',
+        imageAlt: 'Asteroids',
+        title: 'Asteroids',
+        type: 'Action • Arcade',
+        description: 'Klassisches Weltraum-Abenteuer! Schieße auf Asteroiden und überlebe jede Wave!',
+        rating: '⭐⭐⭐⭐⭐',
+        score: '5/5',
+        categories: ['action'],
+        tags: ['Action', 'Weltraum']
+    },
+    {
+        href: 'neon_runner/index.html',
+        image: 'neon_runner/logo.svg',
+        imageAlt: 'Neon Runner',
+        title: 'Neon Runner',
+        type: 'Action • Arcade',
+        description: 'Springe durch eine neonfarbene Stadt, sammle Kristalle und überlebe so lange wie möglich!',
+        rating: '⭐⭐⭐⭐⭐',
+        score: '5/5',
+        categories: ['action'],
+        tags: ['Action', 'Speedrun']
+    },
+    {
+        href: 'sky_stack/index.html',
+        image: 'sky_stack/logo.svg',
+        imageAlt: 'Sky Stack',
+        title: 'Sky Stack',
+        type: 'Action • Arcade',
+        description: 'Setze bewegliche Blöcke präzise aufeinander und übertriff deinen Highscore!',
+        rating: '⭐⭐⭐⭐⭐',
+        score: '5/5',
+        categories: ['action'],
+        tags: ['Arcade', 'Skill']
+    },
+    {
+        href: 'tictactoe_connect4/index.html',
+        image: 'tictactoe_connect4/logo.svg',
+        imageAlt: 'Tic-Tac-Toe & Vier Gewinnt',
+        title: 'Tic-Tac-Toe & Vier Gewinnt',
+        type: 'Strategie',
+        description: 'Zwei klassische Strategiespiele! Spiele gegen einen anderen Spieler oder gegen die KI.',
+        rating: '⭐⭐⭐⭐⭐',
+        score: '5/5',
+        categories: ['strategy'],
+        tags: ['Strategie', 'Klassiker']
+    }
+];
+
+function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, character => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    })[character]);
+}
+
+const gamesGridElement = document.getElementById('gamesGrid');
+if (gamesGridElement) {
+    gamesGridElement.innerHTML = gameCatalog.map(game => `
+        <a href="${escapeHTML(game.href)}" class="game-card" data-category="${escapeHTML(game.categories.join(' '))}">
+            <div class="game-image">
+                <img src="${escapeHTML(game.image)}" alt="${escapeHTML(game.imageAlt)}">
+            </div>
+            <div class="game-info">
+                <h3>${escapeHTML(game.title)}</h3>
+                <p class="game-type">${escapeHTML(game.type)}</p>
+                <p class="game-desc">${escapeHTML(game.description)}</p>
+                <div class="game-rating" aria-label="Bewertung: ${escapeHTML(game.score)}">
+                    <span aria-hidden="true">${escapeHTML(game.rating)}</span> (${escapeHTML(game.score)})
+                </div>
+                <div class="game-tags">
+                    ${game.tags.map(tag => `<span class="tag">${escapeHTML(tag)}</span>`).join('')}
+                </div>
+            </div>
+            <div class="game-action">► Spielen</div>
+        </a>
+    `).join('');
+}
+
 // Filter functionality
 const filterButtons = document.querySelectorAll('.filter-btn');
 const gameCards = document.querySelectorAll('.game-card');
 filterButtons.forEach(button => {
     button.addEventListener('click', () => {
-        filterButtons.forEach(btn => btn.classList.remove('active'));
+        filterButtons.forEach(btn => {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-pressed', 'false');
+        });
         button.classList.add('active');
+        button.setAttribute('aria-pressed', 'true');
         const filterValue = button.getAttribute('data-filter');
-        gameCards.forEach(card => {
+        gameCards.forEach((card, index) => {
             card.style.animation = 'none';
             setTimeout(() => {
                 card.style.animation = '';
             }, 10);
-            if (filterValue === 'all' || card.getAttribute('data-category') === filterValue) {
+            if (filterValue === 'all' || gameCatalog[index].categories.includes(filterValue)) {
                 card.style.display = 'flex';
                 card.style.opacity = '1';
             } else {
@@ -200,24 +349,6 @@ if (platformLockedNotice) {
             gamesGrid.style.pointerEvents = 'none';
         }
     }
-}
-
-// Gastzugang (schnell testen): Wenn der Button vorhanden ist, schalte die Plattform frei
-const guestButton = document.getElementById('guestUnlockButton');
-if (guestButton) {
-    guestButton.addEventListener('click', () => {
-        // gebe ein paar Test-Münzen und Spielzüge, setze unlocked
-        try {
-            localStorage.setItem('gamehub-coin-balance', '5');
-            localStorage.setItem('gamehub-plays-left', '5');
-            localStorage.setItem('gamehub-lern-app-unlocked', 'true');
-            // optional: kopiere Lern-App-Progress aus Demo oder setze leeren Fortschritt
-        } catch (e) {
-            console.warn('Konnte localStorage nicht beschreiben:', e);
-        }
-        // Seite neu laden, damit UI aktualisiert wird
-        window.location.reload();
-    });
 }
 
 const allGameLinks = document.querySelectorAll('.game-card');

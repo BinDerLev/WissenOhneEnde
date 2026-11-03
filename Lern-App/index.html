@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <meta content="#f7f8f5" name="theme-color">
-    <meta content="Deutsch und Mathe Schritt für Schritt verstehen und üben – passend für die Klassen 1 bis 10."
+    <meta content="Deutsch und Mathe Schritt für Schritt verstehen und üben – passend für die Klassen 1 bis 5."
           name="description">
     <title>LernKompass – Deutsch und Mathe üben</title>
     <link href="style.css" rel="stylesheet">
     <script defer src="script.js"></script>
 </head><body>
   <div class="app-shell">
+     <a class="skip-link" href="#app">Zum Inhalt springen</a>
      <header class="topbar">
        <a class="brand" href="#" id="home-link" aria-label="LernKompass Startseite">
          <span class="brand-mark" aria-hidden="true">∑</span>
@@ -22,7 +23,7 @@
          <button class="parent-button" id="parent-button" type="button"><span class="parent-button-label">Elternansicht</span><span class="parent-button-short">Eltern</span></button>
        </div>
      </header>
-    <main id="app" class="main-content">
+    <main id="app" class="main-content" tabindex="-1">
       <section id="dashboard" aria-labelledby="welcome-title">
         <div class="welcome-row">
           <div>
@@ -69,11 +70,6 @@
                 <option value="3">Klasse 3</option>
                 <option value="4">Klasse 4</option>
                 <option value="5">Klasse 5</option>
-                <option value="6">Klasse 6</option>
-                <option value="7">Klasse 7</option>
-                <option value="8">Klasse 8</option>
-                <option value="9">Klasse 9</option>
-                <option value="10">Klasse 10</option>
               </select>
             </label>
           </div>

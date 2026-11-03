@@ -46,23 +46,12 @@
 <section class="filter-section">
     <div class="container">
         <h2>Wähle dein Lieblingsgenre</h2>
-        <div class="filter-buttons">
-            <button class="filter-btn active" data-filter="all">Alle Spiele</button>
-            <button class="filter-btn" data-filter="action">Action</button>
-            <button class="filter-btn" data-filter="puzzle">Puzzle</button>
-            <button class="filter-btn" data-filter="strategy">Strategie</button>
-            <button class="filter-btn" data-filter="adventure">Abenteuer</button>
-        </div>
-    </div>
-</section>
-<section class="learning-access">
-    <div class="container">
-        <div class="learning-banner">
-            <div>
-                <p class="eyebrow-small">Lerne zuerst</p>
-                <h3>GameHub Lern-App</h3>
-            </div>
-            <a href="Lern-App/index.html" class="learning-btn">Zur Lern-App</a>
+        <div class="filter-buttons" role="group" aria-label="Spiele nach Genre filtern">
+            <button class="filter-btn active" data-filter="all" aria-pressed="true">Alle Spiele</button>
+            <button class="filter-btn" data-filter="action" aria-pressed="false">Action</button>
+            <button class="filter-btn" data-filter="puzzle" aria-pressed="false">Puzzle</button>
+            <button class="filter-btn" data-filter="strategy" aria-pressed="false">Strategie</button>
+            <button class="filter-btn" data-filter="adventure" aria-pressed="false">Abenteuer</button>
         </div>
     </div>
 </section>
@@ -74,163 +63,8 @@
             <h3>Plattform gesperrt</h3>
             <p>Schließe zuerst die Lern-App ab, damit du auf die Spiele zugreifen kannst.</p>
             <a href="Lern-App/index.html" class="hero-btn">Lern-App starten</a>
-            <!-- Schnellzugriff für Entwickler / Gastmodus zum Testen -->
-            <button id="guestUnlockButton" class="hero-btn alt">Weiter als Gast (testen)</button>
         </div>
         <div class="games-grid" id="gamesGrid">
-            <!-- Gefangen Unter Wasser -->
-            <a href="gefangen_unter_wasser/index.html" class="game-card" data-category="adventure">
-                <div class="game-image">
-                    <img src="gefangen_unter_wasser/logo_creepy.svg" alt="Gefangen Unter Wasser">
-                </div>
-                <div class="game-info">
-                    <h3>Gefangen Unter Wasser</h3>
-                    <p class="game-type">Abenteuer • Puzzle</p>
-                    <p class="game-desc">Tauche in eine mysteriöse Unterwasserwelt ein, löse Rätsel und find den Schatz!</p>
-                    <div class="game-rating">⭐⭐⭐⭐⭐ (5/5)</div>
-                    <div class="game-tags">
-                        <span class="tag">Abenteuer</span>
-                        <span class="tag">Rätsel</span>
-                    </div>
-                </div>
-                <div class="game-action">► Spielen</div>
-            </a>
-            <!-- Chess -->
-            <a href="chess/index.html" class="game-card" data-category="strategy">
-                <div class="game-image">
-                    <img src="chess/logo.svg" alt="Schach">
-                </div>
-                <div class="game-info">
-                    <h3>Schach</h3>
-                    <p class="game-type">Strategie</p>
-                    <p class="game-desc">Spiele gegen eine intelligente KI in drei verschiedenen Schwierigkeitsstufen!</p>
-                    <div class="game-rating">⭐⭐⭐⭐⭐ (5/5)</div>
-                    <div class="game-tags">
-                        <span class="tag">Strategie</span>
-                        <span class="tag">KI</span>
-                    </div>
-                </div>
-                <div class="game-action">► Spielen</div>
-            </a>
-            <!-- Snake Game -->
-            <a href="snake_game/index.html" class="game-card" data-category="action">
-                <div class="game-image">
-                    <img src="snake_game/logo.svg" alt="Snake Game">
-                </div>
-                <div class="game-info">
-                    <h3>Snake Game</h3>
-                    <p class="game-type">Action • Klassiker</p>
-                    <p class="game-desc">Das legendäre Snake-Spiel! Lenke die Schlange und sammle so viel Futter wie möglich.</p>
-                    <div class="game-rating">⭐⭐⭐⭐ (4/5)</div>
-                    <div class="game-tags">
-                        <span class="tag">Klassiker</span>
-                        <span class="tag">Action</span>
-                    </div>
-                </div>
-                <div class="game-action">► Spielen</div>
-            </a>
-            <!-- Breakout -->
-            <a href="Brick-Bracker/index.html" class="game-card" data-category="action">
-                <div class="game-image">
-                    <img src="breakout_game/logo.svg" alt="Breakout">
-                </div>
-                <div class="game-info">
-                    <h3>Breakout - Brick Breaker</h3>
-                    <p class="game-type">Action</p>
-                    <p class="game-desc">Zerstöre alle Blöcke mit dem Ball! Mehrere Level mit steigender Schwierigkeit.</p>
-                    <div class="game-rating">⭐⭐⭐⭐ (4/5)</div>
-                    <div class="game-tags">
-                        <span class="tag">Action</span>
-                        <span class="tag">Arcade</span>
-                    </div>
-                </div>
-                <div class="game-action">► Spielen</div>
-            </a>
-            <!-- 2048 -->
-            <a href="2048_game/index.html" class="game-card" data-category="puzzle">
-                <div class="game-image">
-                    <img src="2048_game/logo.svg" alt="2048">
-                </div>
-                <div class="game-info">
-                    <h3>2048</h3>
-                    <p class="game-type">Puzzle • Strategie</p>
-                    <p class="game-desc">Kombiniere Zahlen um 2048 zu erreichen! Ein süchtig machendes Zahlenpuzzle.</p>
-                    <div class="game-rating">⭐⭐⭐⭐⭐ (5/5)</div>
-                    <div class="game-tags">
-                        <span class="tag">Puzzle</span>
-                        <span class="tag">Zahlen</span>
-                    </div>
-                </div>
-                <div class="game-action">► Spielen</div>
-            </a>
-            <!-- Asteroids -->
-            <a href="asteroid_game/index.html" class="game-card" data-category="action">
-                <div class="game-image">
-                    <img src="asteroid_game/logo.svg" alt="Asteroids">
-                </div>
-                <div class="game-info">
-                    <h3>Asteroids</h3>
-                    <p class="game-type">Action • Arcade</p>
-                    <p class="game-desc">Klassisches Weltraum-Abenteuer! Schieße auf Asteroiden und überlebe jede Wave!</p>
-                    <div class="game-rating">⭐⭐⭐⭐⭐ (5/5)</div>
-                    <div class="game-tags">
-                        <span class="tag">Action</span>
-                        <span class="tag">Weltraum</span>
-                    </div>
-                </div>
-                <div class="game-action">► Spielen</div>
-            </a>
-            <!-- Neon Runner -->
-            <a href="neon_runner/index.html" class="game-card" data-category="action">
-                <div class="game-image">
-                    <img src="neon_runner/logo.svg" alt="Neon Runner">
-                </div>
-                <div class="game-info">
-                    <h3>Neon Runner</h3>
-                    <p class="game-type">Action • Arcade</p>
-                    <p class="game-desc">Springe durch eine neonfarbene Stadt, sammle Kristalle und überlebe so lange wie möglich!</p>
-                    <div class="game-rating">⭐⭐⭐⭐⭐ (5/5)</div>
-                    <div class="game-tags">
-                        <span class="tag">Action</span>
-                        <span class="tag">Speedrun</span>
-                    </div>
-                </div>
-                <div class="game-action">► Spielen</div>
-            </a>
-            <!-- Sky Stack -->
-            <a href="sky_stack/index.html" class="game-card" data-category="action">
-                <div class="game-image">
-                    <img src="sky_stack/logo.svg" alt="Sky Stack">
-                </div>
-                <div class="game-info">
-                    <h3>Sky Stack</h3>
-                    <p class="game-type">Action • Arcade</p>
-                    <p class="game-desc">Setze bewegliche Blöcke präzise aufeinander und übertriff deinen Highscore!</p>
-                    <div class="game-rating">⭐⭐⭐⭐⭐ (5/5)</div>
-                    <div class="game-tags">
-                        <span class="tag">Arcade</span>
-                        <span class="tag">Skill</span>
-                    </div>
-                </div>
-                <div class="game-action">► Spielen</div>
-            </a>
-            <!-- Tic-Tac-Toe & Vier Gewinnt -->
-            <a href="tictactoe_connect4/index.html" class="game-card" data-category="strategy">
-                <div class="game-image">
-                    <img src="tictactoe_connect4/logo.svg" alt="Tic-Tac-Toe & Vier Gewinnt">
-                </div>
-                <div class="game-info">
-                    <h3>Tic-Tac-Toe & Vier Gewinnt</h3>
-                    <p class="game-type">Strategie</p>
-                    <p class="game-desc">Zwei klassische Strategiespiele! Spiele gegen einen anderen Spieler oder gegen die KI.</p>
-                    <div class="game-rating">⭐⭐⭐⭐⭐ (5/5)</div>
-                    <div class="game-tags">
-                        <span class="tag">Strategie</span>
-                        <span class="tag">Klassiker</span>
-                    </div>
-                </div>
-                <div class="game-action">► Spielen</div>
-            </a>
         </div>
     </div>
 </section>

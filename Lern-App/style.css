@@ -63,8 +63,27 @@ button:focus-visible,
 select:focus-visible,
 input:focus-visible,
 a:focus-visible {
-  outline: 3px solid #95bd9d;
+  outline: 3px solid #245d39;
   outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  z-index: 1;
+  top: 8px;
+  left: 8px;
+  padding: 10px 14px;
+  transform: translateY(calc(-100% - 8px));
+  border-radius: 8px;
+  background: var(--green-dark);
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
 }
 
 .app-shell {
@@ -885,6 +904,7 @@ h1 {
   }
 
   .footer {
+    flex-wrap: wrap;
     gap: 14px;
     font-size: 10px;
   }
@@ -917,6 +937,10 @@ h1 {
   .topbar-actions {
     gap: 6px;
   }
+
+  .select-controls {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -924,6 +948,8 @@ h1 {
   *::before,
   *::after {
     scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
