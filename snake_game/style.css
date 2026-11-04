@@ -183,13 +183,19 @@ h1 {
 
 canvas {
     display: block;
-    width: 100%;
-    max-width: 400px;
+    width: min(100%, 400px);
+    height: auto;
+    aspect-ratio: 1;
     margin: 0 auto 18px;
     border-radius: 16px;
     border: 2px solid #d9cdbd;
     background: #0d1a1a;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+canvas:focus-visible {
+    outline: 3px solid #53a9d8;
+    outline-offset: 3px;
 }
 
 .controls {
@@ -214,6 +220,20 @@ canvas {
 .btn:disabled {
     opacity: 0.55;
     cursor: not-allowed;
+}
+
+.btn,
+.fruit-option,
+.upgrade-btn {
+    min-height: 48px;
+}
+
+.settings-toggle:focus-visible,
+.fruit-option:focus-visible,
+.upgrade-btn:focus-visible,
+.btn:focus-visible {
+    outline: 3px solid #53a9d8;
+    outline-offset: 3px;
 }
 
 .btn-start {
@@ -272,19 +292,36 @@ canvas {
 }
 
 @media (max-width: 600px), (pointer: coarse) {
+    body {
+        align-items: flex-start;
+        padding: 72px 12px 20px;
+    }
+
+    .container {
+        padding: 18px 14px;
+    }
+
     .title-wrap {
         align-items: flex-start;
     }
 
     .fruit-grid,
-    .upgrade-grid,
-    .score-row {
+    .upgrade-grid {
         grid-template-columns: 1fr;
+    }
+
+    .score-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .score-box {
+        padding: 10px;
     }
 
     .touch-controls {
         display: grid;
-        grid-template-columns: repeat(3, 48px);
+        grid-template-columns: repeat(3, minmax(48px, 64px));
         justify-content: center;
         gap: 6px;
         margin: 12px 0;

@@ -290,7 +290,7 @@ test("the GameHub renders every catalog entry with an existing game and image", 
   const catalog = vm.runInContext("gameCatalog", context);
   const categories = new Set(["action", "puzzle", "strategy", "adventure"]);
 
-  assert.equal(catalog.length, 9);
+  assert.equal(catalog.length, 10);
   assert.equal((gamesGrid.innerHTML.match(/class="game-card"/g) || []).length, catalog.length);
   assert.equal(new Set(catalog.map((game) => game.href)).size, catalog.length);
   for (const game of catalog) {

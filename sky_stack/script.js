@@ -5,6 +5,8 @@ const bestScoreDisplay = document.querySelector("#best-score");
 const gameMessage = document.querySelector("#game-message");
 const dropButton = document.querySelector("#drop-button");
 const startButton = document.querySelector("#start-button");
+const modeSelect = document.querySelector("#game-mode");
+const targetScoreDisplay = document.querySelector("#target-score");
 
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
@@ -18,6 +20,8 @@ let score = 0;
 let bestScore = loadBestScore();
 let gameState = "ready";
 let animationFrame = 0;
+let currentMode = "classic";
+const CHALLENGE_TARGET = 12;
 
 bestScoreDisplay.textContent = String(bestScore);
 
@@ -41,13 +45,24 @@ function saveBestScore() {
 
 function startGame() {
   cancelAnimationFrame(animationFrame);
+  currentMode = modeSelect.value;
   score = 0;
-  blocks = [{ x: 200, width: 240, color: "#7185ff" }];
-  movingBlock = { x: 0, width: blocks[0].width, direction: 1, speed: 2.3 };
+  const startingWidth = currentMode === "challenge" ? 190 : 240;
+  blocks = [{ x: 200, width: startingWidth, color: "#7185ff" }];
+  movingBlock = {
+    x: 0,
+    width: blocks[0].width,
+    direction: 1,
+    speed: currentMode === "challenge" ? 3.1 : 2.3
+  };
   gameState = "playing";
   scoreDisplay.textContent = "0";
-  gameMessage.textContent = "Setze den Block möglichst genau auf den Turm.";
+  targetScoreDisplay.textContent = currentMode === "challenge" ? String(CHALLENGE_TARGET) : "–";
+  gameMessage.textContent = currentMode === "challenge"
+    ? `Setze 12 Blöcke möglichst genau aufeinander.`
+    : "Setze den Block möglichst genau auf den Turm.";
   dropButton.disabled = false;
+  modeSelect.disabled = true;
   startButton.textContent = "Neu starten";
   draw();
   animationFrame = requestAnimationFrame(tick);
@@ -98,7 +113,14 @@ function dropBlock() {
     saveBestScore();
   }
 
-  const speed = Math.min(5.2, 2.3 + score * 0.12);
+  if (currentMode === "challenge" && score >= CHALLENGE_TARGET) {
+    winChallenge();
+    return;
+  }
+
+  const speed = currentMode === "challenge"
+    ? Math.min(6.4, 3.1 + score * 0.18)
+    : Math.min(5.2, 2.3 + score * 0.12);
   movingBlock = {
     x: Math.random() < 0.5 ? 28 : WIDTH - 28 - overlap,
     width: overlap,
@@ -114,9 +136,21 @@ function endGame() {
   gameState = "over";
   movingBlock = null;
   dropButton.disabled = true;
+  modeSelect.disabled = false;
+  startButton.textContent = "Nochmal spielen";
   gameMessage.textContent = score
     ? `Der Turm ist ${score} Blöcke hoch. Versuch es gleich noch einmal!`
     : "Knapp daneben! Starte neu und versuche es noch einmal.";
+  draw();
+}
+
+function winChallenge() {
+  gameState = "won";
+  movingBlock = null;
+  dropButton.disabled = true;
+  modeSelect.disabled = false;
+  startButton.textContent = "Challenge wiederholen";
+  gameMessage.textContent = `Geschafft! Du hast den 12. Block gesetzt und die Präzisions-Challenge gewonnen.`;
   draw();
 }
 
@@ -183,10 +217,15 @@ function draw() {
     context.textAlign = "center";
     context.fillStyle = "#fff";
     context.font = "800 34px system-ui, sans-serif";
-    context.fillText(gameState === "over" ? "Turm eingestürzt!" : "Baue deinen Turm", WIDTH / 2, HEIGHT / 2 - 7);
+    const title = gameState === "over"
+      ? "Turm eingestürzt!"
+      : gameState === "won"
+        ? "Challenge geschafft!"
+        : "Baue deinen Turm";
+    context.fillText(title, WIDTH / 2, HEIGHT / 2 - 7);
     context.fillStyle = "#c8d6f1";
     context.font = "16px system-ui, sans-serif";
-    context.fillText(gameState === "over" ? `Höhe: ${score}` : "Präzision ist alles", WIDTH / 2, HEIGHT / 2 + 25);
+    context.fillText(gameState === "over" ? `Höhe: ${score}` : gameState === "won" ? "12 Blöcke erreicht" : "Präzision ist alles", WIDTH / 2, HEIGHT / 2 + 25);
   }
 }
 
@@ -194,7 +233,13 @@ dropButton.addEventListener("click", dropBlock);
 startButton.addEventListener("click", startGame);
 canvas.addEventListener("pointerdown", dropBlock);
 document.addEventListener("keydown", (event) => {
-  if (event.code === "Space" && gameState === "playing") {
+  if (
+    event.code === "Space"
+    && gameState === "playing"
+    && event.target !== modeSelect
+    && event.target !== startButton
+    && event.target !== dropButton
+  ) {
     event.preventDefault();
     dropBlock();
   }

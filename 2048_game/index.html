@@ -51,8 +51,20 @@
             </div>
         </div>
 
+        <section class="daily-panel" aria-labelledby="dailyHeading">
+            <div class="daily-copy">
+                <h2 id="dailyHeading">Tägliche Herausforderung</h2>
+                <p id="dailyInfo">Jeden lokalen Kalendertag ein neues, festgelegtes Spielfeld.</p>
+                <p id="dailyRecord" aria-live="polite"></p>
+            </div>
+            <div class="mode-controls" role="group" aria-label="Spielmodus">
+                <button id="standardModeBtn" class="mode-btn" type="button" aria-pressed="true">Standard</button>
+                <button id="dailyModeBtn" class="mode-btn" type="button" aria-pressed="false">Tages-Challenge spielen</button>
+            </div>
+        </section>
+
         <div class="game-wrapper">
-            <div id="gameBoard" class="game-board"></div>
+            <div id="gameBoard" class="game-board" role="grid" aria-label="2048 Spielfeld"></div>
         </div>
         <p class="touch-hint">Auf dem Spielfeld wischen oder Pfeiltasten/WASD verwenden.</p>
 

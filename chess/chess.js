@@ -11,6 +11,7 @@ let board = []
 let turn = 'w' // 'w' or 'b'
 let selected = null
 let legalMoves = []
+let focusedSquare = [7, 0]
 let gameOver = false
 let aiThinking = false
 let castling = { w: {k: true, q: true}, b: {k: true, q: true} }
@@ -40,17 +41,29 @@ function init() {
 
 function renderBoard() {
   boardEl.innerHTML = ''
+  const pieceNames = { p: 'Bauer', r: 'Turm', n: 'Springer', b: 'Läufer', q: 'Dame', k: 'König' }
   for (let r = 0; r < 8; r++) {
     const rank = document.createElement('div')
     rank.className = 'rank'
+    rank.setAttribute('role', 'row')
     for (let c = 0; c < 8; c++) {
-      const sq = document.createElement('div')
+      const sq = document.createElement('button')
+      sq.type = 'button'
       sq.className = 'square ' + (((r + c) % 2 === 1) ? 'light' : 'dark')
       sq.dataset.r = r
       sq.dataset.c = c
+      sq.setAttribute('role', 'gridcell')
+      sq.tabIndex = focusedSquare[0] === r && focusedSquare[1] === c ? 0 : -1
       const p = board[r][c]
+      const squareName = `${'abcdefgh'[c]}${8 - r}`
+      const pieceDescription = p
+        ? `${pieceNames[p.toLowerCase()]} ${pieceColor(p) === 'w' ? 'weiß' : 'schwarz'}`
+        : 'leeres Feld'
+      sq.setAttribute('aria-label', `${squareName}, ${pieceDescription}`)
+      sq.setAttribute('aria-selected', 'false')
       if (p) sq.textContent = PIECE_UNICODE[p]
       sq.addEventListener('click', onSquareClick)
+      sq.addEventListener('keydown', onSquareKeyDown)
       rank.appendChild(sq)
     }
     boardEl.appendChild(rank)
@@ -59,10 +72,36 @@ function renderBoard() {
       if (searchInput && searchInput.value && searchInput.value.trim()) performSearch()
 }
 
+function onSquareKeyDown(e) {
+  const r = Number(e.currentTarget.dataset.r)
+  const c = Number(e.currentTarget.dataset.c)
+  const directions = {
+    ArrowUp: [-1, 0],
+    ArrowDown: [1, 0],
+    ArrowLeft: [0, -1],
+    ArrowRight: [0, 1]
+  }
+  const direction = directions[e.key]
+  if (!direction) return
+  e.preventDefault()
+  const nextRow = Math.max(0, Math.min(7, r + direction[0]))
+  const nextCol = Math.max(0, Math.min(7, c + direction[1]))
+  focusedSquare = [nextRow, nextCol]
+  const nextSquare = boardEl.querySelector(`.square[data-r="${nextRow}"][data-c="${nextCol}"]`)
+  if (nextSquare) {
+    boardEl.querySelectorAll('.square').forEach(square => { square.tabIndex = -1 })
+    nextSquare.tabIndex = 0
+    nextSquare.focus()
+  }
+}
+
 function onSquareClick(e) {
   if (gameOver) return
   const r = +e.currentTarget.dataset.r
   const c = +e.currentTarget.dataset.c
+  focusedSquare = [r, c]
+  boardEl.querySelectorAll('.square').forEach(square => { square.tabIndex = -1 })
+  e.currentTarget.tabIndex = 0
   const p = board[r][c]
   const color = pieceColor(p)
 
@@ -91,11 +130,15 @@ function onSquareClick(e) {
 function highlightSelection() {
   document.querySelectorAll('.square').forEach(sq => {
     sq.classList.remove('selected','highlight')
+    sq.setAttribute('aria-selected', 'false')
   })
   if (selected) {
     const [sr,sc] = selected
     const sel = document.querySelector(`.square[data-r='${sr}'][data-c='${sc}']`)
-    if (sel) sel.classList.add('selected')
+    if (sel) {
+      sel.classList.add('selected')
+      sel.setAttribute('aria-selected', 'true')
+    }
     for (const m of legalMoves) {
       const [tr,tc] = m.to
       const t = document.querySelector(`.square[data-r='${tr}'][data-c='${tc}']`)
@@ -167,6 +210,7 @@ function doMove(move) {
   turn = (turn==='w') ? 'b' : 'w'
   selected = null
   legalMoves = []
+  focusedSquare = [tr, tc]
   renderBoard()
   checkGameState()
   updateStatus()
@@ -591,24 +635,42 @@ const rulesContainer = document.getElementById('rules-container')
 
 if (toggleRulesBtn) {
   toggleRulesBtn.addEventListener('click', () => {
-    rulesContainer.classList.toggle('hidden')
+    const opening = rulesContainer.classList.contains('hidden')
+    rulesContainer.classList.toggle('hidden', !opening)
+    rulesContainer.setAttribute('aria-hidden', String(!opening))
+    toggleRulesBtn.setAttribute('aria-expanded', String(opening))
+    if (opening) closeRulesBtn.focus()
+    else toggleRulesBtn.focus()
   })
 }
 
+function closeRules() {
+  rulesContainer.classList.add('hidden')
+  rulesContainer.setAttribute('aria-hidden', 'true')
+  toggleRulesBtn.setAttribute('aria-expanded', 'false')
+  toggleRulesBtn.focus()
+}
+
 if (closeRulesBtn) {
-  closeRulesBtn.addEventListener('click', () => {
-    rulesContainer.classList.add('hidden')
-  })
+  closeRulesBtn.addEventListener('click', closeRules)
 }
 
 // Schließe die Anleitung, wenn außerhalb geklickt wird
 if (rulesContainer) {
   rulesContainer.addEventListener('click', (e) => {
-    if (e.target === rulesContainer) {
-      rulesContainer.classList.add('hidden')
-    }
+    if (e.target === rulesContainer) closeRules()
   })
 }
+
+document.addEventListener('keydown', (e) => {
+  if (rulesContainer.classList.contains('hidden')) return
+  if (e.key === 'Escape') {
+    closeRules()
+  } else if (e.key === 'Tab') {
+    e.preventDefault()
+    closeRulesBtn.focus()
+  }
+})
 
 // Suche: Felder oder Figuren hervorheben
 const searchInput = document.getElementById('search')
@@ -666,4 +728,3 @@ if (clearSearchBtn) clearSearchBtn.addEventListener('click', ()=>{ if (searchInp
 if (searchInput) searchInput.addEventListener('keydown',(e)=>{ if (e.key==='Enter') performSearch() })
 
 init()
-

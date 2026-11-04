@@ -8,6 +8,8 @@
 const output = document.getElementById('output');                    // Der Text-Ausgabe-Bereich
 const commandInput = document.getElementById('command-input');        // Das Eingabefeld für Befehle
 const submitBtn = document.getElementById('submit-btn');              // Der Ausführen-Button
+const restartBtn = document.getElementById('restart-btn');
+let endingShown = false;
 
 // ===========================
 // AUSGABE-FUNKTIONEN
@@ -26,6 +28,19 @@ function writeOutput(message) {
     output.appendChild(paragraph);
     // Scrolle automatisch zum Ende des Ausgabefensters
     output.scrollTop = output.scrollHeight;
+}
+
+function refreshAfterRestart() {
+    output.replaceChildren();
+    endingShown = false;
+    commandInput.disabled = false;
+    submitBtn.disabled = false;
+    writeOutput('<span class="success">Ein neuer Tauchgang beginnt. Löse drei Rätsel und entscheide selbst: Schatz oder Flucht?</span>');
+    writeOutput(getLocationDescription());
+    updateInventoryUI();
+    updatePuzzleUI();
+    commandInput.value = '';
+    commandInput.focus();
 }
 
 // ===========================
@@ -51,6 +66,11 @@ function processCommand() {
     // Verarbeite den Befehl mit dem Parser (aus parse.js)
     const result = parser.parse(command);
 
+    if (command.trim().toLowerCase() === 'neustart') {
+        refreshAfterRestart();
+        return;
+    }
+
     // Zeige das Ergebnis des Befehls an
     if (result.valid) {
         writeOutput(result.message);
@@ -60,8 +80,11 @@ function processCommand() {
     }
 
     // Prüfe, ob der Schatz gefunden wurde
-    if (GameState.treasureFound) {
-        writeOutput('<span class="success">🎉 GLÜCKWUNSCH! Du hast das Spiel gewonnen! 🎉</span>');
+    if ((GameState.treasureFound || GameState.escaped) && !endingShown) {
+        writeOutput(GameState.treasureFound
+            ? '<span class="success">🎉 SCHATZENDE: Du hast den verborgenen Reichtum gefunden! Starte neu, um den anderen Weg zu erleben. 🎉</span>'
+            : '<span class="success">🚤 FLUCHTENDE: Du hast es sicher an die Oberfläche geschafft. Starte neu, um nach dem Schatz zu suchen. 🚤</span>');
+        endingShown = true;
         // Deaktiviere die Eingabe, damit der Spieler keine weiteren Befehle eingeben kann
         commandInput.disabled = true;
         submitBtn.disabled = true;
@@ -83,6 +106,10 @@ function processCommand() {
 
 // Wenn der "Ausführen"-Button geklickt wird, verarbeite den Befehl
 submitBtn.addEventListener('click', processCommand);
+restartBtn.addEventListener('click', () => {
+    restartGame();
+    refreshAfterRestart();
+});
 
 // Wenn Enter im Eingabefeld gedrückt wird, verarbeite auch den Befehl
 commandInput.addEventListener('keypress', (e) => {
@@ -122,4 +149,3 @@ window.addEventListener('load', () => {
     // Setze den Fokus auf das Eingabefeld, damit der Spieler sofort typen kann
     commandInput.focus();
 });
-

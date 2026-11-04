@@ -65,6 +65,7 @@ document.querySelectorAll('.touch-controls button').forEach((button) => {
     button.addEventListener('pointerdown', (event) => {
         event.preventDefault();
         if (!gameRunning || gamePaused) return;
+        button.setPointerCapture(event.pointerId);
         if (button.dataset.action === 'shoot') {
             shoot();
             touchControlTimers.set(button, setInterval(shoot, 140));
@@ -158,8 +159,13 @@ function buyUpgrade(type) {
 }
 
 function handleKeyDown(e) {
-    keys[e.key.toLowerCase()] = true;
-    if (e.key === ' ') {
+    const key = e.key.toLowerCase();
+    if (!['arrowleft', 'arrowright', 'arrowup', 'a', 'd', 'w', ' '].includes(key)) return;
+    if (e.target.matches('input, textarea, select, button, a, [contenteditable="true"]')) return;
+    if (!gameRunning || gamePaused) return;
+    if (key.startsWith('arrow')) e.preventDefault();
+    keys[key] = true;
+    if (key === ' ') {
         e.preventDefault();
         shoot();
     }
@@ -168,6 +174,15 @@ function handleKeyDown(e) {
 function handleKeyUp(e) {
     keys[e.key.toLowerCase()] = false;
 }
+
+window.addEventListener('blur', () => {
+    keys = {};
+    document.querySelectorAll('.touch-controls button').forEach((button) => {
+        const timer = touchControlTimers.get(button);
+        if (timer) clearInterval(timer);
+        touchControlTimers.delete(button);
+    });
+});
 
 function startGame() {
     if (!gameRunning) {

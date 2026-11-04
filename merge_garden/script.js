@@ -17,6 +17,11 @@ const comboEl = document.getElementById("combo");
 const resetBtn = document.getElementById("resetBtn");
 const soundBtn = document.getElementById("soundBtn");
 const upgradeButtons = document.querySelectorAll(".upgrade-btn");
+const goalStatusEl = document.getElementById("goal-status");
+const goalProgressEl = document.getElementById("goal-progress");
+const goalProgressFillEl = document.getElementById("goal-progress-fill");
+const goalCountEl = document.getElementById("goal-count");
+const GARDEN_GOAL = 300;
 
 const upgradeConfig = {
   expand: { cost: 20, label: "expandCost" },
@@ -37,6 +42,7 @@ let bonusLevel = 0;
 let luckLevel = 0;
 let autoLevel = 0;
 let autoTimer = null;
+let goalAchieved = false;
 
 function createEmptyBoard(size = BOARD_SIZE) {
   return Array.from({ length: size }, () => Array(size).fill(null));
@@ -263,6 +269,18 @@ function updateStats() {
 
   if (currentTile) {
     nextTileEl.textContent = currentTile.type.emoji;
+    nextTileEl.setAttribute("aria-label", `Nächste Pflanze: ${currentTile.type.id}`);
+  }
+
+  const progress = Math.min(score, GARDEN_GOAL);
+  goalProgressEl.setAttribute("aria-valuenow", String(progress));
+  goalProgressFillEl.style.width = `${(progress / GARDEN_GOAL) * 100}%`;
+  goalCountEl.textContent = `${progress} / ${GARDEN_GOAL} Punkte`;
+  if (score >= GARDEN_GOAL && !goalAchieved) {
+    goalAchieved = true;
+    goalStatusEl.textContent = "Goldene Ernte erreicht! Dein Garten bleibt offen – sammle weiter Punkte oder starte neu.";
+  } else if (!goalAchieved) {
+    goalStatusEl.textContent = `Erreiche ${GARDEN_GOAL} Punkte, um die Goldene Ernte freizuschalten.`;
   }
 
   updateUpgradeButtons();
@@ -292,12 +310,19 @@ function placeCurrentTile(row, col) {
 
 function renderBoard() {
   boardEl.innerHTML = "";
+  boardEl.setAttribute("aria-label", `Garten-Spielfeld, ${board.length} mal ${board.length} Felder`);
 
   for (let row = 0; row < board.length; row += 1) {
     for (let col = 0; col < board.length; col += 1) {
       const cell = document.createElement("button");
       cell.type = "button";
       cell.className = `cell ${board[row][col] ? "filled" : "empty"}`;
+      cell.setAttribute(
+        "aria-label",
+        board[row][col]
+          ? `Reihe ${row + 1}, Spalte ${col + 1}: ${board[row][col].type.id}, Stufe ${board[row][col].level}`
+          : `Reihe ${row + 1}, Spalte ${col + 1}: leer, aktuelle Pflanze platzieren`
+      );
 
       if (board[row][col]) {
         const tile = board[row][col];
@@ -328,6 +353,7 @@ function resetGame() {
   bonusLevel = 0;
   luckLevel = 0;
   autoLevel = 0;
+  goalAchieved = false;
 
   if (autoTimer) {
     clearInterval(autoTimer);
@@ -345,6 +371,8 @@ function resetGame() {
 soundBtn.addEventListener("click", () => {
   soundEnabled = !soundEnabled;
   soundBtn.textContent = soundEnabled ? "🔊" : "🔇";
+  soundBtn.setAttribute("aria-label", soundEnabled ? "Sound ausschalten" : "Sound einschalten");
+  soundBtn.setAttribute("aria-pressed", String(soundEnabled));
 });
 
 upgradeButtons.forEach((button) => {

@@ -223,7 +223,7 @@ main {
 }
 
 /* Ausführen-Button */
-#submit-btn {
+#submit-btn, #restart-btn {
     /* Innerer Abstand */
     padding: 12px 25px;
     /* Grüner Gradient-Hintergrund */
@@ -246,7 +246,7 @@ main {
 }
 
 /* Hover-Effekt - wenn Maus über den Button schwebt */
-#submit-btn:hover {
+#submit-btn:hover, #restart-btn:hover {
     /* Grüner Glow */
     box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
     /* Leicht vergrößert */
@@ -254,9 +254,19 @@ main {
 }
 
 /* Active-Effekt - wenn Button geklickt wird */
-#submit-btn:active {
+#submit-btn:active, #restart-btn:active {
     /* Leicht verkleinert für Feedback */
     transform: scale(0.95);
+}
+
+#submit-btn:focus-visible, #restart-btn:focus-visible, #command-input:focus-visible {
+    outline: 3px solid #ffff00;
+    outline-offset: 3px;
+}
+
+#restart-btn {
+    background: #173a25;
+    color: #00ff00;
 }
 
 /* ===========================
@@ -364,7 +374,7 @@ main {
         width: 100%;
     }
 
-    #submit-btn {
+    #submit-btn, #restart-btn {
         min-height: 44px;
         flex: 1;
         padding: 10px 12px;

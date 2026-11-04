@@ -14,26 +14,29 @@
 <main class="game">
   <header>
     <h1>NEON <span>BRICK BREAKER</span></h1>
-    <div class="stats" aria-live="polite">
+    <div class="stats" role="group" aria-label="Spielstand" aria-live="polite">
       <div class="stat"><small>Punkte</small><strong id="score">0</strong></div>
       <div class="stat"><small>Leben</small><strong id="lives">3</strong></div>
     </div>
   </header>
 
   <div class="canvas-wrap">
-    <canvas id="canvas" width="720" height="480" aria-label="Brick-Breaker-Spielfeld"></canvas>
-    <div class="overlay" id="overlay">
+    <canvas id="canvas" width="720" height="480" tabindex="0" aria-label="Brick-Breaker-Spielfeld" aria-describedby="controls-help"></canvas>
+    <div class="overlay" id="overlay" role="status" aria-live="polite" aria-atomic="true">
       <div class="message">
         <h2 id="title">Bereit?</h2>
-        <p id="description">Zerstöre alle Steine und lass den Ball nicht fallen.</p>
-        <button id="startButton">Spiel starten</button>
+        <p id="description">Bewege den Schläger mit ←/→, A/D, Maus oder Finger. Der Ball startet automatisch. Halte ihn im Spiel und zerstöre alle Steine.</p>
+        <button id="startButton" type="button">Spiel starten</button>
       </div>
     </div>
   </div>
 
-  <div class="help">
-    <span>Steuerung: <kbd>←</kbd> <kbd>→</kbd> oder Maus</span>
-    <span>Auf Mobilgeräten: Finger über das Spielfeld bewegen</span>
+  <div class="game-controls">
+    <button id="pauseButton" class="secondary-button" type="button" disabled>Pause</button>
+    <span id="controls-help" class="help">
+      <span>Schläger: <kbd>←</kbd>/<kbd>→</kbd> oder <kbd>A</kbd>/<kbd>D</kbd>, Maus oder Finger bewegen</span>
+      <span>Pause/Fortsetzen: <kbd>P</kbd> oder <kbd>Esc</kbd> bzw. die Pause-Taste</span>
+    </span>
   </div>
 </main>
 </body>

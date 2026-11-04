@@ -88,6 +88,8 @@ canvas {
     touch-action: none;
 }
 
+canvas:focus-visible { outline: 3px solid white; outline-offset: -4px; }
+
 .overlay {
     position: absolute;
     inset: 0;
@@ -129,12 +131,28 @@ button {
 
 button:hover { transform: translateY(-2px); filter: brightness(1.08); }
 button:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+button:disabled { cursor: not-allowed; filter: saturate(.35); opacity: .65; }
+
+.game-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 15px;
+}
+
+.secondary-button {
+    flex: 0 0 auto;
+    color: var(--text);
+    border: 1px solid #53617f;
+    background: #202a43;
+    box-shadow: none;
+}
 
 .help {
     display: flex;
     justify-content: space-between;
+    flex: 1;
     gap: 12px;
-    margin-top: 15px;
     color: var(--muted);
     font-size: .85rem;
 }
@@ -152,5 +170,6 @@ kbd {
     .game { padding: 15px; }
     header { align-items: flex-start; flex-direction: column; }
     .stat { min-width: 74px; }
+    .game-controls { align-items: flex-start; }
     .help { flex-direction: column; }
 }

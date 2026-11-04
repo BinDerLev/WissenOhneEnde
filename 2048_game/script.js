@@ -9,6 +9,10 @@ const upgradeStateDisplay = document.getElementById('upgradeState');
 const newGameBtn = document.getElementById('newGameBtn');
 const undoBtn = document.getElementById('undoBtn');
 const boostBtn = document.getElementById('boostBtn');
+const standardModeBtn = document.getElementById('standardModeBtn');
+const dailyModeBtn = document.getElementById('dailyModeBtn');
+const dailyInfo = document.getElementById('dailyInfo');
+const dailyRecordDisplay = document.getElementById('dailyRecord');
 const upgradeButtons = [...document.querySelectorAll('.upgrade-btn')];
 
 let grid = [];
@@ -21,6 +25,15 @@ let gameOver = false;
 let gameWon = false;
 let previousState = null;
 let previousScore = 0;
+let previousRandomState = null;
+let moveToken = 0;
+let mode = 'standard';
+let activeDailyDate = null;
+let todayDate = getLocalDateKey();
+let dailySeed = 0;
+let dailyRandomState = 0;
+let dailyConfig = null;
+let dailyRecords = readDailyRecords();
 let extraUndoLives = Number(localStorage.getItem('2048_undoLives') || 1);
 let multiplierLevel = Number(localStorage.getItem('2048_multiplierLevel') || 0);
 let bonusLevel = Number(localStorage.getItem('2048_bonusLevel') || 0);
@@ -42,6 +55,8 @@ levelDisplay.textContent = level;
 goalDisplay.textContent = String(Math.max(2048, 2048 + (level - 1) * 1024));
 updateUpgradeCosts();
 newGameBtn.addEventListener('click', newGame);
+standardModeBtn.addEventListener('click', startStandardGame);
+dailyModeBtn.addEventListener('click', startDailyChallenge);
 undoBtn.addEventListener('click', undo);
 boostBtn.addEventListener('click', useBoost);
 upgradeButtons.forEach((button) => {
@@ -68,6 +83,110 @@ gameBoard.addEventListener('pointerup', (event) => {
 gameBoard.addEventListener('pointercancel', () => {
   swipeStart = null;
 });
+document.addEventListener('visibilitychange', checkDateBoundary);
+window.addEventListener('focus', checkDateBoundary);
+window.setInterval(checkDateBoundary, 30000);
+
+function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function formatLocalDate(dateKey) {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString('de-DE', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+}
+
+function readDailyRecords() {
+  try {
+    const records = JSON.parse(localStorage.getItem('2048_dailyRecords') || '{}');
+    return records && typeof records === 'object' && !Array.isArray(records) ? records : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveDailyRecords() {
+  localStorage.setItem('2048_dailyRecords', JSON.stringify(dailyRecords));
+}
+
+function seedForDate(dateKey) {
+  let seed = 2166136261;
+  for (const character of dateKey) {
+    seed ^= character.charCodeAt(0);
+    seed = Math.imul(seed, 16777619);
+  }
+  return seed >>> 0;
+}
+
+function dailyRandom() {
+  dailyRandomState = (dailyRandomState + 0x6D2B79F5) >>> 0;
+  let value = dailyRandomState;
+  value = Math.imul(value ^ (value >>> 15), value | 1);
+  value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+  return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+}
+
+function randomValue() {
+  return mode === 'daily' ? dailyRandom() : Math.random();
+}
+
+function checkDateBoundary() {
+  const currentDate = getLocalDateKey();
+  if (currentDate === todayDate) return;
+  todayDate = currentDate;
+  updateDailyPanel();
+}
+
+function updateDailyPanel() {
+  const record = dailyRecords[todayDate];
+  const seed = seedForDate(todayDate);
+  const fourChance = 5 + seed % 16;
+  dailyInfo.textContent = `Heute: ${formatLocalDate(todayDate)} · Seed ${seed.toString(16).padStart(8, '0').slice(-6)} · ${fourChance}% Chance auf eine 4. Das Layout und alle Zufallszüge sind für dieses Datum gleich.`;
+  if (mode === 'daily' && activeDailyDate !== todayDate) {
+    dailyRecordDisplay.textContent = `Dein Lauf vom ${formatLocalDate(activeDailyDate)} bleibt erhalten. Die heutige Challenge startet mit „Tages-Challenge spielen“.`;
+  } else if (record?.completed) {
+    dailyRecordDisplay.textContent = `Heute abgeschlossen${record.won ? ' – 2048 erreicht' : ' – keine Züge mehr'} · Bestwert: ${record.bestScore}`;
+  } else if (record?.played) {
+    dailyRecordDisplay.textContent = `Heute gespielt · Bestwert: ${record.bestScore}`;
+  } else {
+    dailyRecordDisplay.textContent = 'Heute noch nicht gespielt.';
+  }
+  standardModeBtn.setAttribute('aria-pressed', String(mode === 'standard'));
+  dailyModeBtn.setAttribute('aria-pressed', String(mode === 'daily'));
+  dailyModeBtn.textContent = mode === 'daily' && activeDailyDate === todayDate
+    ? 'Challenge neu starten'
+    : 'Tages-Challenge spielen';
+}
+
+function startStandardGame() {
+  mode = 'standard';
+  activeDailyDate = null;
+  dailyConfig = null;
+  updateDailyPanel();
+  newGame();
+}
+
+function startDailyChallenge() {
+  checkDateBoundary();
+  mode = 'daily';
+  activeDailyDate = todayDate;
+  dailySeed = seedForDate(activeDailyDate);
+  dailyRandomState = dailySeed;
+  dailyConfig = { fourChance: 5 + dailySeed % 16 };
+  const record = dailyRecords[activeDailyDate] || { bestScore: 0, played: false, completed: false, won: false };
+  record.played = true;
+  dailyRecords[activeDailyDate] = record;
+  saveDailyRecords();
+  updateDailyPanel();
+  newGame();
+}
 
 function saveProgress() {
   localStorage.setItem('2048_coins', String(coins));
@@ -99,9 +218,20 @@ function updateHud() {
     bestScoreDisplay.textContent = bestScore;
     localStorage.setItem('2048_bestScore', bestScore);
   }
+
+  if (mode === 'daily' && activeDailyDate) {
+    const record = dailyRecords[activeDailyDate] || { bestScore: 0, played: true, completed: false, won: false };
+    record.bestScore = Math.max(record.bestScore || 0, score);
+    record.played = true;
+    dailyRecords[activeDailyDate] = record;
+    saveDailyRecords();
+    updateDailyPanel();
+  }
 }
 
 function newGame() {
+  checkDateBoundary();
+  moveToken += 1;
   grid = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
   score = 0;
   combo = 1;
@@ -109,7 +239,14 @@ function newGame() {
   gameWon = false;
   previousState = null;
   previousScore = 0;
+  previousRandomState = null;
   boostActive = false;
+  if (mode === 'daily') {
+    activeDailyDate = todayDate;
+    dailySeed = seedForDate(activeDailyDate);
+    dailyRandomState = dailySeed;
+    dailyConfig = { fourChance: 5 + dailySeed % 16 };
+  }
   updateHud();
   addRandomTile();
   addRandomTile();
@@ -126,8 +263,9 @@ function addRandomTile() {
   }
 
   if (emptyTiles.length > 0) {
-    const randomTile = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
-    grid[randomTile.i][randomTile.j] = Math.random() < 0.9 ? 2 : 4;
+    const randomTile = emptyTiles[Math.floor(randomValue() * emptyTiles.length)];
+    const fourChance = mode === 'daily' ? dailyConfig.fourChance : 10;
+    grid[randomTile.i][randomTile.j] = randomValue() * 100 < fourChance ? 4 : 2;
   }
 }
 
@@ -160,8 +298,10 @@ function applyMove(direction) {
   };
   const moved = moveFunctions[direction]();
   if (!moved) return;
+  const token = moveToken;
 
   setTimeout(() => {
+    if (token !== moveToken) return;
     addRandomTile();
     updateLevel();
     checkGameState();
@@ -177,6 +317,7 @@ function moveDown() { return move('down'); }
 function move(direction) {
   previousState = grid.map(row => [...row]);
   previousScore = score;
+  previousRandomState = mode === 'daily' ? dailyRandomState : null;
 
   let moved = false;
 
@@ -210,6 +351,7 @@ function move(direction) {
   if (!moved) {
     previousState = null;
     previousScore = score;
+    previousRandomState = null;
   }
 
   return moved;
@@ -295,11 +437,25 @@ function checkGameState() {
   updateHud();
 
   if (gameWon) {
+    markDailyComplete(true);
     showGameOverOverlay(true);
   } else if (isGameOver()) {
     gameOver = true;
+    markDailyComplete(false);
     showGameOverOverlay(false);
   }
+}
+
+function markDailyComplete(won) {
+  if (mode !== 'daily' || !activeDailyDate) return;
+  const record = dailyRecords[activeDailyDate] || { bestScore: score, played: true };
+  record.bestScore = Math.max(record.bestScore || 0, score);
+  record.played = true;
+  record.completed = true;
+  record.won = Boolean(record.won || won);
+  dailyRecords[activeDailyDate] = record;
+  saveDailyRecords();
+  updateDailyPanel();
 }
 
 function isGameOver() {
@@ -327,8 +483,12 @@ function undo() {
   extraUndoLives -= 1;
   grid = previousState.map(row => [...row]);
   score = previousScore;
+  if (mode === 'daily' && previousRandomState !== null) {
+    dailyRandomState = previousRandomState;
+  }
   combo = 1;
   previousState = null;
+  previousRandomState = null;
   updateHud();
   saveProgress();
   render();
@@ -342,6 +502,8 @@ function render() {
       const value = grid[i][j];
       const tile = document.createElement('div');
       tile.className = 'game-tile';
+      tile.setAttribute('role', 'gridcell');
+      tile.setAttribute('aria-label', value === 0 ? 'Leer' : String(value));
 
       if (value !== 0) {
         tile.textContent = value;
@@ -399,4 +561,5 @@ function showGameOverOverlay(won) {
   updateHud();
 }
 
+updateDailyPanel();
 newGame();

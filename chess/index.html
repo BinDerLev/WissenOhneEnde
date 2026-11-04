@@ -12,12 +12,12 @@
     <a class="gamehub-back-link" href="../index.html">← Zurück zum GameHub</a>
 	<main class="container">
 	<h1>♟ Schach ♟</h1>
-	<button id="toggle-rules" class="btn-rules">📖 Anleitung</button>
+	<button id="toggle-rules" class="btn-rules" type="button" aria-controls="rules-container" aria-expanded="false">📖 Anleitung</button>
 
-	<div id="rules-container" class="rules-container hidden">
-	  <div class="rules-content">
-	    <h2>Schach Anleitung</h2>
-	    <button id="close-rules" class="close-btn">&times;</button>
+	<div id="rules-container" class="rules-container hidden" aria-hidden="true">
+	  <div class="rules-content" role="dialog" aria-modal="true" aria-labelledby="rules-title">
+	    <h2 id="rules-title">Schach Anleitung</h2>
+	    <button id="close-rules" class="close-btn" type="button" aria-label="Anleitung schließen">&times;</button>
 
 	    <div class="rules-section">
 	      <h3>📋 Ziel des Spiels</h3>
@@ -91,12 +91,12 @@
 	  <div class="player-human"><strong>Du:</strong> <span style="color:#f0e6d2; background:#2a2a2a; padding:2px 8px; border-radius:4px;">● Schwarz</span></div>
 	  <div class="player-ai"><strong>KI:</strong> <span style="color:#fff; background:#3d7028; padding:2px 8px; border-radius:4px;">● Weiß</span></div>
 	</div>
-	<p class="description">Klicke auf eine Figur, um mögliche Züge anzuzeigen. Die KI spielt mit Weiß.</p>
+	<p class="description">Wähle eine Figur und dann ein markiertes Feld. Mit den Pfeiltasten bewegst du den Fokus; Enter wählt ein Feld. Die KI spielt mit Weiß.</p>
 
-	<div id="board" class="board" aria-label="Schachbrett"></div>
+	<div id="board" class="board" role="grid" aria-label="Schachbrett" aria-rowcount="8" aria-colcount="8"></div>
 
 	<div class="controls">
-	  <div id="status" class="status">Lade...</div>
+	  <div id="status" class="status" aria-live="polite">Lade...</div>
 	  <label for="difficulty" style="margin-left:8px">Schwierigkeit:</label>
 	  <select id="difficulty" style="margin-left:6px">
 	    <option value="1">Level 1 (Leicht)</option>
@@ -104,7 +104,7 @@
 	    <option value="3">Level 3 (Schwer)</option>
 	  </select>
  	  <button id="restart" class="btn">Neu starten</button>
- 	  <input id="search" type="text" placeholder="Suche (z.B. e4 oder Springer)" style="padding:8px;border-radius:6px;border:1px solid #ccc;">
+	<input id="search" type="text" aria-label="Schachbrett durchsuchen" placeholder="Suche (z.B. e4 oder Springer)" style="padding:8px;border-radius:6px;border:1px solid #ccc;">
  	  <button id="search-btn" class="btn">Suchen</button>
  	  <button id="clear-search" class="btn" style="background:#888">Suche löschen</button>
 	</div>

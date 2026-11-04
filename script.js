@@ -77,6 +77,18 @@ const gameCatalog = [
         tags: ['Puzzle', 'Zahlen']
     },
     {
+        href: 'memory/index.html',
+        image: 'memory/logo.svg',
+        imageAlt: 'Memory',
+        title: 'Memory',
+        type: 'Puzzle • Konzentration',
+        description: 'Finde alle Kartenpaare und knacke deinen persönlichen Punkte-Rekord!',
+        rating: '⭐⭐⭐⭐⭐',
+        score: '5/5',
+        categories: ['puzzle'],
+        tags: ['Puzzle', 'Klassiker']
+    },
+    {
         href: 'asteroid_game/index.html',
         image: 'asteroid_game/logo.svg',
         imageAlt: 'Asteroids',
@@ -126,6 +138,131 @@ const gameCatalog = [
     }
 ];
 
+const progressStorageKey = 'gamehub-progress-v1';
+const recordDefinitions = [
+    { href: '2048_game/index.html', key: '2048_bestScore', label: '2048', suffix: 'Punkte' },
+    { href: 'snake_game/index.html', key: 'snakeHighScore', label: 'Snake Game', suffix: 'Punkte' },
+    { href: 'asteroid_game/index.html', key: 'asteroid_bestScore', label: 'Asteroids', suffix: 'Punkte' },
+    { href: 'neon_runner/index.html', key: 'neon-runner-best', label: 'Neon Runner', suffix: 'Punkte' },
+    { href: 'sky_stack/index.html', key: 'sky-stack-best', label: 'Sky Stack', suffix: 'Punkte' },
+    { href: 'memory/index.html', key: 'memory-best-score', label: 'Memory', suffix: 'Punkte' }
+];
+
+function readLocalStorage(key) {
+    try {
+        return localStorage.getItem(key);
+    } catch (error) {
+        return null;
+    }
+}
+
+function readProgress() {
+    const raw = readLocalStorage(progressStorageKey);
+    if (!raw) return { totalPlays: 0, games: {}, recent: [] };
+    try {
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+            throw new Error('Ungültiges Fortschrittsformat');
+        }
+        const validHrefs = new Set(gameCatalog.map(game => game.href));
+        const games = {};
+        Object.entries(parsed.games && typeof parsed.games === 'object' ? parsed.games : {}).forEach(([href, value]) => {
+            if (!validHrefs.has(href) || !value || typeof value !== 'object') return;
+            const count = Number(value.count);
+            if (!Number.isFinite(count) || count < 0) return;
+            games[href] = {
+                count: Math.floor(count),
+                lastPlayed: typeof value.lastPlayed === 'string' && Number.isFinite(Date.parse(value.lastPlayed))
+                    ? value.lastPlayed
+                    : ''
+            };
+        });
+        const recent = Array.isArray(parsed.recent)
+            ? [...new Set(parsed.recent.filter(href => validHrefs.has(href)))].slice(0, gameCatalog.length)
+            : [];
+        const totalPlays = Number(parsed.totalPlays);
+        return {
+            totalPlays: Number.isFinite(totalPlays) && totalPlays >= 0 ? Math.floor(totalPlays) : 0,
+            games,
+            recent
+        };
+    } catch (error) {
+        console.warn('GameHub-Fortschritt konnte nicht gelesen werden; Standardwerte werden verwendet.', error);
+        return { totalPlays: 0, games: {}, recent: [] };
+    }
+}
+
+let gameProgress = readProgress();
+
+function saveProgress() {
+    try {
+        localStorage.setItem(progressStorageKey, JSON.stringify(gameProgress));
+    } catch (error) {
+        console.warn('GameHub-Fortschritt konnte nicht gespeichert werden.', error);
+    }
+}
+
+function renderProgress() {
+    const recordList = document.getElementById('recordList');
+    const achievementList = document.getElementById('achievementList');
+    const recentList = document.getElementById('recentList');
+    if (!recordList || !achievementList || !recentList) return;
+
+    const availableRecords = recordDefinitions.map(record => {
+        const value = Number(readLocalStorage(record.key));
+        return { ...record, value };
+    }).filter(record => Number.isFinite(record.value) && record.value > 0);
+    recordList.innerHTML = availableRecords.length
+        ? availableRecords.map(record => `
+            <li><span>${escapeHTML(record.label)}</span><strong>${escapeHTML(record.value)} ${escapeHTML(record.suffix)}</strong></li>
+        `).join('')
+        : '<li class="progress-empty">Noch keine Rekorde – starte ein Spiel und leg los!</li>';
+
+    const playedHrefs = Object.keys(gameProgress.games).filter(href => gameProgress.games[href].count > 0);
+    const categoriesPlayed = new Set(playedHrefs.flatMap(href =>
+        (gameCatalog.find(game => game.href === href) || { categories: [] }).categories
+    ));
+    const achievements = [
+        { title: 'Erster Start', description: 'Spiele dein erstes Game.', progress: Math.min(gameProgress.totalPlays, 1), target: 1 },
+        { title: 'Stammspieler', description: 'Starte insgesamt 10 Spiele.', progress: Math.min(gameProgress.totalPlays, 10), target: 10 },
+        { title: 'Spiele-Sammler', description: 'Probiere 5 verschiedene Spiele aus.', progress: Math.min(playedHrefs.length, 5), target: 5 },
+        { title: 'Genre-Entdecker', description: 'Spiele aus allen 4 Genres.', progress: Math.min(categoriesPlayed.size, 4), target: 4 }
+    ];
+    achievementList.innerHTML = achievements.map(achievement => {
+        const earned = achievement.progress >= achievement.target;
+        return `<li class="achievement-item${earned ? ' earned' : ''}">
+            <span class="achievement-icon" aria-hidden="true">${earned ? '🏅' : '🔒'}</span>
+            <span class="achievement-copy"><strong>${escapeHTML(achievement.title)}</strong>
+            <span>${escapeHTML(achievement.description)}</span>
+            <span class="achievement-progress">${achievement.progress} / ${achievement.target}</span></span>
+            <span class="sr-only">${earned ? 'Erreicht' : 'Noch nicht erreicht'}</span>
+        </li>`;
+    }).join('');
+
+    const recentGames = gameProgress.recent
+        .map(href => gameCatalog.find(game => game.href === href))
+        .filter(Boolean);
+    recentList.innerHTML = recentGames.length
+        ? recentGames.map(game => `
+            <li><a class="recent-game-link" href="${escapeHTML(game.href)}" data-game-href="${escapeHTML(game.href)}">
+                <span>${escapeHTML(game.title)}</span><span aria-hidden="true">►</span>
+            </a></li>
+        `).join('')
+        : '<li class="progress-empty">Deine zuletzt gespielten Games erscheinen hier.</li>';
+}
+
+function recordGameLaunch(href) {
+    const game = gameCatalog.find(item => item.href === href);
+    if (!game) return;
+    const timestamp = new Date().toISOString();
+    const current = gameProgress.games[href] || { count: 0, lastPlayed: '' };
+    gameProgress.games[href] = { count: current.count + 1, lastPlayed: timestamp };
+    gameProgress.totalPlays += 1;
+    gameProgress.recent = [href, ...gameProgress.recent.filter(item => item !== href)].slice(0, gameCatalog.length);
+    saveProgress();
+    renderProgress();
+}
+
 function escapeHTML(value) {
     return String(value).replace(/[&<>"']/g, character => ({
         '&': '&amp;',
@@ -139,7 +276,7 @@ function escapeHTML(value) {
 const gamesGridElement = document.getElementById('gamesGrid');
 if (gamesGridElement) {
     gamesGridElement.innerHTML = gameCatalog.map(game => `
-        <a href="${escapeHTML(game.href)}" class="game-card" data-category="${escapeHTML(game.categories.join(' '))}">
+        <a href="${escapeHTML(game.href)}" class="game-card" data-game-href="${escapeHTML(game.href)}" data-category="${escapeHTML(game.categories.join(' '))}">
             <div class="game-image">
                 <img src="${escapeHTML(game.image)}" alt="${escapeHTML(game.imageAlt)}">
             </div>
@@ -158,6 +295,7 @@ if (gamesGridElement) {
         </a>
     `).join('');
 }
+renderProgress();
 
 // Filter functionality
 const filterButtons = document.querySelectorAll('.filter-btn');
@@ -351,7 +489,10 @@ if (platformLockedNotice) {
     }
 }
 
-const allGameLinks = document.querySelectorAll('.game-card');
+const allGameLinks = [
+    ...document.querySelectorAll('.game-card'),
+    ...document.querySelectorAll('.recent-game-link')
+];
 allGameLinks.forEach(link => {
     if (!unlocked || playsLeft <= 0) {
         link.addEventListener('click', (event) => {
@@ -360,6 +501,7 @@ allGameLinks.forEach(link => {
         });
     } else {
         link.addEventListener('click', () => {
+            recordGameLaunch(link.dataset.gameHref);
             const remaining = Number(localStorage.getItem('gamehub-plays-left') || 0);
             if (remaining > 0) {
                 localStorage.setItem('gamehub-plays-left', String(remaining - 1));

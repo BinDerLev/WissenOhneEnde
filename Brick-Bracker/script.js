@@ -5,6 +5,7 @@ const overlay = document.querySelector("#overlay");
 const title = document.querySelector("#title");
 const description = document.querySelector("#description");
 const startButton = document.querySelector("#startButton");
+const pauseButton = document.querySelector("#pauseButton");
 const scoreDisplay = document.querySelector("#score");
 const livesDisplay = document.querySelector("#lives");
 
@@ -22,6 +23,7 @@ let bricks = [];
 let score = 0;
 let lives = 3;
 let running = false;
+let paused = false;
 let rightPressed = false;
 let leftPressed = false;
 let animationId = null;
@@ -148,17 +150,52 @@ function showOverlay(heading, text, buttonText) {
 // Beendet die Animation und blendet eine Nachricht ein.
 function endGame(won) {
     running = false;
+    paused = false;
     cancelAnimationFrame(animationId);
+    animationId = null;
+    clearPressedKeys();
+    pauseButton.disabled = true;
     showOverlay(
         won ? "GEWONNEN!" : "GAME OVER",
         won ? `Fantastisch! Dein Punktestand: ${score}` : `Dein Punktestand: ${score}. Gib nicht auf!`,
         "Nochmal spielen"
     );
+    startButton.focus();
+}
+
+function clearPressedKeys() {
+    rightPressed = false;
+    leftPressed = false;
+}
+
+function pauseGame() {
+    if (!running) return;
+    running = false;
+    paused = true;
+    cancelAnimationFrame(animationId);
+    animationId = null;
+    clearPressedKeys();
+    pauseButton.textContent = "Fortsetzen";
+    showOverlay("PAUSIERT", "Das Spiel ist angehalten. Setze fort oder drücke P/Esc.", "Fortsetzen");
+    startButton.focus();
+}
+
+function resumeGame() {
+    if (!paused) return;
+    paused = false;
+    overlay.classList.add("hidden");
+    pauseButton.textContent = "Pause";
+    running = true;
+    canvas.focus();
+    update();
 }
 
 // Ein Frame der Spielschleife: bewegen, Kollisionen prüfen und zeichnen.
 function update() {
-    if (!running) return;
+    if (!running) {
+        animationId = null;
+        return;
+    }
 
     if (rightPressed) paddle.x += paddle.speed;
     if (leftPressed) paddle.x -= paddle.speed;
@@ -215,6 +252,7 @@ function update() {
 // Startet ein neues Spiel und setzt Punkte, Leben und Steine zurück.
 function startGame() {
     cancelAnimationFrame(animationId);
+    animationId = null;
     score = 0;
     lives = 3;
     scoreDisplay.textContent = score;
@@ -222,16 +260,32 @@ function startGame() {
     paddle.x = W / 2 - paddle.w / 2;
     createBricks();
     resetBall();
+    paused = false;
+    pauseButton.disabled = false;
+    pauseButton.textContent = "Pause";
     overlay.classList.add("hidden");
     running = true;
+    canvas.focus();
     update();
 }
 
-// Tastatursteuerung: Pfeiltasten oder A/D.
+// Tastatursteuerung: Pfeiltasten oder A/D bewegen, P/Esc pausieren/fortsetzen.
 document.addEventListener("keydown", event => {
-    if (["ArrowRight", "ArrowLeft", " "].includes(event.key)) event.preventDefault();
-    if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") rightPressed = true;
-    if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") leftPressed = true;
+    const key = event.key.toLowerCase();
+    if (key === "p" || key === "escape") {
+        if (running) pauseGame();
+        else if (paused) resumeGame();
+        return;
+    }
+    if (!running) return;
+    if (event.key === "ArrowRight" || key === "d") {
+        event.preventDefault();
+        rightPressed = true;
+    }
+    if (event.key === "ArrowLeft" || key === "a") {
+        event.preventDefault();
+        leftPressed = true;
+    }
 });
 
 document.addEventListener("keyup", event => {
@@ -241,6 +295,7 @@ document.addEventListener("keyup", event => {
 
 // Maus- und Touchsteuerung: Schläger folgt der horizontalen Fingerposition.
 function movePaddle(event) {
+    if (!running) return;
     const rect = canvas.getBoundingClientRect();
     const scaleX = W / rect.width;
     const pointerX = (event.clientX - rect.left) * scaleX;
@@ -253,7 +308,18 @@ canvas.addEventListener("pointerdown", event => {
     event.preventDefault();
     movePaddle(event);
 });
-startButton.addEventListener("click", startGame);
+startButton.addEventListener("click", () => {
+    if (paused) resumeGame();
+    else startGame();
+});
+pauseButton.addEventListener("click", () => {
+    if (running) pauseGame();
+    else if (paused) resumeGame();
+});
+window.addEventListener("blur", clearPressedKeys);
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) pauseGame();
+});
 
 // Das Spielfeld bereits vor Spielbeginn anzeigen.
 createBricks();

@@ -16,8 +16,8 @@
           <h1>Merge Garden</h1>
         </div>
         <div class="header-actions">
-          <button id="soundBtn" class="secondary-btn" aria-label="Sound umschalten">🔊</button>
-          <button id="resetBtn" class="secondary-btn">Neustart</button>
+          <button id="soundBtn" class="secondary-btn" type="button" aria-label="Sound ausschalten" aria-pressed="true">🔊</button>
+          <button id="resetBtn" class="secondary-btn" type="button">Neustart</button>
         </div>
       </header>
 
@@ -36,7 +36,7 @@
         </div>
         <div class="stat-box highlight">
           <span>Aktuell</span>
-          <div id="nextTile" class="next-tile">🌱</div>
+          <div id="nextTile" class="next-tile" role="status" aria-label="Nächste Pflanze">🌱</div>
         </div>
         <div class="stat-box highlight">
           <span>Combo</span>
@@ -44,9 +44,28 @@
         </div>
       </section>
 
+      <section class="garden-goal" aria-labelledby="goal-title">
+        <div class="goal-copy">
+          <h2 id="goal-title">Gartenziel: Goldene Ernte</h2>
+          <p id="goal-status" aria-live="polite">Erreiche 300 Punkte, um die Goldene Ernte freizuschalten.</p>
+        </div>
+        <div
+          id="goal-progress"
+          class="goal-progress"
+          role="progressbar"
+          aria-label="Fortschritt zur Goldenen Ernte"
+          aria-valuemin="0"
+          aria-valuemax="300"
+          aria-valuenow="0"
+        >
+          <span id="goal-progress-fill"></span>
+        </div>
+        <p id="goal-count" class="goal-count">0 / 300 Punkte</p>
+      </section>
+
       <div class="game-layout">
         <main class="board-panel">
-          <div id="board" class="board" aria-label="Garden board"></div>
+          <div id="board" class="board" role="group" aria-label="Garten-Spielfeld, fünf mal fünf Felder"></div>
         </main>
 
         <aside class="shop-panel">
@@ -76,9 +95,9 @@
       </div>
 
       <footer class="legend">
-        <p>1. Platziere die Pflanze auf ein leeres Feld.</p>
-        <p>2. Baue gleiche Pflanzen zu stärkeren Varianten zusammen.</p>
-        <p>3. Kaufe Upgrades und halte deinen Combo-Boost aktiv.</p>
+        <p>1. Wähle ein leeres Feld, um die angezeigte Pflanze zu setzen.</p>
+        <p>2. Gleiche Nachbarpflanzen verschmelzen automatisch zu stärkeren Varianten.</p>
+        <p>3. Kaufe Upgrades und halte deine Combo aktiv. Erreiche 300 Punkte für die Goldene Ernte; danach kannst du weiterspielen oder neu starten.</p>
       </footer>
     </div>
 

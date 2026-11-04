@@ -10,6 +10,7 @@ const GameState = {
     health: 100,                           // Gesundheit des Spielers (in Prozent)
     puzzlesSolved: 0,                      // Anzahl gelöster Rätsel (Maximum: 3)
     treasureFound: false,                  // Boolean: Wurde der Schatz gefunden?
+    escaped: false,                        // Boolean: Hat der Spieler einen sicheren Ausweg gefunden?
     visitedLocations: new Set(),           // Set mit allen besuchten Lokationen
 
     // ===== WELTDATEN: LOKATIONEN =====
@@ -99,7 +100,7 @@ const GameState = {
         // ===== GROTTO =====
         grotto: {
             name: 'Felsengrotte',
-            description: 'Eine enge Grotte mit tropfenden Stalaktiten. Der Boden ist rutschig und gefährlich.',
+            description: 'Eine enge Grotte mit tropfenden Stalaktiten. Der Boden ist rutschig und gefährlich. An der Decke erkennst du einen schmalen, von Luftblasen gesäumten Schacht zur Oberfläche.',
             exits: {
                 norden: 'pool',        // Nach Norden zum Pool
                 osten: 'vault'         // Nach Osten zur Schatzkammer
@@ -153,6 +154,13 @@ const GameState = {
         }
     }
 };
+
+const initialLocationState = Object.fromEntries(
+    Object.entries(GameState.locations).map(([id, location]) => [id, {
+        items: [...location.items],
+        puzzleSolved: Boolean(location.puzzle && location.puzzle.solved)
+    }])
+);
 
 // ===========================
 // HILFS-FUNKTIONEN
@@ -221,10 +229,12 @@ function handleCommand(input) {
     } else if (command === 'status') {
         // Zeige den Spielstatus an
         output = getStatusText();
+    } else if (command === 'fliehe' || command === 'tauche auf') {
+        output = escapeCave();
     } else if (command === 'neustart') {
         // Starte das Spiel neu
         restartGame();
-        output = '<span class="success">Spiel neugestartet! Laden Sie die Seite neu.</span>';
+        output = '<span class="success">Das Abenteuer beginnt von vorn.</span>';
     } else {
         // Unbekannter Befehl
         output = '<span class="warning">Unbekannter Befehl: "' + command + '". Gib "hilfe" ein für verfügbare Befehle.</span>';
@@ -277,6 +287,19 @@ function moveDirection(direction) {
 
     // Zeige die Beschreibung der neuen Lokation
     return getLocationDescription();
+}
+
+function escapeCave() {
+    if (GameState.currentLocation !== 'grotto') {
+        return '<span class="warning">Nur in der Felsengrotte kannst du dem Wasser zur Oberfläche folgen.</span>';
+    }
+
+    if (GameState.puzzlesSolved < 3) {
+        return `<span class="warning">Die Strömung ist zu stark. Löse erst alle drei Rätsel (gelöst: ${GameState.puzzlesSolved}/3), um den sicheren Weg zu finden.</span>`;
+    }
+
+    GameState.escaped = true;
+    return '<span class="success">Du folgst den leuchtenden Markierungen durch einen schmalen Schacht. Ein Fischerboot zieht dich an die frische Luft — du bist gerettet, doch der Schatz bleibt zurück.</span>';
 }
 
 // ===========================
@@ -492,8 +515,10 @@ function getHelpText() {
 <strong>Sonstiges:</strong>
   status - Spielstatus anzeigen
   hilfe - Diese Hilfe anzeigen
+  fliehe - Aus der Felsengrotte zur Oberfläche entkommen (nach 3 Rätseln)
+  neustart - Ein neues Abenteuer beginnen
 
-<span class="special">Ziel:</span> Finde alle 3 Rätsel, löse sie und finde den Schatz!
+<span class="special">Ziel:</span> Löse drei Rätsel und wähle dein Ende: Öffne in der Schatzkammer den Tresor oder entkomme aus der Felsengrotte.
     `;
 }
 
@@ -526,6 +551,7 @@ Rätsel gelöst: ${GameState.puzzlesSolved}/3
 Orte besucht: ${GameState.visitedLocations.size}
 Gegenstände: ${GameState.inventory.length}
 Schatz gefunden: ${GameState.treasureFound ? 'JA! 🎉' : 'Nein'}
+Sicher entkommen: ${GameState.escaped ? 'JA! 🚤' : 'Nein'}
     `;
 }
 
@@ -554,6 +580,7 @@ function updateInventoryUI() {
 function updatePuzzleUI() {
     document.getElementById('puzzles').textContent = GameState.puzzlesSolved;
     document.getElementById('health').textContent = GameState.health;
+    document.getElementById('escaped').textContent = GameState.escaped ? 'Ja' : 'Nein';
 }
 
 // ===========================
@@ -570,6 +597,11 @@ function restartGame() {
     GameState.health = 100;                     // Gesundheit wiederherstellen
     GameState.puzzlesSolved = 0;                // Rätsel-Zähler zurücksetzen
     GameState.treasureFound = false;            // Schatz nicht mehr gefunden
+    GameState.escaped = false;                  // Flucht-Ende zurücksetzen
     GameState.visitedLocations.clear();         // Alle besuchten Lokationen vergessen
+    Object.entries(GameState.locations).forEach(([id, location]) => {
+        const initial = initialLocationState[id];
+        location.items = [...initial.items];
+        if (location.puzzle) location.puzzle.solved = initial.puzzleSolved;
+    });
 }
-

@@ -104,6 +104,70 @@ h1 {
     font-size: 1.2em;
 }
 
+.daily-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 0 18px;
+    padding: 16px 18px;
+    border: 1px solid rgba(255, 209, 102, 0.45);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 209, 102, 0.12), rgba(200, 100, 255, 0.1));
+    text-align: left;
+}
+
+.daily-copy h2 {
+    margin-bottom: 5px;
+    color: #ffdd8a;
+    font-size: 1.05rem;
+}
+
+.daily-copy p {
+    color: #e1d8f2;
+    font-size: 0.88rem;
+    line-height: 1.45;
+}
+
+#dailyRecord {
+    margin-top: 5px;
+    color: #ffdd8a;
+}
+
+.mode-controls {
+    display: flex;
+    flex-shrink: 0;
+    gap: 8px;
+}
+
+.mode-btn {
+    min-height: 44px;
+    padding: 9px 13px;
+    border: 2px solid rgba(255, 221, 138, 0.55);
+    border-radius: 8px;
+    background: rgba(15, 20, 45, 0.8);
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+.mode-btn[aria-pressed="true"] {
+    background: #ffdd8a;
+    color: #241a32;
+}
+
+.mode-btn:hover {
+    filter: brightness(1.12);
+}
+
+.mode-btn:focus-visible,
+.btn:focus-visible,
+.upgrade-btn:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
+}
+
 .game-wrapper {
     margin: 18px 0 12px;
 }
@@ -319,4 +383,6 @@ h1 {
     .header { flex-direction: column; align-items: center; }
     .score-section { width: 100%; justify-content: center; }
     .status-panel, .upgrade-panel { grid-template-columns: 1fr; }
+    .daily-panel { flex-direction: column; align-items: stretch; text-align: center; }
+    .mode-controls { flex-direction: column; }
 }

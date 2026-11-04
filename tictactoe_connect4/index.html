@@ -32,7 +32,7 @@
                 <h1 id="gameTitle">Tic-Tac-Toe</h1>
                 <div class="game-stats">
                     <div class="stat-box">
-                        <span id="currentPlayer">Spieler: X</span>
+                        <span id="currentPlayer" aria-live="polite">Spieler: X</span>
                     </div>
                     <div class="stat-box" id="scoreBox" style="display: none;">
                         <span>Score - You: <span id="playerScore">0</span> | AI: <span id="aiScore">0</span></span>
@@ -41,7 +41,7 @@
             </div>
 
             <div class="game-wrapper">
-                <div id="gameBoard" class="game-board"></div>
+                <div id="gameBoard" class="game-board" role="group" aria-label="Spielbrett"></div>
             </div>
 
             <div class="game-mode">

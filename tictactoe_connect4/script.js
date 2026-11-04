@@ -29,10 +29,12 @@ function selectGame(game) {
 
     if (game === 'tictactoe') {
         gameTitle.textContent = '❌ Tic-Tac-Toe';
+        gameBoard.setAttribute('aria-label', 'Tic-Tac-Toe-Spielbrett, 3 mal 3');
         gameInstructions.textContent = 'Wer zuerst 3 in einer Reihe hat, gewinnt!';
         document.getElementById('scoreBox').style.display = 'none';
     } else {
         gameTitle.textContent = '🟡 Vier Gewinnt';
+        gameBoard.setAttribute('aria-label', 'Vier-Gewinnt-Spielbrett, 6 Zeilen und 7 Spalten');
         gameInstructions.textContent = 'Wer zuerst 4 in einer Reihe hat, gewinnt! Klicke auf die Spalte, um einen Stein zu werfen.';
         document.getElementById('scoreBox').style.display = 'block';
     }
@@ -76,6 +78,7 @@ function initTicTacToe() {
         const cell = document.createElement('button');
         cell.className = 'game-cell';
         cell.dataset.index = i;
+        cell.setAttribute('aria-label', `Feld ${i + 1}, leer`);
         cell.addEventListener('click', () => handleTicTacToeClick(i));
         gameBoard.appendChild(cell);
     }
@@ -233,6 +236,7 @@ function updateTicTacToeDisplay() {
     cells.forEach((cell, index) => {
         cell.textContent = board[index];
         cell.className = 'game-cell';
+        cell.setAttribute('aria-label', `Feld ${index + 1}, ${board[index] || 'leer'}`);
         if (board[index]) {
             cell.classList.add(board[index].toLowerCase());
         }
@@ -260,6 +264,7 @@ function initConnect4() {
         const cell = document.createElement('button');
         cell.className = 'game-cell connect4';
         cell.dataset.index = i;
+        cell.setAttribute('aria-label', `Zeile ${Math.floor(i / 7) + 1}, Spalte ${i % 7 + 1}, leer`);
         cell.addEventListener('click', () => handleConnect4Click(i));
         gameBoard.appendChild(cell);
     }
@@ -482,6 +487,7 @@ function updateConnect4Display() {
     const cells = document.querySelectorAll('.game-cell.connect4');
     cells.forEach((cell, index) => {
         cell.className = 'game-cell connect4';
+        cell.setAttribute('aria-label', `Zeile ${Math.floor(index / 7) + 1}, Spalte ${index % 7 + 1}, ${board[index] || 'leer'}`);
         if (board[index]) {
             cell.classList.add(board[index].toLowerCase());
         }
@@ -536,7 +542,6 @@ function showMessage(title, message) {
 
 // Start
 initTicTacToe();
-
 
 
 

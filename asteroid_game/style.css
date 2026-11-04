@@ -14,6 +14,7 @@ body {
 }
 
 .container {
+    width: min(100%, 860px);
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     border-radius: 15px;
     padding: 30px;
@@ -36,7 +37,7 @@ h1 {
     display: flex;
     justify-content: space-around;
     margin-bottom: 20px;
-    gap: 20px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
@@ -47,7 +48,8 @@ h1 {
     font-weight: bold;
     border: 2px solid rgba(255, 100, 0, 0.4);
     box-shadow: 0 0 15px rgba(255, 100, 0, 0.3);
-    min-width: 110px;
+    min-width: 0;
+    flex: 1 1 110px;
 }
 
 .score-box span, .wave-box span, .lives-box span, .coin-box span, .best-box span {
@@ -91,7 +93,7 @@ h1 {
 
 canvas {
     display: block;
-    width: min(100%, 800px);
+    width: 100%;
     height: auto;
     border: 4px solid #ffbb00;
     background: linear-gradient(135deg, #0a0e27 0%, #1a2a4a 100%);
@@ -101,6 +103,11 @@ canvas {
     box-shadow: 0 0 30px rgba(255, 187, 0, 0.5),
                 0 10px 40px rgba(0, 0, 0, 0.5),
                 inset 0 0 20px rgba(255, 187, 0, 0.1);
+}
+
+canvas:focus-visible {
+    outline: 3px solid #fff3c4;
+    outline-offset: 3px;
 }
 
 .touch-controls {
@@ -147,6 +154,12 @@ canvas {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn:focus-visible,
+.upgrade-btn:focus-visible {
+    outline: 3px solid #ffdd44;
+    outline-offset: 3px;
 }
 
 .btn:disabled {
@@ -225,22 +238,51 @@ canvas {
     }
 
     .game-info {
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+        gap: 8px;
     }
 
     .btn {
         padding: 10px 15px;
         font-size: 0.9em;
     }
-
 }
 
 @media (max-width: 700px), (pointer: coarse) {
+    body {
+        align-items: flex-start;
+        padding: 72px 12px 20px;
+    }
+
+    .container {
+        padding: 16px;
+    }
+
+    .score-box, .wave-box, .lives-box, .coin-box, .best-box {
+        padding: 9px 6px;
+    }
+
     .touch-controls {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
         width: min(100%, 420px);
         margin: 0 auto 14px;
+    }
+
+    .touch-controls button,
+    .controls .btn,
+    .upgrade-btn {
+        min-height: 48px;
+    }
+
+    .upgrade-panel {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .instructions p {
+        line-height: 1.5;
     }
 }

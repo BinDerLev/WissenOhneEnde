@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f5ff">
+  <title>Memory – GameHub</title>
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <link rel="stylesheet" href="../gamehub-nav.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="gamehub-back-link" href="../index.html">← Zurück zum GameHub</a>
+  <main class="memory-shell">
+    <header class="page-header">
+      <p class="eyebrow">PUZZLE · KONZENTRATION</p>
+      <h1>Memory</h1>
+      <p>Finde alle passenden Paare mit möglichst wenigen Zügen.</p>
+    </header>
+
+    <section class="game-panel" aria-label="Memory-Spiel">
+      <div class="game-toolbar">
+        <label for="difficulty">Schwierigkeit
+          <select id="difficulty">
+            <option value="easy">Leicht · 8 Paare</option>
+            <option value="normal" selected>Normal · 10 Paare</option>
+            <option value="hard">Schwer · 18 Paare</option>
+          </select>
+        </label>
+        <button id="restart-button" class="restart-button" type="button">Neu starten</button>
+      </div>
+
+      <div class="stats" aria-label="Spielstand">
+        <div><span>Züge</span><strong id="moves">0</strong></div>
+        <div><span>Zeit</span><strong id="time">00:00</strong></div>
+        <div><span>Paare</span><strong id="matches">0 / 10</strong></div>
+        <div><span>Rekord</span><strong id="best-score">–</strong></div>
+      </div>
+
+      <p id="game-message" class="game-message" aria-live="polite">Dein Spiel wird vorbereitet …</p>
+      <div id="game-board" class="game-board" aria-label="Memory-Karten"></div>
+      <p class="instructions">Wähle immer zwei Karten. Stimmen die Motive überein, bleiben sie aufgedeckt.</p>
+    </section>
+  </main>
+</body>
+</html>

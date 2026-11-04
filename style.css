@@ -226,6 +226,135 @@ body {
     box-shadow: 0 8px 22px rgba(19, 24, 29, 0.03);
 }
 
+.progress-section {
+    padding: 18px 0 8px;
+}
+
+.progress-section .section-title {
+    margin-bottom: 20px;
+}
+
+.progress-layout {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.progress-panel {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--panel);
+    box-shadow: 0 8px 22px rgba(19, 24, 29, 0.03);
+}
+
+.progress-panel h3 {
+    margin-bottom: 14px;
+    font-size: 1.15rem;
+}
+
+.record-list,
+.achievement-list,
+.recent-list {
+    display: grid;
+    gap: 10px;
+    list-style: none;
+}
+
+.record-list li,
+.recent-game-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    color: var(--text);
+    line-height: 1.45;
+}
+
+.record-list li {
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+}
+
+.record-list strong {
+    color: var(--primary-dark);
+    text-align: right;
+}
+
+.progress-empty {
+    color: var(--text-soft);
+    line-height: 1.5;
+}
+
+.achievement-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: var(--text-soft);
+    line-height: 1.4;
+}
+
+.achievement-item.earned {
+    color: var(--text);
+}
+
+.achievement-icon {
+    flex: 0 0 auto;
+    font-size: 1.35rem;
+}
+
+.achievement-copy {
+    display: grid;
+    gap: 2px;
+}
+
+.achievement-copy strong {
+    color: var(--text);
+}
+
+.achievement-progress {
+    color: var(--primary-dark);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.recent-game-link {
+    min-height: 44px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    text-decoration: none;
+}
+
+.recent-game-link:hover {
+    background: var(--panel-soft);
+}
+
+.recent-game-link:focus-visible {
+    outline: 3px solid var(--secondary);
+    outline-offset: 2px;
+}
+
+.progress-note {
+    margin-top: 12px;
+    color: var(--text-soft);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .filter-section h2 {
     text-align: center;
     color: var(--text);
@@ -466,6 +595,14 @@ body {
 }
 
 @media (max-width: 768px) {
+    .progress-layout {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .recent-panel {
+        grid-column: 1 / -1;
+    }
+
     .hamburger {
         display: flex;
     }
@@ -498,6 +635,14 @@ body {
 }
 
 @media (max-width: 480px) {
+    .progress-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .recent-panel {
+        grid-column: auto;
+    }
+
     .nav-logo {
         font-size: 1.1rem;
         letter-spacing: 0.08em;

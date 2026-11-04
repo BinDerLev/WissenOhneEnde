@@ -14,7 +14,7 @@
         <header class="topbar">
             <div class="title-wrap">
                 <h1>🐍 Snake</h1>
-                <button id="settingsToggle" class="settings-toggle" type="button" aria-label="Einstellungen öffnen">⚙️</button>
+                <button id="settingsToggle" class="settings-toggle" type="button" aria-label="Einstellungen öffnen" aria-controls="settingsPanel" aria-expanded="false">⚙️</button>
             </div>
 
             <div class="score-row">
@@ -74,9 +74,9 @@
             </div>
         </div>
 
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <canvas id="gameCanvas" width="400" height="400" role="img" aria-label="Snake-Spielfeld" tabindex="0"></canvas>
 
-        <div class="touch-controls" aria-label="Snake-Richtung">
+        <div class="touch-controls" role="group" aria-label="Snake-Richtung">
             <span aria-hidden="true"></span>
             <button type="button" data-direction="up" aria-label="Nach oben">↑</button>
             <span aria-hidden="true"></span>

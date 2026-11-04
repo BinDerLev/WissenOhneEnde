@@ -22,11 +22,18 @@
       <div class="scoreboard" aria-live="polite">
         <div><span>Höhe</span><strong id="score">0</strong></div>
         <div><span>Rekord</span><strong id="best-score">0</strong></div>
+        <div><span>Ziel</span><strong id="target-score">–</strong></div>
       </div>
     </header>
 
     <section class="game-panel" aria-label="Sky Stack Spiel">
-      <canvas id="game-canvas" width="640" height="460" aria-label="Spielfeld. Klicke oder drücke die Leertaste, um einen Block abzusetzen."></canvas>
+      <label class="mode-picker" for="game-mode">Spielmodus</label>
+      <select id="game-mode" aria-describedby="mode-help">
+        <option value="classic">Klassisch – baue so hoch wie möglich</option>
+        <option value="challenge">Präzisions-Challenge – erreiche 12 Blöcke</option>
+      </select>
+      <p id="mode-help" class="mode-help">Klassisch bleibt unverändert. In der Challenge ist der Startblock schmaler und du gewinnst bei 12 gesetzten Blöcken.</p>
+      <canvas id="game-canvas" width="640" height="460" tabindex="0" aria-keyshortcuts="Space" aria-describedby="game-instructions" aria-label="Spielfeld. Klicke oder drücke die Leertaste, um einen Block abzusetzen."></canvas>
       <div class="game-controls">
         <p id="game-message" aria-live="polite">Drücke „Spiel starten“ und setze die Blöcke passend aufeinander.</p>
         <div class="button-row">
@@ -36,7 +43,7 @@
       </div>
     </section>
 
-    <p class="instructions">Klicke ins Spielfeld, drücke die <strong>Leertaste</strong> oder nutze den Button. Je genauer du triffst, desto höher wird dein Turm.</p>
+    <p id="game-instructions" class="instructions">Klicke ins Spielfeld, drücke die <strong>Leertaste</strong> oder nutze den Button. Je genauer du triffst, desto höher wird dein Turm. In der Präzisions-Challenge ist das Ziel: 12 Blöcke.</p>
   </main>
 </body>
 </html>

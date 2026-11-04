@@ -73,7 +73,10 @@ speedSlider.addEventListener('input', (event) => {
 });
 
 settingsToggle.addEventListener('click', () => {
-    settingsPanel.classList.toggle('hidden');
+    const expanded = settingsToggle.getAttribute('aria-expanded') !== 'true';
+    settingsPanel.classList.toggle('hidden', !expanded);
+    settingsToggle.setAttribute('aria-expanded', String(expanded));
+    settingsToggle.setAttribute('aria-label', expanded ? 'Einstellungen schließen' : 'Einstellungen öffnen');
 });
 
 fruitButtons.forEach((button) => {
@@ -106,6 +109,7 @@ resetBtn.addEventListener('click', resetGame);
 
 function handleKeyPress(event) {
     if (!gameRunning) return;
+    if (event.target.matches('input, textarea, select, button, [contenteditable="true"]')) return;
 
     const key = event.key.toLowerCase();
     const directions = {
