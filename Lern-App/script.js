@@ -1,4 +1,6 @@
 //Hier gibt es einen Fehler er ist das:
+const exercisesPerLesson = 8;
+
 const curriculum = {
   1: [
     { title: "Plus und Minus bis 20", skill: "add", icon: "+", description: "Zahlen geschickt zusammenzählen und abziehen.", explanation: "Beim Plusrechnen gehst du vorwärts. Beim Minusrechnen gehst du zurück. Ein Rechenstrich kann dir helfen: Starte bei der ersten Zahl und springe so viele Schritte, wie die zweite Zahl angibt.", difficulty: "easy" },
@@ -313,7 +315,7 @@ function renderDashboard() {
     const key = progress.subject === "math" ? `${progress.grade}-${index}` : `german-${progress.grade}-${index}`;
     const done = progress.topics[key] || 0;
     const icon = icons[topic.skill]?.[0] || topic.icon;
-    const taskCount = 6;
+    const taskCount = exercisesPerLesson;
     return `
       <button class="topic-card" type="button" data-topic="${index}" aria-label="${topic.title}, ${taskCount} Aufgaben">
         <span class="topic-topline">
@@ -451,8 +453,8 @@ function makeQuestion(topic) {
       b = a + randomInt(1, 5);
       return { text: `Welche Zahl kommt als Nächstes? ${a}, ${a + (b - a)}, ${b + (b - a)}, …`, answer: b + 2 * (b - a), hint: "Finde heraus, wie viel jedes Mal dazukommt.", solution: `Es kommen jeweils ${b - a} dazu. Die nächste Zahl ist ${b + 2 * (b - a)}.` };
     case "shapes": {
-      const sides = randomInt(3, 5);
-      const shape = ["", "", "", "Dreieck", "Viereck", "Fünfeck"][sides];
+      const sides = randomInt(3, 6);
+      const shape = ["", "", "", "Dreieck", "Viereck", "Fünfeck", "Sechseck"][sides];
       const feature = Math.random() < 0.5 ? "Ecken" : "Seiten";
       return { text: `Wie viele ${feature} hat ein ${shape}?`, answer: sides, hint: "Bei Vielecken ist die Anzahl der Ecken genauso groß wie die Anzahl der Seiten.", solution: `Ein ${shape} hat ${sides} ${feature}.` };
     }
@@ -557,6 +559,7 @@ function pickRandom(items) {
 const germanSpellingPairs = [
   ["Fusball", "Fußball"], ["Schwimmbat", "Schwimmbad"], ["Fahrrat", "Fahrrad"],
   ["Feriehn", "Ferien"], ["Bibilothek", "Bibliothek"], ["Abendteuer", "Abenteuer"],
+  ["Kaze", "Katze"], ["Schuhle", "Schule"],
   ["warscheinlich", "wahrscheinlich"], ["nähmlich", "nämlich"], ["Rhytmus", "Rhythmus"],
   ["Portemonai", "Portemonnaie"], ["Maschiene", "Maschine"], ["Gallerie", "Galerie"],
   ["Ketschup", "Ketchup"], ["Terasse", "Terrasse"], ["Packet", "Paket"],
@@ -579,6 +582,8 @@ const germanSentences = [
   { words: ["Wir", "spielen", "nach", "der", "Schule", "im", "Garten"], answer: "Wir spielen nach der Schule im Garten." },
   { words: ["Der", "kleine", "Vogel", "singt"], answer: "Der kleine Vogel singt." },
   { words: ["Papa", "backt", "einen", "Kuchen"], answer: "Papa backt einen Kuchen." },
+  { words: ["Lina", "malt", "ein", "Haus"], answer: "Lina malt ein Haus." },
+  { words: ["Der", "Fuchs", "rennt", "schnell"], answer: "Der Fuchs rennt schnell." },
   { words: ["Obwohl", "es", "regnet", "gehen", "wir", "spazieren"], answer: "Obwohl es regnet, gehen wir spazieren." },
   { words: ["Die", "Forscherin", "erklärt", "das", "spannende", "Experiment"], answer: "Die Forscherin erklärt das spannende Experiment." },
   { words: ["Morgen", "besuchen", "meine", "Freunde", "das", "neue", "Museum"], answer: "Morgen besuchen meine Freunde das neue Museum." },
@@ -588,7 +593,14 @@ const germanSentences = [
 // Zusätzliche Textpools für schwierigere Leseaufgaben
 const germanIntermediateTexts = [
   { text: "Anna hat ihren Hund im Park verloren. Sie ruft seinen Namen und sucht unter den Bäumen.", question: "Was sucht Anna?", options: ["ihren Hund", "einen Ball", "den Bus"], answer: "ihren Hund" },
-  { text: "Max findet eine Karte mit einem Kreuz. Er beginnt zu graben und entdeckt eine alte Dose.", question: "Was hat Max entdeckt?", options: ["eine Dose", "ein Fahrrad", "ein Buch"], answer: "eine Dose" }
+  { text: "Max findet eine Karte mit einem Kreuz. Er beginnt zu graben und entdeckt eine alte Dose.", question: "Was hat Max entdeckt?", options: ["eine Dose", "ein Fahrrad", "ein Buch"], answer: "eine Dose" },
+  { text: "Lara zieht ihre Regenstiefel an, bevor sie durch die Pfützen zum Garten geht.", question: "Warum zieht Lara Regenstiefel an?", options: ["Sie möchte durch Pfützen gehen.", "Sie fährt Fahrrad.", "Sie geht schwimmen."], answer: "Sie möchte durch Pfützen gehen." },
+  { text: "Noah stellt einen Topf mit Bohnen auf die Fensterbank und gießt die Erde jeden Morgen.", question: "Was tut Noah jeden Morgen?", options: ["Er gießt die Erde.", "Er erntet Äpfel.", "Er fegt den Hof."], answer: "Er gießt die Erde." },
+  { text: "Die Schulbücherei ist jeden Dienstag geöffnet. Mia gibt dort ein Buch zurück und leiht ein neues aus.", question: "Wann ist die Schulbücherei geöffnet?", options: ["Jeden Dienstag", "Jeden Sonntag", "Jeden Morgen"], answer: "Jeden Dienstag" },
+  { text: "Ben baut aus Papier eine Brücke und prüft, ob ein Spielzeugauto darüberfahren kann.", question: "Was prüft Ben?", options: ["Ob das Auto über die Brücke fahren kann", "Ob das Papier schwimmen kann", "Ob das Auto fliegen kann"], answer: "Ob das Auto über die Brücke fahren kann" },
+  { text: "Eine Biene fliegt von Blüte zu Blüte und sammelt Nektar für ihren Bienenstock.", question: "Was sammelt die Biene?", options: ["Nektar", "Blätter", "Wasser aus einem See"], answer: "Nektar" },
+  { text: "Am Sonntag sperrt die Stadt eine Straße für den Wochenmarkt. Dort verkaufen Händler Obst und Gemüse.", question: "Was findet am Sonntag statt?", options: ["Ein Wochenmarkt", "Ein Fußballspiel", "Ein Konzert"], answer: "Ein Wochenmarkt" },
+  { text: "Emil packt eine Trinkflasche und ein Brot in seinen Rucksack, bevor er zur Wanderung aufbricht.", question: "Wohin bricht Emil auf?", options: ["Zu einer Wanderung", "Zum Schwimmbad", "Zum Bahnhof"], answer: "Zu einer Wanderung" }
 ];
 
 const germanAdvancedTexts = [
@@ -603,6 +615,8 @@ const germanVocabulary = [
   { word: "riesig", answer: "gewaltig", options: ["winzig", "gewaltig", "schmal"] },
   { word: "mutig", answer: "tapfer", options: ["tapfer", "ängstlich", "vorsichtig"] },
   { word: "erstaunt", answer: "überrascht", options: ["gelangweilt", "überrascht", "wütend"] },
+  { word: "klug", answer: "schlau", options: ["schlau", "müde", "laut"] },
+  { word: "fröhlich", answer: "heiter", options: ["heiter", "dunkel", "langsam"] },
   { word: "still", answer: "ruhig", options: ["laut", "ruhig", "hektisch"] },
   { word: "kostbar", answer: "wertvoll", options: ["wertvoll", "nutzlos", "gewöhnlich"] },
   { word: "erlauben", answer: "gestatten", options: ["verbieten", "gestatten", "vergessen"] },
@@ -618,6 +632,8 @@ const germanPunctuationQuestions = [
   { text: "Kannst du mir bitte helfen", answer: "Kannst du mir bitte helfen?", hint: "Der Satz ist eine Frage." },
   { text: "Morgen spielen wir im Park", answer: "Morgen spielen wir im Park.", hint: "Das ist eine Aussage. Sie endet mit einem Punkt." },
   { text: "Bringst du deinen Ball mit", answer: "Bringst du deinen Ball mit?", hint: "Der Satz ist eine Frage und endet mit einem Fragezeichen." },
+  { text: "Lena liest ein spannendes Buch", answer: "Lena liest ein spannendes Buch.", hint: "Das ist eine Aussage. Sie endet mit einem Punkt." },
+  { text: "Wann fährt der Bus ab", answer: "Wann fährt der Bus ab?", hint: "Der Satz fragt nach einer Zeit." },
   { text: "Ich nehme einen Apfel eine Birne und Trauben", answer: "Ich nehme einen Apfel, eine Birne und Trauben.", hint: "Bei einer Aufzählung trennt ein Komma die einzelnen Teile." },
   { text: "Wir bleiben drinnen weil es draußen stürmt", answer: "Wir bleiben drinnen, weil es draußen stürmt.", hint: "Vor einem Nebensatz mit „weil“ steht ein Komma." },
   { text: "Obwohl sie müde war las sie das Buch zu Ende", answer: "Obwohl sie müde war, las sie das Buch zu Ende.", hint: "Der Nebensatz am Satzanfang wird mit einem Komma abgetrennt." },
@@ -639,17 +655,17 @@ const germanPersons = [
 function makeGermanQuestion(topic) {
   switch (topic.skill) {
     case "de-spelling": {
-      const pool = germanSpellingPairs.slice(0, progress.grade <= 2 ? 6 : progress.grade <= 4 ? 12 : germanSpellingPairs.length);
+      const pool = germanSpellingPairs.slice(0, progress.grade <= 2 ? 8 : progress.grade <= 4 ? 12 : germanSpellingPairs.length);
       const [wrong, answer] = pickRandom(pool);
       return { text: `Schreibe das Wort richtig: ${wrong}`, answer, hint: "Achte auf die Buchstaben, die im Wort oft verwechselt oder vergessen werden." };
     }
     case "de-wordclass": {
-      const pool = germanWords.slice(0, progress.grade <= 2 ? 6 : progress.grade <= 4 ? 9 : germanWords.length);
+      const pool = germanWords.slice(0, progress.grade <= 2 ? 8 : progress.grade <= 4 ? 9 : germanWords.length);
       const item = pickRandom(pool);
       return { text: `Zu welcher Wortart gehört „${item.word}“? (Nomen, Verb oder Adjektiv)`, answer: item.type, hint: "Nomen bezeichnen Dinge, Verben Tätigkeiten und Adjektive Eigenschaften." };
     }
     case "de-wordorder": {
-      const pool = germanSentences.slice(0, progress.grade <= 4 ? 6 : germanSentences.length);
+      const pool = germanSentences.slice(0, progress.grade <= 4 ? 8 : germanSentences.length);
       const item = pickRandom(pool);
       const words = [...item.words];
       for (let index = words.length - 1; index > 0; index -= 1) {
@@ -659,7 +675,7 @@ function makeGermanQuestion(topic) {
       return { text: `Ordne die Wörter zu einem Satz: ${words.join(" / ")}`, answer: item.answer, caseSensitive: true, hint: "Achte auf die Satzstellung, den Satzanfang und das Satzzeichen am Ende." };
     }
     case "de-vocabulary": {
-      const pool = germanVocabulary.slice(0, progress.grade <= 2 ? 6 : progress.grade <= 4 ? 9 : germanVocabulary.length);
+      const pool = germanVocabulary.slice(0, progress.grade <= 2 ? 8 : progress.grade <= 4 ? 9 : germanVocabulary.length);
       const item = pickRandom(pool);
       return { text: `Welches Wort bedeutet ungefähr dasselbe wie „${item.word}“? (${item.options.join(", ")})`, answer: item.answer, hint: "Suche das Wort mit einer ähnlichen Bedeutung." };
     }
@@ -673,14 +689,14 @@ function makeGermanQuestion(topic) {
       return { text: `Setze „${verb}“ für „${person.pronoun}“ ins ${tenseLabel}: ${person.pronoun} ___`, answer, hint: "Bestimme zuerst den Wortstamm und ergänze die passende Verbendung." };
     }
     case "de-punctuation": {
-      const item = pickRandom(germanPunctuationQuestions.slice(0, progress.grade < 5 ? 6 : germanPunctuationQuestions.length));
+      const item = pickRandom(germanPunctuationQuestions.slice(0, progress.grade < 5 ? 8 : germanPunctuationQuestions.length));
       return { text: `Setze Großschreibung und Satzzeichen richtig: ${item.text}`, answer: item.answer, caseSensitive: true, hint: item.hint };
     }
     case "de-reading": {
       // Leseverständnis: wähle Schwierigkeitsgrad nach Klassenstufe
       if (progress.grade < 5) {
         // einfache Sätze wie vorher
-        const item = pickRandom(germanSentences.slice(0, 6));
+        const item = pickRandom(germanSentences.slice(0, 8));
         const possible = item.words.filter(w => w[0] === w[0].toUpperCase() && !["Der","Die","Das","Ein","Eine"].includes(w));
         const subject = possible.length ? possible[0] : item.words[0];
         const distractorPool = germanWords.filter(w => w.type === "Nomen").map(w => w.word).filter(w => w !== subject);
@@ -718,7 +734,7 @@ function makeGermanQuestion(topic) {
     }
     case "de-capitalization": {
       // Groß-/Kleinschreibung üben: zeige kleingeschriebenen Satz, Antworte mit korrekter Großschreibung
-      const item = pickRandom(germanSentences.slice(0, progress.grade < 5 ? 6 : germanSentences.length));
+      const item = pickRandom(germanSentences.slice(0, progress.grade < 5 ? 8 : germanSentences.length));
       const lower = item.answer.toLowerCase();
       return { text: `Setze Großschreibung und Satzzeichen: ${lower}`, answer: item.answer, caseSensitive: true, hint: "Achte auf Satzanfang und Nomen (Großschreibung)." };
     }
@@ -743,7 +759,7 @@ function makeUniqueQuestions(topic, count) {
 function startLesson(topicIndex) {
   const topics = (progress.subject === "german" ? germanCurriculum : curriculum)[progress.grade];
   const topic = topics[topicIndex];
-  const count = 6;
+  const count = exercisesPerLesson;
   activeLesson = {
     topic,
     topicIndex,

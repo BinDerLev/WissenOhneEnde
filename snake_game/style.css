@@ -113,15 +113,13 @@ h1 {
     color: #1f2a2f;
 }
 
-.fruit-grid,
-.upgrade-grid {
+.fruit-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(140px, 1fr));
     gap: 10px;
 }
 
-.fruit-option,
-.upgrade-btn {
+.fruit-option {
     border: 1px solid #d9cdbd;
     background: #fff;
     border-radius: 12px;
@@ -139,14 +137,6 @@ h1 {
     background: #1f2a2f;
     color: #fff;
     border-color: #1f2a2f;
-}
-
-.upgrade-btn strong {
-    background: #fff0b5;
-    color: #563d00;
-    border-radius: 999px;
-    padding: 5px 8px;
-    font-size: 0.76rem;
 }
 
 .speed-control {
@@ -167,18 +157,6 @@ h1 {
     margin-top: 8px;
     font-size: 0.9rem;
     color: #58656d;
-}
-
-.active-powerup {
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    padding: 10px 12px;
-    border-radius: 10px;
-    background: #ebf7f1;
-    border: 1px solid #bddfc9;
-    color: #1d4d36;
-    font-weight: 700;
 }
 
 canvas {
@@ -223,14 +201,12 @@ canvas:focus-visible {
 }
 
 .btn,
-.fruit-option,
-.upgrade-btn {
+.fruit-option {
     min-height: 48px;
 }
 
 .settings-toggle:focus-visible,
 .fruit-option:focus-visible,
-.upgrade-btn:focus-visible,
 .btn:focus-visible {
     outline: 3px solid #53a9d8;
     outline-offset: 3px;
@@ -239,6 +215,23 @@ canvas:focus-visible {
 .btn-start {
     background: #1f2a2f;
     color: white;
+}
+
+.btn-challenge {
+    background: #dcefe5;
+    color: #1d4d36;
+    border: 1px solid #bddfc9;
+}
+
+.daily-status {
+    margin: -4px 0 18px;
+    padding: 12px 14px;
+    border: 1px solid #bddfc9;
+    border-radius: 12px;
+    background: #ebf7f1;
+    color: #1d4d36;
+    font-weight: 700;
+    line-height: 1.5;
 }
 
 .btn-pause {
@@ -305,8 +298,7 @@ canvas:focus-visible {
         align-items: flex-start;
     }
 
-    .fruit-grid,
-    .upgrade-grid {
+    .fruit-grid {
         grid-template-columns: 1fr;
     }
 

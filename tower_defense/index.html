@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101b2c">
+    <title>Wachturm – Tower Defense</title>
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../gamehub-nav.css">
+</head>
+<body>
+    <a class="gamehub-back-link" href="../index.html">← Zurück zum LernLabor</a>
+    <main class="game-shell">
+        <header class="game-header">
+            <div>
+                <p class="eyebrow">STRATEGIE · TOWER DEFENSE</p>
+                <h1>Wachturm</h1>
+                <p class="intro">Verteidige den Kristallpfad und halte zehn Gegnerwellen auf.</p>
+            </div>
+            <button id="restartButton" class="button button-muted" type="button">Neu starten</button>
+        </header>
+
+        <section class="status-bar" aria-label="Spielstatus">
+            <div class="stat"><span>Münzen</span><strong id="goldValue">140</strong></div>
+            <div class="stat"><span>Leben</span><strong id="livesValue">12</strong></div>
+            <div class="stat"><span>Welle</span><strong id="waveValue">0 / 10</strong></div>
+            <div class="stat"><span>Gegner</span><strong id="enemyValue">0</strong></div>
+        </section>
+
+        <section class="battle-layout" aria-label="Tower-Defense-Spiel">
+            <div class="board-wrap">
+                <canvas id="battlefield" width="900" height="600" tabindex="0"
+                        role="application" aria-label="Spielfeld. Pfeiltasten bewegen die Auswahl, Eingabe platziert den gewählten Turm.">
+                    Dein Browser unterstützt das Spielfeld nicht.
+                </canvas>
+                <p class="board-hint">Turm auswählen, dann ein freies Feld anklicken oder mit den Pfeiltasten ansteuern.</p>
+            </div>
+
+            <aside class="control-panel">
+                <section aria-labelledby="towerHeading">
+                    <h2 id="towerHeading">Türme</h2>
+                    <div class="tower-list" role="group" aria-label="Turm auswählen">
+                        <button class="tower-card selected" type="button" data-tower="arrow" aria-pressed="true">
+                            <span class="tower-icon arrow-icon" aria-hidden="true">➶</span>
+                            <span class="tower-copy"><strong>Bogenturm</strong><small>Schnell · 55 Münzen</small></span>
+                            <span class="tower-key" aria-hidden="true">1</span>
+                        </button>
+                        <button class="tower-card" type="button" data-tower="cannon" aria-pressed="false">
+                            <span class="tower-icon cannon-icon" aria-hidden="true">✹</span>
+                            <span class="tower-copy"><strong>Kanone</strong><small>Flächenschaden · 90 Münzen</small></span>
+                            <span class="tower-key" aria-hidden="true">2</span>
+                        </button>
+                        <button class="tower-card" type="button" data-tower="frost" aria-pressed="false">
+                            <span class="tower-icon frost-icon" aria-hidden="true">❄</span>
+                            <span class="tower-copy"><strong>Frostturm</strong><small>Verlangsamt · 75 Münzen</small></span>
+                            <span class="tower-key" aria-hidden="true">3</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="wave-panel" aria-labelledby="waveHeading">
+                    <h2 id="waveHeading">Verteidigung</h2>
+                    <p id="gameMessage" class="game-message" aria-live="polite">Platziere Türme und starte die erste Welle.</p>
+                    <button id="waveButton" class="button button-primary" type="button">Welle 1 starten</button>
+                </section>
+                <p class="help-text"><strong>Tipp:</strong> Bogentürme eignen sich für lange Geraden. Kanonen treffen Gruppen, Frosttürme bremsen schnelle Gegner.</p>
+            </aside>
+        </section>
+        <p id="announcement" class="sr-only" aria-live="polite"></p>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>

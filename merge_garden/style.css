@@ -81,8 +81,7 @@ h1 {
   font-size: clamp(2rem, 3vw, 2.6rem);
 }
 
-.secondary-btn,
-.upgrade-btn {
+.secondary-btn {
   border: none;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
@@ -96,15 +95,14 @@ h1 {
   font-weight: bold;
 }
 
-.secondary-btn:hover,
-.upgrade-btn:hover {
+.secondary-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 18px rgba(64, 109, 71, 0.14);
 }
 
 .stats-bar {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -152,7 +150,7 @@ h1 {
 
 .game-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(220px, 0.8fr);
+  grid-template-columns: 1fr;
   gap: 18px;
 }
 
@@ -267,56 +265,6 @@ h1 {
 .cell.leaf { background: #d5f7d5; }
 .cell.sun { background: #fff3c2; }
 .cell.mint { background: #cfeef7; }
-
-.shop-panel {
-  background: linear-gradient(180deg, #fffef7, #f7f9ef);
-  border: 2px solid var(--line);
-  border-radius: 24px;
-  padding: 16px;
-}
-
-.shop-panel h2 {
-  margin: 0 0 12px;
-  font-size: 1.3rem;
-}
-
-.upgrade-list {
-  display: grid;
-  gap: 10px;
-}
-
-.upgrade-btn {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  background: var(--panel);
-  border: 2px solid var(--line);
-  border-radius: 14px;
-  padding: 12px 14px;
-  color: var(--text);
-  font-weight: 700;
-}
-
-.upgrade-btn strong {
-  background: #fff0ba;
-  padding: 5px 8px;
-  border-radius: 999px;
-  font-size: 0.8rem;
-}
-
-.upgrade-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.shop-footer {
-  margin-top: 14px;
-  color: var(--text-soft);
-  font-size: 0.82rem;
-}
 
 .legend {
   display: flex;

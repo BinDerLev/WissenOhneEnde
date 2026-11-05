@@ -1,0 +1,96 @@
+:root {
+    color-scheme: dark;
+    --bg: #101b2c;
+    --panel: #18263a;
+    --panel-light: #203149;
+    --line: #30425a;
+    --text: #f0f5fb;
+    --muted: #a4b2c6;
+    --gold: #ffd166;
+    --mint: #58dfad;
+    font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 28px 20px 48px;
+    color: var(--text);
+    background:
+        radial-gradient(ellipse at 75% -10%, rgba(52, 94, 139, .35), transparent 50%),
+        var(--bg);
+}
+
+.game-shell { width: min(1180px, 100%); margin: 0 auto; padding-top: 32px; }
+.game-header { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin: 14px 0 25px; }
+.eyebrow { margin: 0 0 7px; color: var(--mint); font-size: .73rem; font-weight: 800; letter-spacing: .16em; }
+h1, h2 { font-family: "Trebuchet MS", "Segoe UI", sans-serif; }
+h1 { margin: 0; font-size: clamp(2.2rem, 5vw, 3.2rem); letter-spacing: -.055em; }
+.intro { margin: 6px 0 0; color: var(--muted); }
+
+.button { min-height: 46px; padding: 0 18px; border: 0; border-radius: 12px; font: inherit; font-weight: 800; cursor: pointer; transition: transform .15s, filter .15s, background .15s; }
+.button:hover:not(:disabled), .tower-card:hover { filter: brightness(1.12); transform: translateY(-1px); }
+.button:focus-visible, .tower-card:focus-visible, canvas:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.button:disabled { cursor: not-allowed; opacity: .48; }
+.button-muted { color: var(--text); background: var(--panel-light); border: 1px solid var(--line); }
+.button-primary { width: 100%; color: #122335; background: var(--mint); }
+
+.status-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.stat { min-height: 76px; padding: 13px 17px; background: rgba(24, 38, 58, .92); border: 1px solid var(--line); border-radius: 14px; }
+.stat span { display: block; color: var(--muted); font-size: .78rem; }
+.stat strong { display: block; margin-top: 3px; font-family: "Trebuchet MS", "Segoe UI", sans-serif; font-size: 1.35rem; }
+#goldValue { color: var(--gold); }
+#livesValue { color: #ff8290; }
+
+.battle-layout { display: grid; grid-template-columns: minmax(0, 1fr) 292px; gap: 16px; align-items: start; }
+.board-wrap { min-width: 0; overflow: hidden; background: #193b37; border: 1px solid var(--line); border-radius: 17px; }
+canvas { display: block; width: 100%; height: auto; touch-action: manipulation; }
+.board-hint { margin: 0; padding: 11px 15px; color: var(--muted); background: #17283a; font-size: .82rem; }
+.control-panel { display: grid; gap: 17px; }
+.control-panel section { padding: 17px; background: rgba(24, 38, 58, .95); border: 1px solid var(--line); border-radius: 15px; }
+h2 { margin: 0 0 13px; font-size: 1.12rem; }
+.tower-list { display: grid; gap: 8px; }
+.tower-card { display: flex; width: 100%; align-items: center; gap: 10px; padding: 10px; color: var(--text); text-align: left; background: #1c2c42; border: 1px solid transparent; border-radius: 11px; cursor: pointer; transition: transform .15s, filter .15s, border-color .15s; }
+.tower-card.selected { background: #243951; border-color: var(--mint); box-shadow: inset 3px 0 var(--mint); }
+.tower-icon { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border-radius: 10px; font-size: 1.4rem; }
+.arrow-icon { color: #ffe295; background: #66572e; }
+.cannon-icon { color: #ff9a79; background: #633d3d; }
+.frost-icon { color: #9bdfff; background: #315268; }
+.tower-copy { flex: 1; }
+.tower-copy strong, .tower-copy small { display: block; }
+.tower-copy strong { font-size: .88rem; }
+.tower-copy small { margin-top: 2px; color: var(--muted); font-size: .72rem; }
+.tower-key { color: #8293aa; font-size: .75rem; }
+.game-message { min-height: 42px; margin: -2px 0 13px; color: var(--muted); font-size: .88rem; line-height: 1.45; }
+.game-message[data-state="win"] { color: var(--mint); }
+.game-message[data-state="loss"] { color: #ff929c; }
+.help-text { margin: 0; padding: 0 4px; color: var(--muted); font-size: .83rem; line-height: 1.6; }
+.help-text strong { color: var(--text); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 850px) {
+    body { padding: 22px 14px 36px; }
+    .battle-layout { grid-template-columns: 1fr; }
+    .control-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .control-panel > section:first-child { grid-row: span 2; }
+}
+
+@media (max-width: 540px) {
+    body { padding: 14px 10px 28px; }
+    .game-header { align-items: flex-start; margin: 16px 0 18px; }
+    .game-header .button { min-height: 40px; padding: 0 11px; font-size: .82rem; }
+    .intro { max-width: 260px; font-size: .9rem; }
+    .status-bar { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .stat { min-height: 65px; padding: 10px 13px; }
+    .battle-layout { gap: 11px; }
+    .control-panel { grid-template-columns: 1fr; gap: 11px; }
+    .control-panel > section:first-child { grid-row: auto; }
+    .tower-list { grid-template-columns: 1fr; }
+    .board-hint { font-size: .73rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}

@@ -10,38 +10,23 @@ const TILE_TYPES = [
 
 const boardEl = document.getElementById("board");
 const scoreEl = document.getElementById("score");
-const coinsEl = document.getElementById("coins");
 const roundEl = document.getElementById("round");
 const nextTileEl = document.getElementById("nextTile");
 const comboEl = document.getElementById("combo");
 const resetBtn = document.getElementById("resetBtn");
 const soundBtn = document.getElementById("soundBtn");
-const upgradeButtons = document.querySelectorAll(".upgrade-btn");
 const goalStatusEl = document.getElementById("goal-status");
 const goalProgressEl = document.getElementById("goal-progress");
 const goalProgressFillEl = document.getElementById("goal-progress-fill");
 const goalCountEl = document.getElementById("goal-count");
 const GARDEN_GOAL = 300;
 
-const upgradeConfig = {
-  expand: { cost: 20, label: "expandCost" },
-  bonus: { cost: 25, label: "bonusCost" },
-  luck: { cost: 30, label: "luckCost" },
-  auto: { cost: 35, label: "autoCost" }
-};
-
 let board = [];
 let score = 0;
-let coins = 0;
 let round = 1;
 let combo = 1;
 let currentTile = null;
 let soundEnabled = true;
-let expandLevel = 0;
-let bonusLevel = 0;
-let luckLevel = 0;
-let autoLevel = 0;
-let autoTimer = null;
 let goalAchieved = false;
 
 function createEmptyBoard(size = BOARD_SIZE) {
@@ -107,12 +92,11 @@ function playSound(type = "merge") {
 
   const frequencies = {
     merge: [440, 660],
-    buy: [220, 330],
     place: [300]
   };
 
   const notes = frequencies[type] || frequencies.merge;
-  oscillator.type = type === "buy" ? "square" : "triangle";
+  oscillator.type = "triangle";
   oscillator.frequency.setValueAtTime(notes[0], ctx.currentTime);
   if (notes[1]) {
     oscillator.frequency.linearRampToValueAtTime(notes[1], ctx.currentTime + 0.08);
@@ -135,96 +119,6 @@ function getTileValue(tile) {
   return baseValue;
 }
 
-function canBuyUpgrade(cost) {
-  return coins >= cost;
-}
-
-function spendCoins(amount) {
-  coins -= amount;
-  updateStats();
-}
-
-function updateUpgradeButtons() {
-  Object.entries(upgradeConfig).forEach(([key, config]) => {
-    const button = document.querySelector(`.upgrade-btn[data-upgrade="${key}"]`);
-    const cost = getUpgradeCost(key);
-    const text = button.querySelector("strong");
-    text.textContent = String(cost);
-
-    if (coins >= cost) {
-      button.disabled = false;
-    } else {
-      button.disabled = true;
-    }
-  });
-}
-
-function getUpgradeCost(key) {
-  const base = upgradeConfig[key].cost;
-  const level = {
-    expand: expandLevel,
-    bonus: bonusLevel,
-    luck: luckLevel,
-    auto: autoLevel
-  }[key] || 0;
-
-  return base + level * 10;
-}
-
-function buyUpgrade(type) {
-  const cost = getUpgradeCost(type);
-  if (!canBuyUpgrade(cost)) {
-    return;
-  }
-
-  spendCoins(cost);
-  playSound("buy");
-
-  if (type === "expand") {
-    expandLevel += 1;
-    if (board.length < 7) {
-      const newSize = board.length + 1;
-      const currentBoard = board;
-      const nextBoard = createEmptyBoard(newSize);
-
-      for (let row = 0; row < currentBoard.length; row += 1) {
-        for (let col = 0; col < currentBoard.length; col += 1) {
-          nextBoard[row][col] = currentBoard[row][col];
-        }
-      }
-      board = nextBoard;
-    }
-  }
-
-  if (type === "bonus") bonusLevel += 1;
-  if (type === "luck") luckLevel += 1;
-  if (type === "auto") autoLevel += 1;
-
-  if (type === "auto") {
-    startAutoSpawn();
-  }
-
-  updateUpgradeButtons();
-  renderBoard();
-}
-
-function startAutoSpawn() {
-  if (autoTimer) {
-    clearInterval(autoTimer);
-  }
-
-  autoTimer = setInterval(() => {
-    if (autoLevel > 0) {
-      const cell = getRandomCell();
-      if (cell) {
-        board[cell.row][cell.col] = makeTile(randomType(), 1);
-        playSound("place");
-      }
-      renderBoard();
-    }
-  }, 2000 - autoLevel * 180);
-}
-
 function mergeTileFrom(row, col) {
   const sourceTile = board[row][col];
   if (!sourceTile) return false;
@@ -243,7 +137,6 @@ function mergeTileFrom(row, col) {
       board[nextRow][nextCol] = mergedTile;
       board[row][col] = null;
       score += getTileValue(mergedTile) * combo;
-      coins += Math.max(1, mergedLevel + bonusLevel);
       combo = Math.min(8, combo + 1);
       round += 1;
       playSound("merge");
@@ -263,7 +156,6 @@ function mergeTileFrom(row, col) {
 
 function updateStats() {
   scoreEl.textContent = String(score);
-  coinsEl.textContent = String(coins);
   roundEl.textContent = String(round);
   comboEl.textContent = `x${combo}`;
 
@@ -283,7 +175,6 @@ function updateStats() {
     goalStatusEl.textContent = `Erreiche ${GARDEN_GOAL} Punkte, um die Goldene Ernte freizuschalten.`;
   }
 
-  updateUpgradeButtons();
 }
 
 function placeCurrentTile(row, col) {
@@ -293,13 +184,12 @@ function placeCurrentTile(row, col) {
     currentTile = makeTile(randomType(), 1);
   }
 
-  const placedTile = makeTile(currentTile.type, currentTile.level + luckLevel);
+  const placedTile = makeTile(currentTile.type, currentTile.level);
   board[row][col] = placedTile;
   const didMerge = mergeTileFrom(row, col);
 
   if (!didMerge) {
-    score += 2 + luckLevel;
-    coins += 1;
+    score += 2;
   }
 
   currentTile = makeTile(randomType(), 1);
@@ -345,20 +235,10 @@ function renderBoard() {
 function resetGame() {
   board = createEmptyBoard();
   score = 0;
-  coins = 0;
   round = 1;
   combo = 1;
   currentTile = makeTile(randomType(), 1);
-  expandLevel = 0;
-  bonusLevel = 0;
-  luckLevel = 0;
-  autoLevel = 0;
   goalAchieved = false;
-
-  if (autoTimer) {
-    clearInterval(autoTimer);
-    autoTimer = null;
-  }
 
   for (let i = 0; i < 3; i += 1) {
     spawnRandomTile();
@@ -373,13 +253,6 @@ soundBtn.addEventListener("click", () => {
   soundBtn.textContent = soundEnabled ? "🔊" : "🔇";
   soundBtn.setAttribute("aria-label", soundEnabled ? "Sound ausschalten" : "Sound einschalten");
   soundBtn.setAttribute("aria-pressed", String(soundEnabled));
-});
-
-upgradeButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    const type = button.dataset.upgrade;
-    buyUpgrade(type);
-  });
 });
 
 resetBtn.addEventListener("click", resetGame);

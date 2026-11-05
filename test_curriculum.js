@@ -26,6 +26,7 @@ function createLocalStorage(initial = {}) {
 function createElement() {
   const listeners = new Map();
   const classes = new Set();
+  const attributes = new Map();
   return {
     listeners,
     style: {},
@@ -50,6 +51,12 @@ function createElement() {
       const registered = listeners.get(type) || [];
       registered.push(listener);
       listeners.set(type, registered);
+    },
+    setAttribute(name, value) {
+      attributes.set(name, String(value));
+    },
+    getAttribute(name) {
+      return attributes.get(name) || null;
     },
     querySelectorAll() {
       return [];
@@ -102,7 +109,23 @@ function createGameHubContext(storageValues = {}) {
   };
   const platformNotice = createElement();
   const gamesGrid = createElement();
+  const recentList = createElement();
+  const achievementList = createElement();
   const gameCard = createElement();
+  gameCard.dataset.gameHref = "gefangen_unter_wasser/index.html";
+  const cardContainer = createElement();
+  cardContainer.dataset.gameHref = "gefangen_unter_wasser/index.html";
+  const favoriteButton = createElement();
+  favoriteButton.dataset.gameHref = "gefangen_unter_wasser/index.html";
+  const filterButtons = ["all", "action", "puzzle", "strategy", "adventure"].map((filter) => {
+    const button = createElement();
+    button.setAttribute("data-filter", filter);
+    return button;
+  });
+  const searchInput = createElement();
+  const favoritesOnly = createElement();
+  favoritesOnly.setAttribute("aria-pressed", "false");
+  const emptyState = createElement();
   const document = {
     body: createElement(),
     head: createElement(),
@@ -110,11 +133,20 @@ function createGameHubContext(storageValues = {}) {
     getElementById(id) {
       if (id === "platformLockedNotice") return platformNotice;
       if (id === "gamesGrid") return gamesGrid;
+      if (id === "recentList") return recentList;
+      if (id === "achievementList") return achievementList;
+      if (id === "gameSearch") return searchInput;
+      if (id === "favoritesOnly") return favoritesOnly;
+      if (id === "gamesEmptyState") return emptyState;
       return getElement(`#${id}`);
     },
     querySelector: () => null,
     querySelectorAll(selector) {
-      return selector === ".game-card" ? [gameCard] : [];
+      if (selector === ".game-card") return [cardContainer];
+      if (selector === ".game-card-link") return [gameCard];
+      if (selector === ".favorite-toggle") return [favoriteButton];
+      if (selector === ".filter-btn") return filterButtons;
+      return [];
     }
   };
   const localStorage = createLocalStorage(storageValues);
@@ -136,7 +168,22 @@ function createGameHubContext(storageValues = {}) {
     setTimeout() {}
   });
   new vm.Script(gameHubSource, { filename: gameHubPath }).runInContext(context);
-  return { context, gameCard, gamesGrid, localStorage, platformNotice, window };
+  return {
+    context,
+    gameCard,
+    cardContainer,
+    favoriteButton,
+    filterButtons,
+    favoritesOnly,
+    searchInput,
+    emptyState,
+    gamesGrid,
+    recentList,
+    achievementList,
+    localStorage,
+    platformNotice,
+    window
+  };
 }
 
 function test(name, callback) {
@@ -285,14 +332,75 @@ test("playing a game consumes one play and locks the platform at zero", () => {
   assert.equal(finalPlay.window.location.href, "Lern-App/index.html");
 });
 
+test("playing a game records progress and updates recent games and achievements", () => {
+  const gameHub = createGameHubContext({
+    "gamehub-lern-app-unlocked": "true",
+    "gamehub-plays-left": "3"
+  });
+  const launch = gameHub.gameCard.listeners.get("click").at(-1);
+
+  launch({});
+
+  const progress = JSON.parse(gameHub.localStorage.getItem("gamehub-progress-v1"));
+  assert.equal(progress.totalPlays, 1);
+  assert.deepEqual(progress.games["gefangen_unter_wasser/index.html"].count, 1);
+  assert.deepEqual(progress.recent, ["gefangen_unter_wasser/index.html"]);
+  assert.match(gameHub.recentList.innerHTML, /Gefangen Unter Wasser/);
+  assert.match(gameHub.achievementList.innerHTML, /Erster Start/);
+  assert.match(gameHub.achievementList.innerHTML, /1 \/ 1/);
+  assert.equal(gameHub.localStorage.getItem("gamehub-plays-left"), "2");
+
+  launch({});
+  const repeatedProgress = JSON.parse(gameHub.localStorage.getItem("gamehub-progress-v1"));
+  assert.equal(repeatedProgress.totalPlays, 2);
+  assert.equal(repeatedProgress.games["gefangen_unter_wasser/index.html"].count, 2);
+  assert.deepEqual(repeatedProgress.recent, ["gefangen_unter_wasser/index.html"]);
+});
+
+test("saved GameHub progress accepts only valid catalog games and bounded recent entries", () => {
+  const gameHub = createGameHubContext({
+    "gamehub-progress-v1": JSON.stringify({
+      totalPlays: 2.8,
+      games: {
+        "gefangen_unter_wasser/index.html": { count: 1.9, lastPlayed: "2026-01-02T03:04:05.000Z" },
+        "missing/index.html": { count: 7, lastPlayed: "2026-01-02T03:04:05.000Z" },
+        "chess/index.html": { count: -1, lastPlayed: "not a date" }
+      },
+      recent: [
+        "gefangen_unter_wasser/index.html",
+        "gefangen_unter_wasser/index.html",
+        "missing/index.html",
+        "chess/index.html"
+      ]
+    })
+  });
+  const progress = vm.runInContext("gameProgress", gameHub.context);
+
+  assert.equal(progress.totalPlays, 2);
+  assert.deepEqual(JSON.parse(JSON.stringify(progress.games)), {
+    "gefangen_unter_wasser/index.html": {
+      count: 1,
+      lastPlayed: "2026-01-02T03:04:05.000Z"
+    }
+  });
+  assert.deepEqual(JSON.parse(JSON.stringify(progress.recent)), [
+    "gefangen_unter_wasser/index.html",
+    "chess/index.html"
+  ]);
+});
+
 test("the GameHub renders every catalog entry with an existing game and image", () => {
   const { context, gamesGrid } = createGameHubContext();
   const catalog = vm.runInContext("gameCatalog", context);
   const categories = new Set(["action", "puzzle", "strategy", "adventure"]);
 
-  assert.equal(catalog.length, 10);
+  assert.equal(catalog.length, 11);
   assert.equal((gamesGrid.innerHTML.match(/class="game-card"/g) || []).length, catalog.length);
   assert.equal(new Set(catalog.map((game) => game.href)).size, catalog.length);
+  const towerDefense = catalog.find((game) => game.href === "tower_defense/index.html");
+  assert.ok(towerDefense, "Tower Defense should be registered");
+  assert.equal(towerDefense.image, "tower_defense/logo.svg");
+  assert.equal(towerDefense.title, "Tower Defense");
   for (const game of catalog) {
     assert.ok(fs.existsSync(path.join(root, game.href)), `missing game page: ${game.href}`);
     assert.ok(fs.existsSync(path.join(root, game.image)), `missing game image: ${game.image}`);
@@ -301,6 +409,46 @@ test("the GameHub renders every catalog entry with an existing game and image", 
       assert.ok(categories.has(category), `${game.title} has unsupported category ${category}`);
     }
   }
+});
+
+test("search, genre and favorites filters can be combined", () => {
+  const { cardContainer, favoritesOnly, filterButtons, searchInput, emptyState } = createGameHubContext();
+  searchInput.value = "unter wasser";
+  searchInput.listeners.get("input")[0]();
+  assert.equal(cardContainer.style.display, "flex");
+
+  const actionFilter = filterButtons.find((button) => button.getAttribute("data-filter") === "action");
+  actionFilter.listeners.get("click")[0]();
+  assert.equal(cardContainer.style.display, "none");
+
+  const adventureFilter = filterButtons.find((button) => button.getAttribute("data-filter") === "adventure");
+  adventureFilter.listeners.get("click")[0]();
+  assert.equal(cardContainer.style.display, "flex");
+
+  favoritesOnly.listeners.get("click")[0]();
+  assert.equal(cardContainer.style.display, "none");
+  assert.equal(emptyState.hidden, false);
+});
+
+test("favoriting is accessible, persists locally, and consumes no play", () => {
+  const gameHub = createGameHubContext({
+    "gamehub-lern-app-unlocked": "true",
+    "gamehub-plays-left": "2"
+  });
+  const { favoriteButton, gamesGrid, localStorage } = gameHub;
+  favoriteButton.listeners.get("click")[0]();
+
+  assert.equal(localStorage.getItem("gamehub-favorites-v1"), JSON.stringify(["gefangen_unter_wasser/index.html"]));
+  assert.equal(favoriteButton.getAttribute("aria-pressed"), "true");
+  assert.match(favoriteButton.getAttribute("aria-label"), /Aus Favoriten entfernen: Gefangen Unter Wasser/);
+  assert.equal(localStorage.getItem("gamehub-plays-left"), "2");
+  assert.equal(localStorage.getItem("gamehub-progress-v1"), null);
+  assert.match(gamesGrid.innerHTML, /<\/a>\s*<button class="favorite-toggle"/);
+
+  const restored = createGameHubContext({
+    "gamehub-favorites-v1": JSON.stringify(["gefangen_unter_wasser/index.html"])
+  });
+  assert.match(restored.gamesGrid.innerHTML, /aria-pressed="true"/);
 });
 
 function useDeterministicRandom(context, seed) {
@@ -328,8 +476,8 @@ function assertNumericQuestionMatchesTask(skill, question) {
       calculate: ([, , second, third]) => Number(third) + (Number(third) - Number(second))
     },
     shapes: {
-      expression: /Wie viele (?:Ecken|Seiten) hat ein (Dreieck|Viereck|Fünfeck)\?/,
-      calculate: (match) => ({ Dreieck: 3, Viereck: 4, Fünfeck: 5 })[match[1]]
+      expression: /Wie viele (?:Ecken|Seiten) hat ein (Dreieck|Viereck|Fünfeck|Sechseck)\?/,
+      calculate: (match) => ({ Dreieck: 3, Viereck: 4, Fünfeck: 5, Sechseck: 6 })[match[1]]
     },
     multiply: {
       expression: /Wie viel ist (\d+) × (\d+)\?/,
@@ -417,6 +565,29 @@ function assertNumericQuestionMatchesTask(skill, question) {
     );
   }
 }
+
+test("every lesson offers eight distinct exercises for each subject and grade", () => {
+  const { context } = createLearningContext();
+  useDeterministicRandom(context, 0x8e71c1);
+  const curricula = vm.runInContext("[curriculum, germanCurriculum]", context);
+  const exerciseCount = vm.runInContext("exercisesPerLesson", context);
+
+  for (const [subjectIndex, curriculum] of curricula.entries()) {
+    const subject = subjectIndex === 0 ? "math" : "german";
+    for (const [grade, topics] of Object.entries(curriculum)) {
+      vm.runInContext(`progress.subject = "${subject}"; progress.grade = ${Number(grade)};`, context);
+      for (const [topicIndex, topic] of topics.entries()) {
+        const questions = context.makeUniqueQuestions(topic, exerciseCount);
+        assert.equal(questions.length, exerciseCount, `${subject} grade ${grade} topic ${topicIndex} has the wrong exercise count`);
+        assert.equal(
+          new Set(questions.map((question) => question.text)).size,
+          questions.length,
+          `${subject} grade ${grade} topic ${topicIndex} contains duplicate exercises`
+        );
+      }
+    }
+  }
+});
 
 test("generated questions have valid shapes and math answers match every curriculum task", () => {
   const { context } = createLearningContext();

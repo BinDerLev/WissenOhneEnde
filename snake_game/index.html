@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="../gamehub-nav.css">
 </head>
 <body>
-    <a class="gamehub-back-link" href="../index.html">← Zurück zum GameHub</a>
+    <a class="gamehub-back-link" href="../index.html">← Zurück zum LernLabor</a>
     <div class="container">
         <header class="topbar">
             <div class="title-wrap">
@@ -25,10 +25,6 @@
                 <div class="score-box">
                     <span>High Score</span>
                     <strong id="highScore">0</strong>
-                </div>
-                <div class="score-box">
-                    <span>Münzen</span>
-                    <strong id="coinCount">0</strong>
                 </div>
                 <div class="score-box">
                     <span>Level</span>
@@ -59,19 +55,6 @@
                 <div class="speed-value"><span id="speedValue">150 ms</span></div>
             </div>
 
-            <div class="settings-block">
-                <h2>Upgrades</h2>
-                <div class="upgrade-grid">
-                    <button class="upgrade-btn" data-upgrade="gold" type="button">Goldbonus <strong id="goldCost">25</strong></button>
-                    <button class="upgrade-btn" data-upgrade="shield" type="button">Schild <strong id="shieldCost">30</strong></button>
-                    <button class="upgrade-btn" data-upgrade="tempo" type="button">Tempo <strong id="tempoCost">20</strong></button>
-                </div>
-            </div>
-
-            <div class="settings-block">
-                <h2>Aktiv</h2>
-                <div id="activePowerUp" class="active-powerup">keine</div>
-            </div>
         </div>
 
         <canvas id="gameCanvas" width="400" height="400" role="img" aria-label="Snake-Spielfeld" tabindex="0"></canvas>
@@ -87,15 +70,19 @@
 
         <div class="controls">
             <button id="startBtn" class="btn btn-start" type="button">Start Game</button>
+            <button id="dailyChallengeBtn" class="btn btn-challenge" type="button">Tages-Challenge</button>
             <button id="pauseBtn" class="btn btn-pause" type="button" disabled>Pause</button>
             <button id="resetBtn" class="btn btn-reset" type="button">Neustart</button>
         </div>
+
+        <div id="dailyStatus" class="daily-status" aria-live="polite"></div>
 
         <div class="instructions">
             <h3>Anleitung:</h3>
             <p>🎮 Nutze die Richtungstasten auf dem Bildschirm, die Pfeiltasten oder WASD.</p>
             <p>🍏 Iss das gewählte Obst, um Punkte zu sammeln.</p>
-            <p>⚡ Sammle Power-Ups für Schild, Langsamkeit oder Doppelpunkte.</p>
+            <p>📅 In der Tages-Challenge musst du 10 Äpfel sammeln und die Hindernisse meiden.</p>
+            <p>⚙️ Stelle im Menü Obst und Spieltempo ein.</p>
             <p>⚠️ Triff nicht die Wand oder dich selbst.</p>
         </div>
     </div>

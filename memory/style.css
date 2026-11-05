@@ -40,7 +40,8 @@ h1 { margin: 0; color: #202945; font-size: clamp(2.2rem, 8vw, 3.5rem); letter-sp
 
 .game-toolbar { display: flex; align-items: end; justify-content: space-between; gap: 14px; }
 .game-toolbar label { display: grid; gap: 6px; color: #58627c; font-size: .86rem; font-weight: 700; }
-select, .restart-button {
+.game-actions { display: flex; gap: 8px; }
+select, .daily-button, .restart-button {
   min-height: 46px;
   padding: 0 14px;
   border: 1px solid #d5dbee;
@@ -48,6 +49,8 @@ select, .restart-button {
   background: #fff;
   color: #283452;
 }
+.daily-button { border-color: #5a67c7; color: #4a56b3; font-weight: 800; cursor: pointer; }
+.daily-button[aria-pressed="true"] { background: #eef0ff; }
 .restart-button { border-color: #5a67c7; background: #5a67c7; color: #fff; font-weight: 800; cursor: pointer; }
 .restart-button:hover { background: #454fa8; }
 button:focus-visible, select:focus-visible { outline: 3px solid #f0ad55; outline-offset: 3px; }
@@ -56,6 +59,7 @@ button:focus-visible, select:focus-visible { outline: 3px solid #f0ad55; outline
 .stats > div { display: grid; gap: 4px; padding: 10px; border-radius: 12px; background: #f1f3fc; text-align: center; }
 .stats span { color: #66708a; font-size: .75rem; }
 .stats strong { color: #29345a; font-size: 1rem; }
+.daily-status { margin: 0; padding: 10px 12px; border-radius: 10px; background: #f5f6ff; color: #58627c; font-size: .85rem; text-align: center; }
 .game-message { min-height: 1.5em; margin: 14px 0; color: #475593; font-weight: 700; text-align: center; }
 
 .game-board {
@@ -91,7 +95,8 @@ button:focus-visible, select:focus-visible { outline: 3px solid #f0ad55; outline
 @media (max-width: 480px) {
   body { padding-inline: 10px; }
   .game-toolbar { align-items: stretch; flex-direction: column; }
-  .restart-button { width: 100%; }
+  .game-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .game-actions button { padding-inline: 8px; }
   .stats { gap: 6px; }
   .stats > div { padding: 8px 4px; }
   .stats strong { font-size: .88rem; }

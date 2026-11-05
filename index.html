@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GameHub - Deine Gaming Plattform</title>
+    <title>LernLabor – Lernen und Spielen</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/svg+xml"
           href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='90'>🎮</text></svg>">
@@ -15,7 +15,7 @@
     <div class="nav-container">
         <div class="nav-logo">
             <span class="logo-icon">🎮</span>
-            <span class="logo-text">GameHub</span>
+            <span class="logo-text">LernLabor</span>
         </div>
         <ul class="nav-menu">
             <li><a href="#home" class="nav-link">Home</a></li>
@@ -32,11 +32,11 @@
 <header class="hero" id="home">
     <div class="hero-content">
         <h1 class="hero-title">
-            <span class="hero-text-animated">GAME</span>HUB
+            <span class="hero-text-animated">Lern</span>Labor
         </h1>
-        <p class="hero-subtitle">Entdecke & Spiele die besten Spiele online</p>
-        <p class="hero-description">Von Klassikern bis zu neuen Abenteuern - alles kostenlos direkt im Browser!</p>
-        <a href="#games" class="hero-btn">Spiele Entdecken</a>
+        <p class="hero-subtitle">Lernen, entdecken und spielen</p>
+        <p class="hero-description">Übe Mathe und Deutsch und entdecke spannende Spiele – alles kostenlos direkt im Browser!</p>
+        <a href="Lern-App/index.html" class="hero-btn">Jetzt lernen</a>
     </div>
     <div class="hero-visual">
         <div class="game-controller"></div>
@@ -66,6 +66,10 @@
 <section class="filter-section">
     <div class="container">
         <h2>Wähle dein Lieblingsgenre</h2>
+        <div class="game-search">
+            <label for="gameSearch">Spiele suchen</label>
+            <input id="gameSearch" type="search" autocomplete="off" placeholder="Titel, Genre oder Stichwort">
+        </div>
         <div class="filter-buttons" role="group" aria-label="Spiele nach Genre filtern">
             <button class="filter-btn active" data-filter="all" aria-pressed="true">Alle Spiele</button>
             <button class="filter-btn" data-filter="action" aria-pressed="false">Action</button>
@@ -73,6 +77,7 @@
             <button class="filter-btn" data-filter="strategy" aria-pressed="false">Strategie</button>
             <button class="filter-btn" data-filter="adventure" aria-pressed="false">Abenteuer</button>
         </div>
+        <button class="favorites-filter" id="favoritesOnly" type="button" aria-pressed="false">♡ Nur Favoriten</button>
     </div>
 </section>
 <!-- Games Grid -->
@@ -86,10 +91,11 @@
         </div>
         <div class="games-grid" id="gamesGrid">
         </div>
+        <p class="games-empty" id="gamesEmptyState" role="status" hidden>Keine Spiele entsprechen deiner Suche.</p>
     </div>
 </section>
 <footer class="footer">
-    <p>&copy; 2026 GameHub | Alle Spiele sind kostenlos | Erstellt mit ❤️ und 🎮</p>
+    <p>&copy; 2026 LernLabor | Lernen und Spielen kostenlos im Browser | Erstellt mit ❤️ und 🎮</p>
 </footer>
 <script src="script.js"></script>
 

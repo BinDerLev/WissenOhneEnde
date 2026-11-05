@@ -11,18 +11,11 @@ const fruitConfig = {
     orange: { icon: '🍊', color: '#f4a14a', points: 40, glow: '#ffc07a' }
 };
 
-const upgradeCosts = {
-    gold: 25,
-    shield: 30,
-    tempo: 20
-};
-
 let snake = [{ x: 10, y: 10 }];
 let food = { x: 15, y: 15, type: 'apple' };
 let direction = { x: 1, y: 0 };
 let nextDirection = { x: 1, y: 0 };
 let score = 0;
-let coins = Number(localStorage.getItem('snakeCoins') || 0);
 let level = Number(localStorage.getItem('snakeLevel') || 1);
 let highScore = Number(localStorage.getItem('snakeHighScore') || 0);
 let gameRunning = false;
@@ -33,17 +26,17 @@ let lastFrameTime = 0;
 let accumulator = 0;
 let moveInterval = currentSpeed;
 let prevSnake = snake.map(s => ({ ...s }));
-let activePowerUp = null;
-let powerUpTimer = 0;
-let goldBonusLevel = Number(localStorage.getItem('snakeGoldBonus') || 0);
-let shieldLevel = Number(localStorage.getItem('snakeShieldLevel') || 0);
-let tempoLevel = Number(localStorage.getItem('snakeTempoLevel') || 0);
+let challengeMode = false;
+let challengeDate = null;
+let challengeConfig = null;
+let dailyFoodsEaten = 0;
+let dailyCompleted = false;
 
 const scoreDisplay = document.getElementById('score');
 const highScoreDisplay = document.getElementById('highScore');
-const coinDisplay = document.getElementById('coinCount');
 const levelDisplay = document.getElementById('levelDisplay');
 const startBtn = document.getElementById('startBtn');
+const dailyChallengeBtn = document.getElementById('dailyChallengeBtn');
 const pauseBtn = document.getElementById('pauseBtn');
 const resetBtn = document.getElementById('resetBtn');
 const settingsToggle = document.getElementById('settingsToggle');
@@ -51,16 +44,13 @@ const settingsPanel = document.getElementById('settingsPanel');
 const speedSlider = document.getElementById('speedSlider');
 const speedValue = document.getElementById('speedValue');
 const recordBanner = document.getElementById('recordBanner');
+const dailyStatus = document.getElementById('dailyStatus');
 const fruitButtons = [...document.querySelectorAll('.fruit-option')];
-const upgradeButtons = [...document.querySelectorAll('.upgrade-btn')];
-const activePowerUpDisplay = document.getElementById('activePowerUp');
 
 highScoreDisplay.textContent = highScore;
-coinDisplay.textContent = coins;
 levelDisplay.textContent = level;
 updateSpeedLabel();
-updateUpgradeCosts();
-updatePowerUpDisplay();
+updateDailyStatus();
 
 speedSlider.addEventListener('input', (event) => {
     currentSpeed = Number(event.target.value);
@@ -92,18 +82,12 @@ fruitButtons.forEach((button) => {
     });
 });
 
-upgradeButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-        const type = button.dataset.upgrade;
-        buyUpgrade(type);
-    });
-});
-
 document.addEventListener('keydown', handleKeyPress);
 document.querySelectorAll('.touch-controls [data-direction]').forEach((button) => {
     button.addEventListener('click', () => setDirection(button.dataset.direction));
 });
-startBtn.addEventListener('click', startGame);
+startBtn.addEventListener('click', () => startGame(false));
+dailyChallengeBtn.addEventListener('click', startDailyChallenge);
 pauseBtn.addEventListener('click', togglePause);
 resetBtn.addEventListener('click', resetGame);
 
@@ -144,68 +128,116 @@ function updateSpeedLabel() {
     speedValue.textContent = `${currentSpeed} ms`;
 }
 
-function updateUpgradeCosts() {
-    document.getElementById('goldCost').textContent = String(upgradeCosts.gold + goldBonusLevel * 10);
-    document.getElementById('shieldCost').textContent = String(upgradeCosts.shield + shieldLevel * 12);
-    document.getElementById('tempoCost').textContent = String(upgradeCosts.tempo + tempoLevel * 10);
+function getLocalDateKey(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
-function updatePowerUpDisplay() {
-    activePowerUpDisplay.textContent = activePowerUp || 'keine';
+function createDailyConfig(dateKey) {
+    let seed = 2166136261;
+    for (const character of dateKey) {
+        seed ^= character.charCodeAt(0);
+        seed = Math.imul(seed, 16777619);
+    }
+
+    let randomState = seed >>> 0;
+    const random = () => {
+        randomState += 0x6D2B79F5;
+        let value = randomState;
+        value = Math.imul(value ^ (value >>> 15), value | 1);
+        value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+        return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+    };
+
+    const obstacles = [];
+    while (obstacles.length < 12) {
+        const candidate = {
+            x: Math.floor(random() * TILE_COUNT),
+            y: Math.floor(random() * TILE_COUNT)
+        };
+        const nearStart = Math.abs(candidate.x - 10) <= 2 && Math.abs(candidate.y - 10) <= 2;
+        const duplicate = obstacles.some(cell => cell.x === candidate.x && cell.y === candidate.y);
+        if (!nearStart && !duplicate) obstacles.push(candidate);
+    }
+
+    return { obstacles, random, goal: 10 };
+}
+
+function getDailyRecords() {
+    try {
+        const records = JSON.parse(localStorage.getItem('snakeDailyRecords') || '{}');
+        return records && typeof records === 'object' && !Array.isArray(records) ? records : {};
+    } catch {
+        return {};
+    }
+}
+
+function updateDailyStatus() {
+    const dateKey = challengeDate || getLocalDateKey();
+    const dailyConfigForDisplay = challengeConfig || createDailyConfig(dateKey);
+    const record = getDailyRecords()[dateKey] || {};
+    const completion = record.completed ? 'Abgeschlossen ✓' : 'Noch offen';
+    const mode = challengeMode ? 'Aktuelle Runde' : 'Heutige Challenge';
+    const progress = challengeMode ? ` | Fortschritt: ${dailyFoodsEaten}/${dailyConfigForDisplay.goal}` : '';
+    dailyStatus.textContent = `📅 ${mode} · ${dateKey} | Ziel: ${dailyConfigForDisplay.goal} Äpfel | 12 Hindernisse${progress} | Tagesrekord: ${Number(record.bestScore) || 0} Punkte | ${completion}`;
+}
+
+function saveDailyResult(completed = false) {
+    if (!challengeMode || !challengeDate) return;
+    const records = getDailyRecords();
+    const existing = records[challengeDate];
+    const record = existing && typeof existing === 'object' ? existing : { bestScore: 0, completed: false };
+    record.bestScore = Math.max(Number(record.bestScore) || 0, score);
+    record.completed = Boolean(record.completed || completed);
+    records[challengeDate] = record;
+    localStorage.setItem('snakeDailyRecords', JSON.stringify(records));
+    updateDailyStatus();
 }
 
 function saveProgress() {
-    localStorage.setItem('snakeCoins', String(coins));
     localStorage.setItem('snakeLevel', String(level));
     localStorage.setItem('snakeHighScore', String(highScore));
-    localStorage.setItem('snakeGoldBonus', String(goldBonusLevel));
-    localStorage.setItem('snakeShieldLevel', String(shieldLevel));
-    localStorage.setItem('snakeTempoLevel', String(tempoLevel));
 }
 
-function buyUpgrade(type) {
-    const costs = {
-        gold: upgradeCosts.gold + goldBonusLevel * 10,
-        shield: upgradeCosts.shield + shieldLevel * 12,
-        tempo: upgradeCosts.tempo + tempoLevel * 10
-    };
-
-    const cost = costs[type];
-    if (coins < cost) return;
-
-    coins -= cost;
-    coinDisplay.textContent = coins;
-
-    if (type === 'gold') goldBonusLevel += 1;
-    if (type === 'shield') shieldLevel += 1;
-    if (type === 'tempo') tempoLevel += 1;
-
-    saveProgress();
-    updateUpgradeCosts();
-    activatePowerUp(type === 'tempo' ? 'tempo' : type === 'shield' ? 'shield' : 'gold');
-}
-
-function activatePowerUp(type) {
-    activePowerUp = type;
-    updatePowerUpDisplay();
-
-    if (type === 'shield') {
-        powerUpTimer = 6000;
-    } else if (type === 'tempo') {
-        powerUpTimer = 5000;
-    } else {
-        powerUpTimer = 7000;
-    }
-}
-
-function startGame() {
+function startGame(isDailyChallenge = false) {
     if (!gameRunning) {
+        if (!isDailyChallenge && challengeMode) {
+            challengeMode = false;
+            challengeDate = null;
+            challengeConfig = null;
+            dailyFoodsEaten = 0;
+            dailyCompleted = false;
+            resetGame();
+        }
+        challengeMode = isDailyChallenge;
+        if (!challengeMode) {
+            challengeDate = null;
+            challengeConfig = null;
+            dailyFoodsEaten = 0;
+            dailyCompleted = false;
+        }
+        updateDailyStatus();
         gameRunning = true;
         gamePaused = false;
         startBtn.disabled = true;
+        dailyChallengeBtn.disabled = true;
         pauseBtn.disabled = false;
         restartLoop();
     }
+}
+
+function startDailyChallenge() {
+    if (gameRunning) return;
+    challengeMode = true;
+    challengeDate = getLocalDateKey();
+    challengeConfig = createDailyConfig(challengeDate);
+    dailyFoodsEaten = 0;
+    dailyCompleted = false;
+    score = 0;
+    resetGame();
+    startGame(true);
 }
 
 function restartLoop() {
@@ -233,6 +265,7 @@ function togglePause() {
 }
 
 function resetGame() {
+    if (challengeMode && (gameRunning || score > 0)) saveDailyResult(dailyCompleted);
     if (rafId) {
         cancelAnimationFrame(rafId);
         rafId = null;
@@ -245,14 +278,14 @@ function resetGame() {
     gameRunning = false;
     gamePaused = false;
     startBtn.disabled = false;
+    dailyChallengeBtn.disabled = false;
     pauseBtn.disabled = true;
     pauseBtn.textContent = 'Pause';
-    activePowerUp = null;
-    powerUpTimer = 0;
-    updatePowerUpDisplay();
     hideRecordBanner();
+    if (challengeMode && challengeDate) challengeConfig = createDailyConfig(challengeDate);
     generateFood();
     prevSnake = snake.map(s => ({ ...s }));
+    updateDailyStatus();
     draw();
 }
 
@@ -268,17 +301,6 @@ function updateLevel() {
     }
 }
 
-function applyPowerUpEffects() {
-    if (!activePowerUp) return;
-
-    if (powerUpTimer > 0) {
-        powerUpTimer -= moveInterval;
-    } else {
-        activePowerUp = null;
-        updatePowerUpDisplay();
-    }
-}
-
 function performTick() {
     if (gamePaused || !gameRunning) return;
 
@@ -288,27 +310,16 @@ function performTick() {
     const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
 
     if (head.x < 0 || head.x >= TILE_COUNT || head.y < 0 || head.y >= TILE_COUNT) {
-        if (shieldLevel > 0 && activePowerUp === 'shield') {
-            activePowerUp = null;
-            updatePowerUpDisplay();
-            snake = [{ x: 10, y: 10 }];
-            direction = { x: 1, y: 0 };
-            nextDirection = { x: 1, y: 0 };
-            return;
-        }
         endGame();
         return;
     }
 
     if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-        if (shieldLevel > 0 && activePowerUp === 'shield') {
-            activePowerUp = null;
-            updatePowerUpDisplay();
-            snake = [{ x: 10, y: 10 }];
-            direction = { x: 1, y: 0 };
-            nextDirection = { x: 1, y: 0 };
-            return;
-        }
+        endGame();
+        return;
+    }
+
+    if (challengeMode && challengeConfig.obstacles.some(cell => cell.x === head.x && cell.y === head.y)) {
         endGame();
         return;
     }
@@ -317,12 +328,9 @@ function performTick() {
 
     if (head.x === food.x && head.y === food.y) {
         const points = fruitConfig[food.type].points;
-        const multiplier = activePowerUp === 'gold' ? 2 : 1;
-        const gained = points * multiplier;
-        score += gained;
+        score += points;
         scoreDisplay.textContent = score;
-        coins += 1 + goldBonusLevel;
-        coinDisplay.textContent = coins;
+        if (challengeMode) dailyFoodsEaten += 1;
         generateFood();
         updateLevel();
 
@@ -334,7 +342,11 @@ function performTick() {
         snake.pop();
     }
 
-    applyPowerUpEffects();
+    if (challengeMode) updateDailyStatus();
+    if (challengeMode && dailyFoodsEaten >= challengeConfig.goal) {
+        dailyCompleted = true;
+        endGame();
+    }
 }
 
 function gameLoopRAF(timestamp) {
@@ -360,16 +372,21 @@ function gameLoopRAF(timestamp) {
 }
 
 function generateFood() {
+    if (challengeMode && !challengeConfig) {
+        challengeConfig = createDailyConfig(challengeDate || getLocalDateKey());
+    }
     let newFood;
     let validPosition = false;
 
     while (!validPosition) {
+        const random = challengeMode ? challengeConfig.random : Math.random;
         newFood = {
-            x: Math.floor(Math.random() * TILE_COUNT),
-            y: Math.floor(Math.random() * TILE_COUNT),
-            type: food.type || 'apple'
+            x: Math.floor(random() * TILE_COUNT),
+            y: Math.floor(random() * TILE_COUNT),
+            type: challengeMode ? 'apple' : food.type || 'apple'
         };
-        validPosition = !snake.some(segment => segment.x === newFood.x && segment.y === newFood.y);
+        const isObstacle = challengeMode && challengeConfig.obstacles.some(cell => cell.x === newFood.x && cell.y === newFood.y);
+        validPosition = !isObstacle && !snake.some(segment => segment.x === newFood.x && segment.y === newFood.y);
     }
 
     food = newFood;
@@ -396,6 +413,18 @@ function drawBoard() {
         ctx.moveTo(0, i * GRID_SIZE);
         ctx.lineTo(canvas.width, i * GRID_SIZE);
         ctx.stroke();
+    }
+
+    if (challengeMode && challengeConfig) {
+        ctx.fillStyle = '#6f6260';
+        challengeConfig.obstacles.forEach(cell => {
+            const x = cell.x * GRID_SIZE;
+            const y = cell.y * GRID_SIZE;
+            ctx.fillRect(x + 2, y + 2, GRID_SIZE - 4, GRID_SIZE - 4);
+            ctx.fillStyle = '#a89891';
+            ctx.fillRect(x + 5, y + 5, GRID_SIZE - 10, GRID_SIZE - 10);
+            ctx.fillStyle = '#6f6260';
+        });
     }
 }
 
@@ -482,6 +511,7 @@ function endGame() {
     gameRunning = false;
     gamePaused = false;
     startBtn.disabled = false;
+    dailyChallengeBtn.disabled = false;
     pauseBtn.disabled = true;
     pauseBtn.textContent = 'Pause';
 
@@ -496,6 +526,7 @@ function endGame() {
         hideRecordBanner();
     }
 
+    if (challengeMode) saveDailyResult(dailyCompleted);
     saveProgress();
     draw();
 }

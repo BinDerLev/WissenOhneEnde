@@ -7,6 +7,9 @@ const dropButton = document.querySelector("#drop-button");
 const startButton = document.querySelector("#start-button");
 const modeSelect = document.querySelector("#game-mode");
 const targetScoreDisplay = document.querySelector("#target-score");
+const dailyDateDisplay = document.querySelector("#daily-challenge-date");
+const dailyConfigDisplay = document.querySelector("#daily-challenge-config");
+const dailyStatusDisplay = document.querySelector("#daily-challenge-status");
 
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
@@ -22,8 +25,84 @@ let gameState = "ready";
 let animationFrame = 0;
 let currentMode = "classic";
 const CHALLENGE_TARGET = 12;
+const dailyDateKey = getLocalDateKey();
+const dailyConfig = createDailyConfig(dailyDateKey);
+let dailyRandom = null;
+let dailyRecord = loadDailyRecord();
 
 bestScoreDisplay.textContent = String(bestScore);
+dailyDateDisplay.textContent = `Tages-Challenge · ${formatDailyDate(dailyDateKey)}`;
+dailyConfigDisplay.textContent = `Fester Tagesaufbau: Startbreite ${dailyConfig.startingWidth} · Tempo ${dailyConfig.speed.toFixed(1).replace(".", ",")}`;
+updateDailyStatus();
+
+function getLocalDateKey() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+function formatDailyDate(dateKey) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Intl.DateTimeFormat("de-DE", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  }).format(new Date(year, month - 1, day));
+}
+
+function createSeededRandom(seedText) {
+  let seed = 2166136261;
+  for (let index = 0; index < seedText.length; index += 1) {
+    seed ^= seedText.charCodeAt(index);
+    seed = Math.imul(seed, 16777619);
+  }
+  return function nextRandom() {
+    seed += 0x6d2b79f5;
+    let value = seed;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function createDailyConfig(dateKey) {
+  const random = createSeededRandom(dateKey);
+  return {
+    startingWidth: 170 + Math.floor(random() * 41),
+    speed: Number((2.8 + random() * 0.8).toFixed(1)),
+    startingX: random(),
+    startingDirection: random() < 0.5 ? -1 : 1
+  };
+}
+
+function dailyStorageKey() {
+  return `sky-stack-daily-${dailyDateKey}`;
+}
+
+function loadDailyRecord() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(dailyStorageKey()) || "{}");
+    return {
+      bestScore: Number.isInteger(stored.bestScore) && stored.bestScore >= 0 ? stored.bestScore : 0,
+      completed: stored.completed === true
+    };
+  } catch (error) {
+    console.warn("Sky-Stack-Tagesrekord konnte nicht geladen werden.", error);
+    return { bestScore: 0, completed: false };
+  }
+}
+
+function saveDailyRecord() {
+  try {
+    localStorage.setItem(dailyStorageKey(), JSON.stringify(dailyRecord));
+  } catch (error) {
+    console.warn("Sky-Stack-Tagesrekord konnte nicht gespeichert werden.", error);
+  }
+}
+
+function updateDailyStatus(active = false) {
+  const status = dailyRecord.completed ? "Geschafft" : active ? "Läuft" : "Offen";
+  dailyStatusDisplay.textContent = `Status: ${status} · Tagesrekord: ${dailyRecord.bestScore}/${CHALLENGE_TARGET}`;
+}
 
 function loadBestScore() {
   try {
@@ -47,20 +126,26 @@ function startGame() {
   cancelAnimationFrame(animationFrame);
   currentMode = modeSelect.value;
   score = 0;
-  const startingWidth = currentMode === "challenge" ? 190 : 240;
+  const startingWidth = currentMode === "daily" ? dailyConfig.startingWidth : currentMode === "challenge" ? 190 : 240;
   blocks = [{ x: 200, width: startingWidth, color: "#7185ff" }];
+  const isDaily = currentMode === "daily";
+  dailyRandom = isDaily ? createSeededRandom(dailyDateKey) : null;
+  const dailyStartingX = 28 + Math.floor(dailyConfig.startingX * (WIDTH - 56 - startingWidth));
   movingBlock = {
-    x: 0,
+    x: isDaily ? dailyStartingX : 0,
     width: blocks[0].width,
-    direction: 1,
-    speed: currentMode === "challenge" ? 3.1 : 2.3
+    direction: isDaily ? dailyConfig.startingDirection : 1,
+    speed: isDaily ? dailyConfig.speed : currentMode === "challenge" ? 3.1 : 2.3
   };
   gameState = "playing";
   scoreDisplay.textContent = "0";
-  targetScoreDisplay.textContent = currentMode === "challenge" ? String(CHALLENGE_TARGET) : "–";
-  gameMessage.textContent = currentMode === "challenge"
-    ? `Setze 12 Blöcke möglichst genau aufeinander.`
+  targetScoreDisplay.textContent = currentMode === "challenge" || isDaily ? String(CHALLENGE_TARGET) : "–";
+  gameMessage.textContent = isDaily
+    ? `Die Tages-Challenge für ${formatDailyDate(dailyDateKey)}: Setze 12 Blöcke.`
+    : currentMode === "challenge"
+      ? `Setze 12 Blöcke möglichst genau aufeinander.`
     : "Setze den Block möglichst genau auf den Turm.";
+  if (isDaily) updateDailyStatus(true);
   dropButton.disabled = false;
   modeSelect.disabled = true;
   startButton.textContent = "Neu starten";
@@ -113,18 +198,27 @@ function dropBlock() {
     saveBestScore();
   }
 
-  if (currentMode === "challenge" && score >= CHALLENGE_TARGET) {
+  if (currentMode === "daily" && score > dailyRecord.bestScore) {
+    dailyRecord.bestScore = score;
+    saveDailyRecord();
+    updateDailyStatus(true);
+  }
+
+  if ((currentMode === "challenge" || currentMode === "daily") && score >= CHALLENGE_TARGET) {
     winChallenge();
     return;
   }
 
-  const speed = currentMode === "challenge"
-    ? Math.min(6.4, 3.1 + score * 0.18)
+  const speed = currentMode === "daily"
+    ? Math.min(6.4, dailyConfig.speed + score * 0.18)
+    : currentMode === "challenge"
+      ? Math.min(6.4, 3.1 + score * 0.18)
     : Math.min(5.2, 2.3 + score * 0.12);
+  const random = currentMode === "daily" ? dailyRandom : Math.random;
   movingBlock = {
-    x: Math.random() < 0.5 ? 28 : WIDTH - 28 - overlap,
+    x: random() < 0.5 ? 28 : WIDTH - 28 - overlap,
     width: overlap,
-    direction: Math.random() < 0.5 ? 1 : -1,
+    direction: random() < 0.5 ? 1 : -1,
     speed
   };
   if (movingBlock.x <= 28) movingBlock.direction = 1;
@@ -141,6 +235,7 @@ function endGame() {
   gameMessage.textContent = score
     ? `Der Turm ist ${score} Blöcke hoch. Versuch es gleich noch einmal!`
     : "Knapp daneben! Starte neu und versuche es noch einmal.";
+  if (currentMode === "daily") updateDailyStatus();
   draw();
 }
 
@@ -150,7 +245,15 @@ function winChallenge() {
   dropButton.disabled = true;
   modeSelect.disabled = false;
   startButton.textContent = "Challenge wiederholen";
-  gameMessage.textContent = `Geschafft! Du hast den 12. Block gesetzt und die Präzisions-Challenge gewonnen.`;
+  if (currentMode === "daily") {
+    dailyRecord.completed = true;
+    dailyRecord.bestScore = Math.max(dailyRecord.bestScore, score);
+    saveDailyRecord();
+    updateDailyStatus();
+    gameMessage.textContent = `Geschafft! Du hast die Tages-Challenge für ${formatDailyDate(dailyDateKey)} gewonnen.`;
+  } else {
+    gameMessage.textContent = `Geschafft! Du hast den 12. Block gesetzt und die Präzisions-Challenge gewonnen.`;
+  }
   draw();
 }
 
@@ -231,6 +334,7 @@ function draw() {
 
 dropButton.addEventListener("click", dropBlock);
 startButton.addEventListener("click", startGame);
+modeSelect.addEventListener("change", () => updateDailyStatus());
 canvas.addEventListener("pointerdown", dropBlock);
 document.addEventListener("keydown", (event) => {
   if (

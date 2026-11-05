@@ -135,10 +135,23 @@ const gameCatalog = [
         score: '5/5',
         categories: ['strategy'],
         tags: ['Strategie', 'Klassiker']
+    },
+    {
+        href: 'tower_defense/index.html',
+        image: 'tower_defense/logo.svg',
+        imageAlt: 'Tower Defense',
+        title: 'Tower Defense',
+        type: 'Strategie • Action',
+        description: 'Verteidige deinen Weg mit clever platzierten Türmen gegen immer stärkere Gegnerwellen.',
+        rating: '⭐⭐⭐⭐⭐',
+        score: '5/5',
+        categories: ['strategy', 'action'],
+        tags: ['Strategie', 'Tower Defense']
     }
 ];
 
 const progressStorageKey = 'gamehub-progress-v1';
+const favoritesStorageKey = 'gamehub-favorites-v1';
 const recordDefinitions = [
     { href: '2048_game/index.html', key: '2048_bestScore', label: '2048', suffix: 'Punkte' },
     { href: 'snake_game/index.html', key: 'snakeHighScore', label: 'Snake Game', suffix: 'Punkte' },
@@ -193,6 +206,29 @@ function readProgress() {
 }
 
 let gameProgress = readProgress();
+
+function readFavorites() {
+    const raw = readLocalStorage(favoritesStorageKey);
+    if (!raw) return new Set();
+    try {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return new Set();
+        const validHrefs = new Set(gameCatalog.map(game => game.href));
+        return new Set(parsed.filter(href => typeof href === 'string' && validHrefs.has(href)));
+    } catch (error) {
+        return new Set();
+    }
+}
+
+let favoriteGames = readFavorites();
+
+function saveFavorites() {
+    try {
+        localStorage.setItem(favoritesStorageKey, JSON.stringify([...favoriteGames]));
+    } catch (error) {
+        console.warn('GameHub-Favoriten konnten nicht gespeichert werden.', error);
+    }
+}
 
 function saveProgress() {
     try {
@@ -276,23 +312,31 @@ function escapeHTML(value) {
 const gamesGridElement = document.getElementById('gamesGrid');
 if (gamesGridElement) {
     gamesGridElement.innerHTML = gameCatalog.map(game => `
-        <a href="${escapeHTML(game.href)}" class="game-card" data-game-href="${escapeHTML(game.href)}" data-category="${escapeHTML(game.categories.join(' '))}">
-            <div class="game-image">
-                <img src="${escapeHTML(game.image)}" alt="${escapeHTML(game.imageAlt)}">
-            </div>
-            <div class="game-info">
-                <h3>${escapeHTML(game.title)}</h3>
-                <p class="game-type">${escapeHTML(game.type)}</p>
-                <p class="game-desc">${escapeHTML(game.description)}</p>
-                <div class="game-rating" aria-label="Bewertung: ${escapeHTML(game.score)}">
-                    <span aria-hidden="true">${escapeHTML(game.rating)}</span> (${escapeHTML(game.score)})
+        <article class="game-card" data-game-href="${escapeHTML(game.href)}" data-category="${escapeHTML(game.categories.join(' '))}">
+            <a href="${escapeHTML(game.href)}" class="game-card-link" data-game-href="${escapeHTML(game.href)}">
+                <div class="game-image">
+                    <img src="${escapeHTML(game.image)}" alt="${escapeHTML(game.imageAlt)}">
                 </div>
-                <div class="game-tags">
-                    ${game.tags.map(tag => `<span class="tag">${escapeHTML(tag)}</span>`).join('')}
+                <div class="game-info">
+                    <h3>${escapeHTML(game.title)}</h3>
+                    <p class="game-type">${escapeHTML(game.type)}</p>
+                    <p class="game-desc">${escapeHTML(game.description)}</p>
+                    <div class="game-rating" aria-label="Bewertung: ${escapeHTML(game.score)}">
+                        <span aria-hidden="true">${escapeHTML(game.rating)}</span> (${escapeHTML(game.score)})
+                    </div>
+                    <div class="game-tags">
+                        ${game.tags.map(tag => `<span class="tag">${escapeHTML(tag)}</span>`).join('')}
+                    </div>
                 </div>
-            </div>
-            <div class="game-action">► Spielen</div>
-        </a>
+                <span class="game-action">► Spielen</span>
+            </a>
+            <button class="favorite-toggle" type="button" data-game-href="${escapeHTML(game.href)}"
+                aria-label="${favoriteGames.has(game.href) ? 'Aus Favoriten entfernen: ' : 'Zu Favoriten hinzufügen: '}${escapeHTML(game.title)}"
+                aria-pressed="${favoriteGames.has(game.href)}">
+                <span aria-hidden="true">${favoriteGames.has(game.href) ? '♥' : '♡'}</span>
+                <span>${favoriteGames.has(game.href) ? 'Gemerkt' : 'Merken'}</span>
+            </button>
+        </article>
     `).join('');
 }
 renderProgress();
@@ -300,6 +344,35 @@ renderProgress();
 // Filter functionality
 const filterButtons = document.querySelectorAll('.filter-btn');
 const gameCards = document.querySelectorAll('.game-card');
+const searchInput = document.getElementById('gameSearch');
+const favoritesOnlyButton = document.getElementById('favoritesOnly');
+const gamesEmptyState = document.getElementById('gamesEmptyState');
+let selectedCategory = 'all';
+
+function applyGameFilters() {
+    const query = searchInput ? searchInput.value.trim().toLocaleLowerCase('de') : '';
+    let visibleCount = 0;
+    gameCards.forEach((card, index) => {
+        const game = gameCatalog[index];
+        const searchableText = [
+            game.title,
+            game.type,
+            game.description,
+            ...game.categories,
+            ...game.tags
+        ].join(' ').toLocaleLowerCase('de');
+        const matchesQuery = !query || searchableText.includes(query);
+        const matchesCategory = selectedCategory === 'all' || game.categories.includes(selectedCategory);
+        const matchesFavorites = !favoritesOnlyButton || favoritesOnlyButton.getAttribute('aria-pressed') !== 'true'
+            || favoriteGames.has(game.href);
+        const isVisible = matchesQuery && matchesCategory && matchesFavorites;
+        card.style.display = isVisible ? 'flex' : 'none';
+        card.style.opacity = isVisible ? '1' : '0';
+        if (isVisible) visibleCount += 1;
+    });
+    if (gamesEmptyState) gamesEmptyState.hidden = visibleCount > 0;
+}
+
 filterButtons.forEach(button => {
     button.addEventListener('click', () => {
         filterButtons.forEach(btn => {
@@ -308,22 +381,38 @@ filterButtons.forEach(button => {
         });
         button.classList.add('active');
         button.setAttribute('aria-pressed', 'true');
-        const filterValue = button.getAttribute('data-filter');
-        gameCards.forEach((card, index) => {
-            card.style.animation = 'none';
-            setTimeout(() => {
-                card.style.animation = '';
-            }, 10);
-            if (filterValue === 'all' || gameCatalog[index].categories.includes(filterValue)) {
-                card.style.display = 'flex';
-                card.style.opacity = '1';
-            } else {
-                card.style.display = 'none';
-                card.style.opacity = '0';
-            }
-        });
+        selectedCategory = button.getAttribute('data-filter');
+        applyGameFilters();
     });
 });
+if (searchInput) searchInput.addEventListener('input', applyGameFilters);
+if (favoritesOnlyButton) {
+    favoritesOnlyButton.addEventListener('click', () => {
+        const showFavorites = favoritesOnlyButton.getAttribute('aria-pressed') !== 'true';
+        favoritesOnlyButton.setAttribute('aria-pressed', String(showFavorites));
+        favoritesOnlyButton.textContent = `${showFavorites ? '♥' : '♡'} Nur Favoriten`;
+        applyGameFilters();
+    });
+}
+document.querySelectorAll('.favorite-toggle').forEach(button => {
+    button.addEventListener('click', () => {
+        const href = button.dataset.gameHref;
+        const game = gameCatalog.find(item => item.href === href);
+        if (!game) return;
+        if (favoriteGames.has(href)) {
+            favoriteGames.delete(href);
+        } else {
+            favoriteGames.add(href);
+        }
+        saveFavorites();
+        const isFavorite = favoriteGames.has(href);
+        button.setAttribute('aria-pressed', String(isFavorite));
+        button.setAttribute('aria-label', `${isFavorite ? 'Aus Favoriten entfernen: ' : 'Zu Favoriten hinzufügen: '}${game.title}`);
+        button.innerHTML = `<span aria-hidden="true">${isFavorite ? '♥' : '♡'}</span><span>${isFavorite ? 'Gemerkt' : 'Merken'}</span>`;
+        applyGameFilters();
+    });
+});
+applyGameFilters();
 // Navigation active state on scroll
 window.addEventListener('scroll', () => {
     const navLinks = document.querySelectorAll('.nav-link');
@@ -343,7 +432,7 @@ window.addEventListener('scroll', () => {
     });
 });
 // Game card click tracking
-gameCards.forEach(card => {
+document.querySelectorAll('.game-card-link').forEach(card => {
     card.addEventListener('click', (e) => {
         const gameName = card.querySelector('h3').textContent;
         console.log(`🎮 Spieler startet: ${gameName}`);
@@ -490,7 +579,7 @@ if (platformLockedNotice) {
 }
 
 const allGameLinks = [
-    ...document.querySelectorAll('.game-card'),
+    ...document.querySelectorAll('.game-card-link'),
     ...document.querySelectorAll('.recent-game-link')
 ];
 allGameLinks.forEach(link => {

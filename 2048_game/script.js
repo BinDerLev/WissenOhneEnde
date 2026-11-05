@@ -1,24 +1,19 @@
 const gameBoard = document.getElementById('gameBoard');
 const scoreDisplay = document.getElementById('score');
 const bestScoreDisplay = document.getElementById('bestScore');
-const coinsDisplay = document.getElementById('coins');
 const goalDisplay = document.getElementById('goal');
 const comboDisplay = document.getElementById('combo');
 const levelDisplay = document.getElementById('level');
-const upgradeStateDisplay = document.getElementById('upgradeState');
 const newGameBtn = document.getElementById('newGameBtn');
 const undoBtn = document.getElementById('undoBtn');
-const boostBtn = document.getElementById('boostBtn');
 const standardModeBtn = document.getElementById('standardModeBtn');
 const dailyModeBtn = document.getElementById('dailyModeBtn');
 const dailyInfo = document.getElementById('dailyInfo');
 const dailyRecordDisplay = document.getElementById('dailyRecord');
-const upgradeButtons = [...document.querySelectorAll('.upgrade-btn')];
 
 let grid = [];
 let score = 0;
 let bestScore = Number(localStorage.getItem('2048_bestScore') || 0);
-let coins = Number(localStorage.getItem('2048_coins') || 0);
 let level = Number(localStorage.getItem('2048_level') || 1);
 let combo = 1;
 let gameOver = false;
@@ -34,34 +29,18 @@ let dailySeed = 0;
 let dailyRandomState = 0;
 let dailyConfig = null;
 let dailyRecords = readDailyRecords();
-let extraUndoLives = Number(localStorage.getItem('2048_undoLives') || 1);
-let multiplierLevel = Number(localStorage.getItem('2048_multiplierLevel') || 0);
-let bonusLevel = Number(localStorage.getItem('2048_bonusLevel') || 0);
-let boostActive = false;
-let boostCharges = Number(localStorage.getItem('2048_boostCharges') || 1);
+let undoAvailable = true;
 
 const GRID_SIZE = 4;
 const WIN_VALUE = 2048;
-const upgradeCosts = {
-  multiplier: 20,
-  undo: 25,
-  bonus: 30
-};
-
 bestScoreDisplay.textContent = bestScore;
-coinsDisplay.textContent = coins;
 comboDisplay.textContent = `x${combo}`;
 levelDisplay.textContent = level;
 goalDisplay.textContent = String(Math.max(2048, 2048 + (level - 1) * 1024));
-updateUpgradeCosts();
 newGameBtn.addEventListener('click', newGame);
 standardModeBtn.addEventListener('click', startStandardGame);
 dailyModeBtn.addEventListener('click', startDailyChallenge);
 undoBtn.addEventListener('click', undo);
-boostBtn.addEventListener('click', useBoost);
-upgradeButtons.forEach((button) => {
-  button.addEventListener('click', () => buyUpgrade(button.dataset.upgrade));
-});
 document.addEventListener('keydown', handleKeyPress);
 let swipeStart = null;
 gameBoard.addEventListener('pointerdown', (event) => {
@@ -189,29 +168,15 @@ function startDailyChallenge() {
 }
 
 function saveProgress() {
-  localStorage.setItem('2048_coins', String(coins));
   localStorage.setItem('2048_level', String(level));
   localStorage.setItem('2048_bestScore', String(bestScore));
-  localStorage.setItem('2048_undoLives', String(extraUndoLives));
-  localStorage.setItem('2048_multiplierLevel', String(multiplierLevel));
-  localStorage.setItem('2048_bonusLevel', String(bonusLevel));
-  localStorage.setItem('2048_boostCharges', String(boostCharges));
-}
-
-function updateUpgradeCosts() {
-  document.getElementById('multiplierCost').textContent = String(upgradeCosts.multiplier + multiplierLevel * 10);
-  document.getElementById('undoCost').textContent = String(upgradeCosts.undo + extraUndoLives * 12);
-  document.getElementById('bonusCost').textContent = String(upgradeCosts.bonus + bonusLevel * 15);
 }
 
 function updateHud() {
   scoreDisplay.textContent = score;
   comboDisplay.textContent = `x${combo}`;
-  coinsDisplay.textContent = coins;
   levelDisplay.textContent = level;
   goalDisplay.textContent = String(Math.max(2048, 2048 + (level - 1) * 1024));
-  upgradeStateDisplay.textContent = boostActive ? 'Boost ON' : 'Ready';
-  updateUpgradeCosts();
 
   if (score > bestScore) {
     bestScore = score;
@@ -240,7 +205,7 @@ function newGame() {
   previousState = null;
   previousScore = 0;
   previousRandomState = null;
-  boostActive = false;
+  undoAvailable = true;
   if (mode === 'daily') {
     activeDailyDate = todayDate;
     dailySeed = seedForDate(activeDailyDate);
@@ -366,10 +331,8 @@ function slideAndMerge(line) {
       filtered[i] = mergedValue;
       filtered.splice(i + 1, 1);
 
-      const reward = mergedValue * (multiplierLevel + 1) * (boostActive ? 2 : 1);
-      score += reward;
+      score += mergedValue;
       combo = Math.min(9, combo + 1);
-      coins += 1 + bonusLevel;
 
       if (mergedValue === WIN_VALUE && !gameWon) {
         gameWon = true;
@@ -391,46 +354,6 @@ function updateLevel() {
     level = newLevel;
     levelDisplay.textContent = level;
   }
-}
-
-function useBoost() {
-  if (boostCharges <= 0) return;
-  boostCharges -= 1;
-  boostActive = true;
-  upgradeStateDisplay.textContent = 'Boost ON';
-
-  setTimeout(() => {
-    boostActive = false;
-    upgradeStateDisplay.textContent = 'Ready';
-    saveProgress();
-  }, 4000);
-
-  saveProgress();
-}
-
-function buyUpgrade(type) {
-  const cost = {
-    multiplier: upgradeCosts.multiplier + multiplierLevel * 10,
-    undo: upgradeCosts.undo + extraUndoLives * 12,
-    bonus: upgradeCosts.bonus + bonusLevel * 15
-  }[type];
-
-  if (coins < cost) return;
-
-  coins -= cost;
-
-  if (type === 'multiplier') {
-    multiplierLevel += 1;
-  }
-  if (type === 'undo') {
-    extraUndoLives += 1;
-  }
-  if (type === 'bonus') {
-    bonusLevel += 1;
-  }
-
-  saveProgress();
-  updateHud();
 }
 
 function checkGameState() {
@@ -478,9 +401,9 @@ function isGameOver() {
 
 function undo() {
   if (!previousState) return;
-  if (extraUndoLives <= 0) return;
+  if (!undoAvailable) return;
 
-  extraUndoLives -= 1;
+  undoAvailable = false;
   grid = previousState.map(row => [...row]);
   score = previousScore;
   if (mode === 'daily' && previousRandomState !== null) {
@@ -532,10 +455,6 @@ function showGameOverOverlay(won) {
   const scoreMsg = document.createElement('p');
   scoreMsg.innerHTML = `Dein Score: <span class="score-value">${score}</span>`;
 
-  const rewardMsg = document.createElement('p');
-  rewardMsg.textContent = `+${Math.max(5, Math.floor(score / 50))} Münzen gewonnen`;
-  coins += Math.max(5, Math.floor(score / 50));
-
   const continueBtn = document.createElement('button');
   continueBtn.className = 'btn btn-new';
   continueBtn.textContent = won ? 'Weiterspielen' : 'Neues Spiel';
@@ -553,7 +472,6 @@ function showGameOverOverlay(won) {
   box.appendChild(heading);
   box.appendChild(message);
   box.appendChild(scoreMsg);
-  box.appendChild(rewardMsg);
   box.appendChild(continueBtn);
   overlay.appendChild(box);
   document.body.appendChild(overlay);

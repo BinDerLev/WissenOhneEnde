@@ -6,13 +6,16 @@ const cardSets = {
 const symbols = ['🍎', '🚀', '🐱', '🌈', '⚽', '🍀', '🎸', '🦋', '🍉', '⭐', '🐳', '🎈', '🍩', '🌻', '🦊', '🎮', '🍓', '🚲'];
 const board = document.getElementById('game-board');
 const difficulty = document.getElementById('difficulty');
+const dailyButton = document.getElementById('daily-button');
 const restartButton = document.getElementById('restart-button');
 const movesElement = document.getElementById('moves');
 const timeElement = document.getElementById('time');
 const matchesElement = document.getElementById('matches');
 const bestElement = document.getElementById('best-score');
+const dailyStatusElement = document.getElementById('daily-status');
 const messageElement = document.getElementById('game-message');
 const bestScoreKey = 'memory-best-score';
+const dailyRecordsKey = 'memory-daily-records';
 
 let deck = [];
 let flipped = [];
@@ -22,6 +25,10 @@ let elapsedSeconds = 0;
 let timer = null;
 let mismatchTimeout = null;
 let locked = false;
+let dailyMode = false;
+let activeDailyDate = null;
+let activeDailyDifficulty = null;
+let gameFinished = false;
 
 function shuffle(items) {
     for (let index = items.length - 1; index > 0; index -= 1) {
@@ -29,6 +36,49 @@ function shuffle(items) {
         [items[index], items[randomIndex]] = [items[randomIndex], items[index]];
     }
     return items;
+}
+
+function shuffleWithSeed(items, seed) {
+    let state = seed >>> 0;
+    const random = () => {
+        state = (state + 0x6D2B79F5) | 0;
+        let value = state;
+        value = Math.imul(value ^ (value >>> 15), value | 1);
+        value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+        return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+    };
+
+    for (let index = items.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(random() * (index + 1));
+        [items[index], items[randomIndex]] = [items[randomIndex], items[index]];
+    }
+    return items;
+}
+
+function getLocalDateKey(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function formatDate(dateKey) {
+    const [year, month, day] = dateKey.split('-').map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString('de-DE', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+}
+
+function getDailySeed(dateKey, difficultyName) {
+    const seedText = `${dateKey}:${difficultyName}`;
+    let seed = 2166136261;
+    for (let index = 0; index < seedText.length; index += 1) {
+        seed ^= seedText.charCodeAt(index);
+        seed = Math.imul(seed, 16777619);
+    }
+    return seed >>> 0;
 }
 
 function formatTime(seconds) {
@@ -42,12 +92,67 @@ function readBestScore() {
     return Number.isFinite(score) && score > 0 ? score : 0;
 }
 
+function readDailyRecords() {
+    try {
+        const records = JSON.parse(localStorage.getItem(dailyRecordsKey) || '{}');
+        return records && typeof records === 'object' && !Array.isArray(records) ? records : {};
+    } catch {
+        return {};
+    }
+}
+
+function readDailyRecord(dateKey, difficultyName) {
+    const record = readDailyRecords()[dateKey]?.[difficultyName];
+    if (!record || typeof record !== 'object') return { bestScore: 0, completed: false };
+    const bestScore = Number(record.bestScore);
+    return {
+        bestScore: Number.isFinite(bestScore) && bestScore > 0 ? bestScore : 0,
+        completed: record.completed === true
+    };
+}
+
+function saveDailyCompletion(dateKey, difficultyName, score) {
+    const records = readDailyRecords();
+    const dayRecords = records[dateKey] && typeof records[dateKey] === 'object'
+        ? records[dateKey]
+        : {};
+    const previousRecord = readDailyRecord(dateKey, difficultyName);
+    dayRecords[difficultyName] = {
+        bestScore: Math.max(previousRecord.bestScore, score),
+        completed: true
+    };
+    records[dateKey] = dayRecords;
+    try {
+        localStorage.setItem(dailyRecordsKey, JSON.stringify(records));
+    } catch {
+        // The game can still finish if local storage is unavailable or full.
+    }
+    return dayRecords[difficultyName];
+}
+
+function renderDailyStatus() {
+    const dateKey = dailyMode && activeDailyDate ? activeDailyDate : getLocalDateKey();
+    const difficultyName = dailyMode && activeDailyDifficulty
+        ? activeDailyDifficulty
+        : difficulty.value;
+    const record = readDailyRecord(dateKey, difficultyName);
+    let status = record.completed ? 'Abgeschlossen' : 'Noch nicht abgeschlossen';
+    if (dailyMode && activeDailyDate === dateKey && !gameFinished && !record.completed) {
+        status = 'In Bearbeitung';
+    }
+    const best = record.bestScore ? `${record.bestScore} Pkt.` : '–';
+    const difficultyLabel = { easy: 'Leicht', normal: 'Normal', hard: 'Schwer' }[difficultyName];
+    dailyStatusElement.textContent =
+        `Tages-Challenge (${difficultyLabel}) · ${formatDate(dateKey)}: ${status} · Tagesbestleistung: ${best}`;
+}
+
 function renderStats() {
     movesElement.textContent = String(moves);
     timeElement.textContent = formatTime(elapsedSeconds);
     matchesElement.textContent = `${matchedPairs} / ${cardSets[difficulty.value].pairs}`;
     const best = readBestScore();
     bestElement.textContent = best ? `${best} Pkt.` : '–';
+    renderDailyStatus();
 }
 
 function startTimer() {
@@ -73,10 +178,20 @@ function hideCard(card, index) {
 function finishGame() {
     window.clearInterval(timer);
     timer = null;
+    gameFinished = true;
     const score = Math.max(0, deck.length / 2 * 100 - moves * 10 - elapsedSeconds);
     const previousBest = readBestScore();
-    if (score > previousBest) {
+    const newAllTimeBest = score > previousBest;
+    if (newAllTimeBest) {
         localStorage.setItem(bestScoreKey, String(score));
+    }
+
+    if (dailyMode && activeDailyDate) {
+        const dailyRecord = saveDailyCompletion(activeDailyDate, activeDailyDifficulty, score);
+        const allTimeMessage = newAllTimeBest ? ' Neuer Allzeitrekord!' : '';
+        messageElement.textContent =
+            `Tages-Challenge vom ${formatDate(activeDailyDate)} abgeschlossen in ${formatTime(elapsedSeconds)} mit ${moves} Zügen – Tagesbestleistung: ${dailyRecord.bestScore} Punkte.${allTimeMessage}`;
+    } else if (newAllTimeBest) {
         messageElement.textContent = `Geschafft in ${formatTime(elapsedSeconds)} mit ${moves} Zügen – neuer Rekord: ${score} Punkte!`;
     } else {
         messageElement.textContent = `Geschafft in ${formatTime(elapsedSeconds)} mit ${moves} Zügen – du erreichst ${score} Punkte.`;
@@ -125,7 +240,13 @@ function newGame() {
     timer = null;
     mismatchTimeout = null;
     const settings = cardSets[difficulty.value];
-    deck = shuffle([...symbols.slice(0, settings.pairs), ...symbols.slice(0, settings.pairs)]);
+    activeDailyDate = dailyMode ? getLocalDateKey() : null;
+    activeDailyDifficulty = dailyMode ? difficulty.value : null;
+    gameFinished = false;
+    const cards = [...symbols.slice(0, settings.pairs), ...symbols.slice(0, settings.pairs)];
+    deck = dailyMode
+        ? shuffleWithSeed(cards, getDailySeed(activeDailyDate, difficulty.value))
+        : shuffle(cards);
     flipped = [];
     matchedPairs = 0;
     moves = 0;
@@ -146,9 +267,15 @@ function newGame() {
     });
 
     messageElement.textContent = 'Wähle zwei Karten und finde alle Paare.';
+    dailyButton.textContent = dailyMode ? 'Zum normalen Spiel' : 'Tages-Challenge';
+    dailyButton.setAttribute('aria-pressed', String(dailyMode));
     renderStats();
 }
 
 restartButton.addEventListener('click', newGame);
 difficulty.addEventListener('change', newGame);
+dailyButton.addEventListener('click', () => {
+    dailyMode = !dailyMode;
+    newGame();
+});
 newGame();

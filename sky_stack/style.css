@@ -134,6 +134,30 @@ h1 {
   line-height: 1.5;
 }
 
+.daily-panel {
+  margin: 0 18px 12px;
+  padding: 10px 12px;
+  border: 1px solid rgb(142 223 255 / 20%);
+  border-radius: 10px;
+  background: rgb(142 223 255 / 6%);
+  color: #c8d6f1;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.daily-panel p {
+  margin: 0;
+}
+
+.daily-panel p:first-child {
+  color: #8edfff;
+  font-weight: 800;
+}
+
+.daily-panel p:last-child {
+  margin-top: 2px;
+}
+
 .game-controls {
   padding: 16px 18px 18px;
   border-top: 1px solid rgb(255 255 255 / 9%);
@@ -218,7 +242,8 @@ h1 {
   }
 
   #game-mode,
-  .mode-help {
+  .mode-help,
+  .daily-panel {
     max-width: calc(100% - 26px);
     margin-left: 13px;
     margin-right: 13px;

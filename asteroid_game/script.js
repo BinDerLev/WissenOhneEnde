@@ -4,26 +4,14 @@ const ctx = canvas.getContext('2d');
 const scoreDisplay = document.getElementById('score');
 const waveDisplay = document.getElementById('wave');
 const livesDisplay = document.getElementById('lives');
-const coinsDisplay = document.getElementById('coins');
 const bestScoreDisplay = document.getElementById('bestScore');
 const startBtn = document.getElementById('startBtn');
 const pauseBtn = document.getElementById('pauseBtn');
 const resetBtn = document.getElementById('resetBtn');
-const upgradeButtons = [...document.querySelectorAll('.upgrade-btn')];
 const touchControlTimers = new WeakMap();
 
-const upgradeCosts = {
-    ship: 35,
-    shot: 40,
-    shield: 45,
-};
-
-let maxShipSpeed = 8;
-let bulletSpeed = 7;
-let shipLevel = Number(localStorage.getItem('asteroid_shipLevel') || 0);
-let shotLevel = Number(localStorage.getItem('asteroid_shotLevel') || 0);
-let shieldLevel = Number(localStorage.getItem('asteroid_shieldLevel') || 0);
-let coins = Number(localStorage.getItem('asteroid_coins') || 0);
+const MAX_SHIP_SPEED = 8;
+const BULLET_SPEED = 7;
 let bestScore = Number(localStorage.getItem('asteroid_bestScore') || 0);
 
 const SHIP_SIZE = 15;
@@ -41,7 +29,6 @@ let ship = {
     vy: 0,
     width: SHIP_SIZE,
     height: SHIP_SIZE,
-    shield: 0,
 };
 
 let asteroids = [];
@@ -54,10 +41,6 @@ let gameRunning = false;
 let gamePaused = false;
 let gameLoop;
 let invulnerableTimer = 0;
-
-upgradeButtons.forEach((button) => {
-    button.addEventListener('click', () => buyUpgrade(button.dataset.upgrade));
-});
 
 document.addEventListener('keydown', handleKeyDown);
 document.addEventListener('keyup', handleKeyUp);
@@ -98,27 +81,7 @@ pauseBtn.addEventListener('click', togglePause);
 resetBtn.addEventListener('click', resetGame);
 
 function saveProgress() {
-    localStorage.setItem('asteroid_shipLevel', String(shipLevel));
-    localStorage.setItem('asteroid_shotLevel', String(shotLevel));
-    localStorage.setItem('asteroid_shieldLevel', String(shieldLevel));
-    localStorage.setItem('asteroid_coins', String(coins));
     localStorage.setItem('asteroid_bestScore', String(bestScore));
-}
-
-function updateUpgradeButtons() {
-    upgradeButtons.forEach((button) => {
-        const type = button.dataset.upgrade;
-        const cost = upgradeCosts[type];
-        const labelMap = {
-            ship: '🚀 Schiff',
-            shot: '🔫 Schuss',
-            shield: '🛡️ Schild',
-        };
-        const level = type === 'ship' ? shipLevel : type === 'shot' ? shotLevel : shieldLevel;
-        button.textContent = `${labelMap[type]} + ${cost}`;
-        button.disabled = coins < cost;
-        button.title = `Level ${level}`;
-    });
 }
 
 function updateHud() {
@@ -130,32 +93,7 @@ function updateHud() {
     scoreDisplay.textContent = score;
     waveDisplay.textContent = wave;
     livesDisplay.textContent = lives;
-    coinsDisplay.textContent = coins;
     bestScoreDisplay.textContent = bestScore;
-    updateUpgradeButtons();
-}
-
-function buyUpgrade(type) {
-    const cost = upgradeCosts[type];
-    if (coins < cost) return;
-
-    coins -= cost;
-
-    if (type === 'ship') {
-        shipLevel += 1;
-        maxShipSpeed = 8 + shipLevel * 0.8;
-    }
-    if (type === 'shot') {
-        shotLevel += 1;
-        bulletSpeed = 7 + shotLevel * 1.1;
-    }
-    if (type === 'shield') {
-        shieldLevel += 1;
-        ship.shield = Math.max(ship.shield, shieldLevel);
-    }
-
-    saveProgress();
-    updateHud();
 }
 
 function handleKeyDown(e) {
@@ -217,7 +155,6 @@ function resetGame() {
         vy: 0,
         width: SHIP_SIZE,
         height: SHIP_SIZE,
-        shield: shieldLevel > 0 ? 1 : 0,
     };
     asteroids = [];
     bullets = [];
@@ -278,8 +215,8 @@ function createAsteroid(x, y, size, vx = null, vy = null) {
 function shoot() {
     if (!gameRunning || gamePaused) return;
 
-    const bulletVx = Math.cos(ship.angle) * bulletSpeed + ship.vx;
-    const bulletVy = Math.sin(ship.angle) * bulletSpeed + ship.vy;
+    const bulletVx = Math.cos(ship.angle) * BULLET_SPEED + ship.vx;
+    const bulletVy = Math.sin(ship.angle) * BULLET_SPEED + ship.vy;
 
     bullets.push({
         x: ship.x + Math.cos(ship.angle) * 20,
@@ -306,9 +243,9 @@ function update() {
     }
 
     const speed = Math.hypot(ship.vx, ship.vy);
-    if (speed > maxShipSpeed) {
-        ship.vx = (ship.vx / speed) * maxShipSpeed;
-        ship.vy = (ship.vy / speed) * maxShipSpeed;
+    if (speed > MAX_SHIP_SPEED) {
+        ship.vx = (ship.vx / speed) * MAX_SHIP_SPEED;
+        ship.vy = (ship.vy / speed) * MAX_SHIP_SPEED;
     }
 
     ship.vx *= FRICTION;
@@ -358,7 +295,6 @@ function update() {
             if (dist < asteroids[a].radius) {
                 bullets.splice(b, 1);
                 score += asteroids[a].size * 100;
-                coins += 2 + wave;
                 updateHud();
 
                 if (asteroids[a].size > 1) {
@@ -390,13 +326,6 @@ function update() {
             );
 
             if (dist < asteroids[a].radius + SHIP_SIZE) {
-                if (ship.shield > 0) {
-                    ship.shield -= 1;
-                    invulnerableTimer = INVULNERABLE_TIME;
-                    asteroids.splice(a, 1);
-                    continue;
-                }
-
                 lives--;
                 invulnerableTimer = INVULNERABLE_TIME;
                 if (lives <= 0) {
@@ -419,8 +348,6 @@ function update() {
 function nextWave() {
     clearInterval(gameLoop);
     wave++;
-    coins += 8 + wave * 2;
-
     ship = {
         x: canvas.width / 2,
         y: canvas.height / 2,
@@ -429,7 +356,6 @@ function nextWave() {
         vy: 0,
         width: SHIP_SIZE,
         height: SHIP_SIZE,
-        shield: Math.max(0, shieldLevel > 0 ? 1 : 0),
     };
 
     invulnerableTimer = INVULNERABLE_TIME;
@@ -491,14 +417,6 @@ function draw() {
     ctx.translate(shipX, shipY);
     ctx.rotate(ship.angle);
 
-    if (ship.shield > 0) {
-        ctx.strokeStyle = 'rgba(90, 220, 255, 0.9)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(0, 0, SHIP_SIZE + 8, 0, Math.PI * 2);
-        ctx.stroke();
-    }
-
     ctx.shadowColor = '#00ffaa';
     ctx.shadowBlur = 15;
     ctx.fillStyle = '#00ffaa';
@@ -553,7 +471,6 @@ function endGame() {
 }
 
 bestScoreDisplay.textContent = bestScore;
-coinsDisplay.textContent = coins;
 updateHud();
 spawnAsteroids(wave);
 draw();
