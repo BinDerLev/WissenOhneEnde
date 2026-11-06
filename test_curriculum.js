@@ -411,6 +411,28 @@ test("the GameHub renders every catalog entry with an existing game and image", 
   }
 });
 
+test("every GameHub game loads and invokes the shared round-return helper", () => {
+  const { context } = createGameHubContext();
+  const catalog = vm.runInContext("gameCatalog", context);
+
+  for (const game of catalog) {
+    const gameDirectory = path.dirname(path.join(root, game.href));
+    const html = fs.readFileSync(path.join(gameDirectory, "index.html"), "utf8");
+    const scripts = [...html.matchAll(/<script\b[^>]*src=["']([^"']+)["'][^>]*>/gi)];
+    const helperIndex = scripts.findIndex(([, src]) => src === "../game-round-session.js");
+    const firstGameScriptIndex = scripts.findIndex(([, src]) => src !== "../game-round-session.js");
+
+    assert.ok(helperIndex >= 0, `${game.title} does not load the round-return helper`);
+    assert.ok(firstGameScriptIndex > helperIndex, `${game.title} loads its logic before the helper`);
+
+    const gameScripts = fs.readdirSync(gameDirectory).filter((file) => file.endsWith(".js"));
+    const callsRoundReturn = gameScripts.some((file) =>
+      fs.readFileSync(path.join(gameDirectory, file), "utf8").includes("GameRoundSession.finish()")
+    );
+    assert.ok(callsRoundReturn, `${game.title} has no round-end return hook`);
+  }
+});
+
 test("search, genre and favorites filters can be combined", () => {
   const { cardContainer, favoritesOnly, filterButtons, searchInput, emptyState } = createGameHubContext();
   searchInput.value = "unter wasser";

@@ -88,6 +88,7 @@ function processCommand() {
         // Deaktiviere die Eingabe, damit der Spieler keine weiteren Befehle eingeben kann
         commandInput.disabled = true;
         submitBtn.disabled = true;
+        window.GameRoundSession.finish();
     }
 
     // Leere das Eingabefeld für den nächsten Befehl

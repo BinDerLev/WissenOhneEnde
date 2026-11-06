@@ -158,6 +158,7 @@ function endGame() {
     saveBest();
     startBtn.textContent = 'Play Again';
     draw();
+    window.GameRoundSession.finish();
 }
 
 function gameLoop(timestamp) {

@@ -30,6 +30,7 @@ let dailyRandomState = 0;
 let dailyConfig = null;
 let dailyRecords = readDailyRecords();
 let undoAvailable = true;
+let roundFinished = false;
 
 const GRID_SIZE = 4;
 const WIN_VALUE = 2048;
@@ -145,6 +146,7 @@ function updateDailyPanel() {
 }
 
 function startStandardGame() {
+  if (roundFinished) return;
   mode = 'standard';
   activeDailyDate = null;
   dailyConfig = null;
@@ -153,6 +155,7 @@ function startStandardGame() {
 }
 
 function startDailyChallenge() {
+  if (roundFinished) return;
   checkDateBoundary();
   mode = 'daily';
   activeDailyDate = todayDate;
@@ -195,6 +198,7 @@ function updateHud() {
 }
 
 function newGame() {
+  if (roundFinished) return;
   checkDateBoundary();
   moveToken += 1;
   grid = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
@@ -362,11 +366,23 @@ function checkGameState() {
   if (gameWon) {
     markDailyComplete(true);
     showGameOverOverlay(true);
+    finishRound();
   } else if (isGameOver()) {
     gameOver = true;
     markDailyComplete(false);
     showGameOverOverlay(false);
+    finishRound();
   }
+}
+
+function finishRound() {
+  if (roundFinished) return;
+  roundFinished = true;
+  newGameBtn.disabled = true;
+  undoBtn.disabled = true;
+  standardModeBtn.disabled = true;
+  dailyModeBtn.disabled = true;
+  window.GameRoundSession.finish();
 }
 
 function markDailyComplete(won) {
@@ -400,6 +416,7 @@ function isGameOver() {
 }
 
 function undo() {
+  if (roundFinished || gameOver || gameWon) return;
   if (!previousState) return;
   if (!undoAvailable) return;
 
@@ -455,24 +472,9 @@ function showGameOverOverlay(won) {
   const scoreMsg = document.createElement('p');
   scoreMsg.innerHTML = `Dein Score: <span class="score-value">${score}</span>`;
 
-  const continueBtn = document.createElement('button');
-  continueBtn.className = 'btn btn-new';
-  continueBtn.textContent = won ? 'Weiterspielen' : 'Neues Spiel';
-  continueBtn.style.marginTop = '20px';
-  continueBtn.addEventListener('click', () => {
-    overlay.remove();
-    if (!won) {
-      newGame();
-    } else {
-      gameWon = false;
-      newGame();
-    }
-  });
-
   box.appendChild(heading);
   box.appendChild(message);
   box.appendChild(scoreMsg);
-  box.appendChild(continueBtn);
   overlay.appendChild(box);
   document.body.appendChild(overlay);
   saveProgress();

@@ -16,7 +16,7 @@
             <div>
                 <p class="eyebrow">STRATEGIE · TOWER DEFENSE</p>
                 <h1>Wachturm</h1>
-                <p class="intro">Verteidige den Kristallpfad und halte zehn Gegnerwellen auf.</p>
+                <p class="intro">Verteidige den Kristallpfad und halte drei Gegnerwellen auf.</p>
             </div>
             <button id="restartButton" class="button button-muted" type="button">Neu starten</button>
         </header>
@@ -24,7 +24,7 @@
         <section class="status-bar" aria-label="Spielstatus">
             <div class="stat"><span>Münzen</span><strong id="goldValue">140</strong></div>
             <div class="stat"><span>Leben</span><strong id="livesValue">12</strong></div>
-            <div class="stat"><span>Welle</span><strong id="waveValue">0 / 10</strong></div>
+            <div class="stat"><span>Welle</span><strong id="waveValue">0 / 3</strong></div>
             <div class="stat"><span>Gegner</span><strong id="enemyValue">0</strong></div>
         </section>
 
@@ -69,6 +69,7 @@
         </section>
         <p id="announcement" class="sr-only" aria-live="polite"></p>
     </main>
+    <script src="../game-round-session.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -466,8 +466,8 @@ function endGame() {
     }
     saveProgress();
     updateHud();
-    alert(`Game Over! 🚀\nDein Final Score: ${score}\nWellen erreicht: ${wave}`);
-    resetGame();
+    draw();
+    window.GameRoundSession.finish();
 }
 
 bestScoreDisplay.textContent = bestScore;

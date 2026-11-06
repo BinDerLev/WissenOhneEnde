@@ -529,6 +529,7 @@ function endGame() {
     if (challengeMode) saveDailyResult(dailyCompleted);
     saveProgress();
     draw();
+    window.GameRoundSession.finish();
 }
 
 draw();

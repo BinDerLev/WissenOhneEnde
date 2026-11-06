@@ -237,6 +237,7 @@ function endGame() {
     : "Knapp daneben! Starte neu und versuche es noch einmal.";
   if (currentMode === "daily") updateDailyStatus();
   draw();
+  window.GameRoundSession.finish();
 }
 
 function winChallenge() {
@@ -255,6 +256,7 @@ function winChallenge() {
     gameMessage.textContent = `Geschafft! Du hast den 12. Block gesetzt und die Präzisions-Challenge gewonnen.`;
   }
   draw();
+  window.GameRoundSession.finish();
 }
 
 function drawBackground() {

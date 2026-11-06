@@ -17,12 +17,14 @@ let board = [];
 let currentPlayer = 'X';
 let gameOver = false;
 let gameWon = false;
+let roundFinished = false;
 
 // Event listeners
 newGameBtn.addEventListener('click', newGame);
 menuBtn.addEventListener('click', backToMenu);
 
 function selectGame(game) {
+    if (roundFinished) return;
     currentGame = game;
     menuScreen.classList.remove('active');
     gameScreen.classList.add('active');
@@ -43,6 +45,7 @@ function selectGame(game) {
 }
 
 function changeGameMode(mode) {
+    if (roundFinished) return;
     gameMode = mode;
     if (gameOver || gameWon) {
         newGame();
@@ -50,12 +53,14 @@ function changeGameMode(mode) {
 }
 
 function backToMenu() {
+    if (roundFinished) return;
     menuScreen.classList.add('active');
     gameScreen.classList.remove('active');
     currentGame = null;
 }
 
 function newGame() {
+    if (roundFinished) return;
     if (currentGame === 'tictactoe') {
         initTicTacToe();
     } else {
@@ -511,6 +516,8 @@ function updateDisplay() {
 }
 
 function showMessage(title, message) {
+    roundFinished = true;
+    window.GameRoundSession.finish();
     const overlay = document.createElement('div');
     overlay.className = 'message-overlay';
 
@@ -520,21 +527,12 @@ function showMessage(title, message) {
     const heading = document.createElement('h2');
     heading.textContent = title;
 
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-new';
-    btn.textContent = 'Nächstes Spiel';
-    btn.addEventListener('click', () => {
-        overlay.remove();
-        newGame();
-    });
-
     box.appendChild(heading);
     if (message) {
         const msg = document.createElement('p');
         msg.innerHTML = message;
         box.appendChild(msg);
     }
-    box.appendChild(btn);
     overlay.appendChild(box);
 
     document.body.appendChild(overlay);
@@ -542,7 +540,6 @@ function showMessage(title, message) {
 
 // Start
 initTicTacToe();
-
 
 
 

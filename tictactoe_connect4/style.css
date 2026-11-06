@@ -298,7 +298,11 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 10000;
+}
+
+body[data-round-finished="true"] .game-round-return-notice {
+    z-index: 10001;
 }
 
 .message-box {

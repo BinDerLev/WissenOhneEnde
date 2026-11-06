@@ -13,6 +13,7 @@ let selected = null
 let legalMoves = []
 let focusedSquare = [7, 0]
 let gameOver = false
+let roundFinished = false
 let aiThinking = false
 let castling = { w: {k: true, q: true}, b: {k: true, q: true} }
 let enPassant = null // {r,c} square that can be captured into this move, or null
@@ -470,6 +471,11 @@ function checkGameState() {
       statusEl.textContent = 'Patt.'
     }
     gameOver = true
+    if (!roundFinished) {
+      roundFinished = true
+      restartBtn.disabled = true
+      window.GameRoundSession.finish()
+    }
   }
 }
 
@@ -626,7 +632,9 @@ function pieceMoves(r,c,bd) {
   return moves
 }
 
-restartBtn.addEventListener('click', init)
+restartBtn.addEventListener('click', () => {
+  if (!roundFinished) init()
+})
 
 // Anleitung Toggle
 const toggleRulesBtn = document.getElementById('toggle-rules')

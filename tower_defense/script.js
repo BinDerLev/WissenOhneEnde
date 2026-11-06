@@ -8,7 +8,7 @@
     const cell = 70;
     const offsetX = 30;
     const offsetY = 20;
-    const maxWaves = 10;
+    const maxWaves = 3;
     const route = [
         [0, 1], [9, 1], [9, 5], [2, 5], [2, 3], [11, 3], [11, 7]
     ].map(([x, y]) => ({ x: offsetX + x * cell + cell / 2, y: offsetY + y * cell + cell / 2 }));
@@ -293,20 +293,25 @@
         elements.announcement.textContent = won ? "Du hast gewonnen!" : "Das Spiel ist vorbei.";
         elements.waveButton.disabled = true;
         elements.waveButton.textContent = won ? "Sieg!" : "Verloren";
+        window.GameRoundSession.finish();
     }
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#244b3e";
+        ctx.fillStyle = "#102a2e";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         for (let y = 0; y < rows; y += 1) {
             for (let x = 0; x < cols; x += 1) {
-                ctx.fillStyle = (x + y) % 2 ? "#2a5645" : "#2d5a48";
+                ctx.fillStyle = (x + y) % 2 ? "#285044" : "#2b5547";
                 ctx.fillRect(offsetX + x * cell, offsetY + y * cell, cell, cell);
-                ctx.strokeStyle = "rgba(171, 224, 172, .13)";
+                if (!isRoad(x, y) && (x * 7 + y * 11) % 5 === 0) drawGroundDetail(x, y);
+                ctx.strokeStyle = "rgba(184, 224, 185, .09)";
                 ctx.strokeRect(offsetX + x * cell, offsetY + y * cell, cell, cell);
             }
         }
+        ctx.strokeStyle = "rgba(179, 231, 188, .22)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(offsetX + 1, offsetY + 1, cols * cell - 2, rows * cell - 2);
         drawRoad();
         towers.forEach(drawTower);
         if (pointerCell) drawCellHighlight(pointerCell, true);
@@ -323,20 +328,43 @@
         ctx.globalAlpha = 1;
     }
 
+    function drawGroundDetail(x, y) {
+        const seed = x * 37 + y * 61;
+        const centerX = offsetX + x * cell + 18 + (seed % 34);
+        const centerY = offsetY + y * cell + 18 + (seed % 29);
+        ctx.fillStyle = "rgba(170, 207, 142, .16)";
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, 8, 3, (seed % 7) * .2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "rgba(15, 42, 37, .16)";
+        ctx.beginPath();
+        ctx.arc(centerX + 15, centerY + 13, 2, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
     function drawRoad() {
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
         ctx.beginPath();
         route.forEach((point, index) => index ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y));
+        ctx.shadowColor = "rgba(9, 23, 24, .65)";
+        ctx.shadowBlur = 13;
+        ctx.shadowOffsetY = 5;
+        ctx.strokeStyle = "#493f32";
+        ctx.lineWidth = 54;
+        ctx.stroke();
+        ctx.shadowColor = "transparent";
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
         ctx.strokeStyle = "#b9935a";
-        ctx.lineWidth = 47;
+        ctx.lineWidth = 48;
         ctx.stroke();
-        ctx.strokeStyle = "#d9b976";
-        ctx.lineWidth = 35;
+        ctx.strokeStyle = "#d5b876";
+        ctx.lineWidth = 37;
         ctx.stroke();
-        ctx.setLineDash([8, 15]);
-        ctx.strokeStyle = "rgba(115, 77, 41, .35)";
-        ctx.lineWidth = 2;
+        ctx.setLineDash([3, 18]);
+        ctx.strokeStyle = "rgba(113, 77, 43, .46)";
+        ctx.lineWidth = 3;
         ctx.stroke();
         ctx.setLineDash([]);
         drawGate(route[0], "IN", "#8ce3b9");
@@ -344,12 +372,23 @@
     }
 
     function drawGate(point, label, color) {
+        ctx.shadowColor = "rgba(0, 0, 0, .35)";
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 3;
         ctx.fillStyle = "#172b2e";
         ctx.beginPath();
-        ctx.arc(point.x, point.y, 18, 0, Math.PI * 2);
+        ctx.arc(point.x, point.y, 19, 0, Math.PI * 2);
         ctx.fill();
+        ctx.shadowColor = "transparent";
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
         ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 13, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(255, 255, 255, .16)";
+        ctx.lineWidth = 1;
         ctx.stroke();
         ctx.fillStyle = color;
         ctx.font = "bold 12px sans-serif";
@@ -386,12 +425,23 @@
     function drawTower(tower) {
         const center = towerCenter(tower);
         const spec = towerTypes[tower.type];
+        ctx.shadowColor = "rgba(4, 17, 20, .5)";
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 4;
         ctx.beginPath();
-        ctx.arc(center.x, center.y, 20, 0, Math.PI * 2);
-        ctx.fillStyle = "#182d35";
+        ctx.arc(center.x, center.y, 22, 0, Math.PI * 2);
+        ctx.fillStyle = "#152d30";
         ctx.fill();
+        ctx.shadowColor = "transparent";
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
         ctx.strokeStyle = spec.color;
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 3.5;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(center.x, center.y, 16, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(255, 255, 255, .16)";
+        ctx.lineWidth = 1;
         ctx.stroke();
         drawTowerIcon(center.x, center.y, tower.type, 1);
     }
@@ -430,11 +480,11 @@
         ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
         ctx.fillStyle = enemy.slowTime > 0 ? "#70c9ed" : "#e47767";
         ctx.fill();
-        ctx.strokeStyle = "#3e2630";
+        ctx.strokeStyle = enemy.slowTime > 0 ? "#d7f6ff" : "#ffd3a3";
         ctx.lineWidth = 2;
         ctx.stroke();
-        ctx.fillStyle = "#472c31";
-        ctx.fillRect(enemy.x - 8, enemy.y - 20, 16, 3);
+        ctx.fillStyle = "rgba(12, 24, 28, .8)";
+        ctx.fillRect(enemy.x - 9, enemy.y - 21, 18, 5);
         ctx.fillStyle = "#75e0a1";
         ctx.fillRect(enemy.x - 8, enemy.y - 20, 16 * Math.max(0, enemy.hp / enemy.maxHp), 3);
     }

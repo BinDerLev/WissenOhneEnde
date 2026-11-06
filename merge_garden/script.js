@@ -28,6 +28,7 @@ let combo = 1;
 let currentTile = null;
 let soundEnabled = true;
 let goalAchieved = false;
+let roundFinished = false;
 
 function createEmptyBoard(size = BOARD_SIZE) {
   return Array.from({ length: size }, () => Array(size).fill(null));
@@ -178,6 +179,7 @@ function updateStats() {
 }
 
 function placeCurrentTile(row, col) {
+  if (roundFinished) return;
   if (board[row][col]) return;
 
   if (!currentTile) {
@@ -196,6 +198,12 @@ function placeCurrentTile(row, col) {
   playSound("place");
   updateStats();
   renderBoard();
+  if (board.every((row) => row.every((cell) => cell !== null))) {
+    roundFinished = true;
+    resetBtn.disabled = true;
+    goalStatusEl.textContent = "Das Spielfeld ist voll. Deine Runde ist beendet.";
+    window.GameRoundSession.finish();
+  }
 }
 
 function renderBoard() {
@@ -233,6 +241,7 @@ function renderBoard() {
 }
 
 function resetGame() {
+  if (roundFinished) return;
   board = createEmptyBoard();
   score = 0;
   round = 1;

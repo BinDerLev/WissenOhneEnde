@@ -179,6 +179,9 @@ function finishGame() {
     window.clearInterval(timer);
     timer = null;
     gameFinished = true;
+    difficulty.disabled = true;
+    dailyButton.disabled = true;
+    restartButton.disabled = true;
     const score = Math.max(0, deck.length / 2 * 100 - moves * 10 - elapsedSeconds);
     const previousBest = readBestScore();
     const newAllTimeBest = score > previousBest;
@@ -197,10 +200,11 @@ function finishGame() {
         messageElement.textContent = `Geschafft in ${formatTime(elapsedSeconds)} mit ${moves} Zügen – du erreichst ${score} Punkte.`;
     }
     renderStats();
+    window.GameRoundSession.finish();
 }
 
 function chooseCard(card, index) {
-    if (locked || card.classList.contains('is-revealed') || card.classList.contains('is-matched')) return;
+    if (gameFinished || locked || card.classList.contains('is-revealed') || card.classList.contains('is-matched')) return;
     startTimer();
     revealCard(card, deck[index], index);
     flipped.push({ card, index, symbol: deck[index] });
@@ -235,6 +239,7 @@ function chooseCard(card, index) {
 }
 
 function newGame() {
+    if (gameFinished) return;
     if (timer !== null) window.clearInterval(timer);
     if (mismatchTimeout !== null) window.clearTimeout(mismatchTimeout);
     timer = null;
@@ -275,6 +280,7 @@ function newGame() {
 restartButton.addEventListener('click', newGame);
 difficulty.addEventListener('change', newGame);
 dailyButton.addEventListener('click', () => {
+    if (gameFinished) return;
     dailyMode = !dailyMode;
     newGame();
 });
