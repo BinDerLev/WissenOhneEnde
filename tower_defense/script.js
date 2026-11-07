@@ -302,16 +302,25 @@
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         for (let y = 0; y < rows; y += 1) {
             for (let x = 0; x < cols; x += 1) {
-                ctx.fillStyle = (x + y) % 2 ? "#285044" : "#2b5547";
-                ctx.fillRect(offsetX + x * cell, offsetY + y * cell, cell, cell);
-                if (!isRoad(x, y) && (x * 7 + y * 11) % 5 === 0) drawGroundDetail(x, y);
-                ctx.strokeStyle = "rgba(184, 224, 185, .09)";
-                ctx.strokeRect(offsetX + x * cell, offsetY + y * cell, cell, cell);
+                const left = offsetX + x * cell;
+                const top = offsetY + y * cell;
+                const seed = terrainSeed(x, y);
+                const tileGradient = ctx.createLinearGradient(left, top, left + cell, top + cell);
+                tileGradient.addColorStop(0, (x + y) % 2 ? "#315b49" : "#2d5746");
+                tileGradient.addColorStop(1, (x + y) % 2 ? "#2a5142" : "#284d3f");
+                ctx.fillStyle = tileGradient;
+                ctx.fillRect(left, top, cell, cell);
+                if (!isRoad(x, y)) drawGroundDetail(x, y);
+                ctx.strokeStyle = "rgba(179, 218, 180, .045)";
+                ctx.lineWidth = 1;
+                ctx.strokeRect(left, top, cell, cell);
             }
         }
-        ctx.strokeStyle = "rgba(179, 231, 188, .22)";
+        ctx.strokeStyle = "rgba(179, 231, 188, .34)";
         ctx.lineWidth = 2;
         ctx.strokeRect(offsetX + 1, offsetY + 1, cols * cell - 2, rows * cell - 2);
+        ctx.fillStyle = "rgba(8, 24, 25, .26)";
+        ctx.fillRect(offsetX, offsetY + rows * cell, cols * cell, 7);
         drawRoad();
         towers.forEach(drawTower);
         if (pointerCell) drawCellHighlight(pointerCell, true);
@@ -328,18 +337,159 @@
         ctx.globalAlpha = 1;
     }
 
+    function terrainSeed(x, y) {
+        let value = Math.imul(x + 19, 0x45d9f3b) ^ Math.imul(y + 7, 0x119de1f3);
+        value = Math.imul(value ^ (value >>> 16), 0x45d9f3b);
+        return (value ^ (value >>> 16)) >>> 0;
+    }
+
     function drawGroundDetail(x, y) {
-        const seed = x * 37 + y * 61;
-        const centerX = offsetX + x * cell + 18 + (seed % 34);
-        const centerY = offsetY + y * cell + 18 + (seed % 29);
-        ctx.fillStyle = "rgba(170, 207, 142, .16)";
+        const seed = terrainSeed(x, y);
+        const centerX = offsetX + x * cell + 12 + seed % 45;
+        const centerY = offsetY + y * cell + 13 + (seed >>> 7) % 43;
+        const kind = seed % 23;
+        if (kind === 0) {
+            drawTree(centerX, centerY, seed);
+        } else if (kind < 3) {
+            drawBush(centerX, centerY, seed);
+        } else if (kind < 7) {
+            drawFern(centerX, centerY, seed);
+        } else if (kind < 11) {
+            drawFlower(centerX, centerY, seed);
+        } else {
+            drawGrassTuft(centerX, centerY, seed);
+        }
+    }
+
+    function drawTree(x, y, seed) {
+        const size = 1 + (seed % 4) * .08;
+        ctx.fillStyle = "rgba(8, 24, 21, .28)";
         ctx.beginPath();
-        ctx.ellipse(centerX, centerY, 8, 3, (seed % 7) * .2, 0, Math.PI * 2);
+        ctx.ellipse(x + 5, y + 16 * size, 19 * size, 7 * size, -.16, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = "rgba(15, 42, 37, .16)";
+        ctx.fillStyle = "#634a34";
         ctx.beginPath();
-        ctx.arc(centerX + 15, centerY + 13, 2, 0, Math.PI * 2);
+        ctx.moveTo(x - 3 * size, y + 13 * size);
+        ctx.lineTo(x - 2 * size, y - 8 * size);
+        ctx.lineTo(x + 4 * size, y - 8 * size);
+        ctx.lineTo(x + 5 * size, y + 14 * size);
+        ctx.closePath();
         ctx.fill();
+        ctx.strokeStyle = "rgba(211, 165, 99, .42)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x + 1 * size, y + 8 * size);
+        ctx.lineTo(x + 1 * size, y - 5 * size);
+        ctx.stroke();
+
+        const canopy = ctx.createRadialGradient(x - 5 * size, y - 22 * size, 2, x, y - 12 * size, 26 * size);
+        canopy.addColorStop(0, "#75aa62");
+        canopy.addColorStop(.52, "#438451");
+        canopy.addColorStop(1, "#245a40");
+        ctx.fillStyle = canopy;
+        ctx.beginPath();
+        ctx.moveTo(x - 20 * size, y - 13 * size);
+        ctx.bezierCurveTo(x - 24 * size, y - 26 * size, x - 13 * size, y - 38 * size, x - 3 * size, y - 36 * size);
+        ctx.bezierCurveTo(x + 7 * size, y - 42 * size, x + 23 * size, y - 31 * size, x + 20 * size, y - 18 * size);
+        ctx.bezierCurveTo(x + 27 * size, y - 7 * size, x + 14 * size, y + 1 * size, x + 3 * size, y - 3 * size);
+        ctx.bezierCurveTo(x - 7 * size, y + 4 * size, x - 23 * size, y - 2 * size, x - 20 * size, y - 13 * size);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "rgba(164, 205, 115, .45)";
+        ctx.beginPath();
+        ctx.ellipse(x - 8 * size, y - 23 * size, 7 * size, 3 * size, -.55, 0, Math.PI * 2);
+        ctx.ellipse(x + 3 * size, y - 32 * size, 5 * size, 2 * size, -.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "rgba(24, 75, 53, .42)";
+        ctx.beginPath();
+        ctx.arc(x + 11 * size, y - 13 * size, 5 * size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function drawBush(x, y, seed) {
+        const size = .82 + (seed % 4) * .08;
+        ctx.fillStyle = "rgba(8, 24, 21, .2)";
+        ctx.beginPath();
+        ctx.ellipse(x + 2, y + 7, 17 * size, 5 * size, 0, 0, Math.PI * 2);
+        ctx.fill();
+        const leaves = seed % 2
+            ? [[-10, 0, 8], [0, -4, 10], [10, 0, 8]]
+            : [[-8, 1, 8], [4, -4, 9], [13, 2, 6]];
+        leaves.forEach(([dx, dy, radius], index) => {
+            const gradient = ctx.createRadialGradient(x + dx - 2, y + dy - 3, 1, x + dx, y + dy, radius);
+            gradient.addColorStop(0, index === 1 ? "#70aa61" : "#55945a");
+            gradient.addColorStop(1, index === 1 ? "#34744b" : "#286346");
+            ctx.beginPath();
+            ctx.arc(x + dx * size, y + dy * size, radius * size, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+        });
+        ctx.fillStyle = "rgba(219, 236, 160, .75)";
+        ctx.beginPath();
+        ctx.arc(x - 3 * size, y - 6 * size, 1.8 * size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function drawFern(x, y, seed) {
+        ctx.fillStyle = "rgba(15, 50, 37, .22)";
+        ctx.beginPath();
+        ctx.ellipse(x, y + 7, 11, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.lineCap = "round";
+        ctx.lineWidth = 1.7;
+        for (let frond = 0; frond < 5; frond += 1) {
+            const direction = frond - 2;
+            const endX = x + direction * 5 + (seed % 3) - 1;
+            const endY = y - 6 - (2 - Math.abs(direction)) * 2;
+            ctx.strokeStyle = frond % 2 ? "#69a96a" : "#8ab96d";
+            ctx.beginPath();
+            ctx.moveTo(x, y + 5);
+            ctx.quadraticCurveTo(x + direction * 2, y, endX, endY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(endX - direction * 1.3, endY + 2, 3, 1.3, direction * .16, 0, Math.PI * 2);
+            ctx.fillStyle = frond % 2 ? "#4a8b5a" : "#72a966";
+            ctx.fill();
+        }
+    }
+
+    function drawFlower(x, y, seed) {
+        const petalColors = ["#d9c99a", "#cdb5c2", "#dfc18d"];
+        ctx.fillStyle = "rgba(15, 50, 37, .2)";
+        ctx.beginPath();
+        ctx.ellipse(x + 1, y + 3, 7, 2.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(154, 195, 115, .7)";
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(x, y + 3);
+        ctx.lineTo(x + (seed % 2 ? 2 : -2), y - 4);
+        ctx.stroke();
+        ctx.fillStyle = petalColors[(seed >>> 4) % petalColors.length];
+        for (let petal = 0; petal < 5; petal += 1) {
+            const angle = petal * Math.PI * 2 / 5;
+            ctx.beginPath();
+            ctx.arc(x + Math.cos(angle) * 2.4, y - 5 + Math.sin(angle) * 2.4, 1.6, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.fillStyle = "#f4d779";
+        ctx.beginPath();
+        ctx.arc(x, y - 5, 1.25, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function drawGrassTuft(x, y, seed) {
+        ctx.strokeStyle = seed % 2 ? "rgba(166, 202, 132, .48)" : "rgba(132, 181, 119, .48)";
+        ctx.lineWidth = 1.35;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(x - 5, y + 3);
+        ctx.quadraticCurveTo(x - 3, y - 2, x - 5, y - 5);
+        ctx.moveTo(x, y + 4);
+        ctx.quadraticCurveTo(x + 1, y - 2, x + 4, y - 6);
+        ctx.moveTo(x + 4, y + 4);
+        ctx.quadraticCurveTo(x + 7, y, x + 8, y - 3);
+        ctx.stroke();
     }
 
     function drawRoad() {
@@ -350,25 +500,52 @@
         ctx.shadowColor = "rgba(9, 23, 24, .65)";
         ctx.shadowBlur = 13;
         ctx.shadowOffsetY = 5;
-        ctx.strokeStyle = "#493f32";
-        ctx.lineWidth = 54;
+        ctx.strokeStyle = "#3e392e";
+        ctx.lineWidth = 56;
         ctx.stroke();
         ctx.shadowColor = "transparent";
         ctx.shadowBlur = 0;
         ctx.shadowOffsetY = 0;
-        ctx.strokeStyle = "#b9935a";
-        ctx.lineWidth = 48;
+        ctx.strokeStyle = "#92734d";
+        ctx.lineWidth = 50;
         ctx.stroke();
-        ctx.strokeStyle = "#d5b876";
+        ctx.strokeStyle = "#ddc896";
+        ctx.lineWidth = 43;
+        ctx.stroke();
+        const roadSurface = ctx.createLinearGradient(0, offsetY, 0, offsetY + rows * cell);
+        roadSurface.addColorStop(0, "#f1e1b9");
+        roadSurface.addColorStop(.5, "#e8d5a5");
+        roadSurface.addColorStop(1, "#d8bf8d");
+        ctx.strokeStyle = roadSurface;
         ctx.lineWidth = 37;
         ctx.stroke();
-        ctx.setLineDash([3, 18]);
-        ctx.strokeStyle = "rgba(113, 77, 43, .46)";
-        ctx.lineWidth = 3;
-        ctx.stroke();
-        ctx.setLineDash([]);
+        drawRoadJoints();
         drawGate(route[0], "IN", "#8ce3b9");
         drawGate(route[route.length - 1], "✦", "#ffd166");
+    }
+
+    function drawRoadJoints() {
+        ctx.save();
+        ctx.strokeStyle = "rgba(126, 99, 62, .32)";
+        ctx.lineWidth = 1.2;
+        ctx.lineCap = "round";
+        route.slice(1).forEach((point, index) => {
+            const start = route[index];
+            const dx = point.x - start.x;
+            const dy = point.y - start.y;
+            const length = Math.hypot(dx, dy);
+            const normalX = -dy / length;
+            const normalY = dx / length;
+            for (let distance = 14; distance < length - 10; distance += 24) {
+                const centerX = start.x + dx / length * distance;
+                const centerY = start.y + dy / length * distance;
+                ctx.beginPath();
+                ctx.moveTo(centerX - normalX * 16, centerY - normalY * 16);
+                ctx.lineTo(centerX + normalX * 16, centerY + normalY * 16);
+                ctx.stroke();
+            }
+        });
+        ctx.restore();
     }
 
     function drawGate(point, label, color) {
@@ -402,7 +579,7 @@
         if (isRoad(x, y)) return;
         const occupied = towers.some(tower => tower.x === x && tower.y === y);
         const spec = towerTypes[selectedTower];
-        const center = { x: offsetX + x * cell + cell / 2, y: offsetY + y * cell + cell / 2 };
+        const center = towerCenter(target);
         ctx.fillStyle = occupied ? "rgba(255, 108, 108, .22)" : "rgba(88, 223, 173, .19)";
         ctx.fillRect(offsetX + x * cell, offsetY + y * cell, cell, cell);
         if (hover && !occupied && !waveActive && !gameOver) {
@@ -413,7 +590,7 @@
             ctx.strokeStyle = "rgba(230, 250, 255, .25)";
             ctx.lineWidth = 1;
             ctx.stroke();
-            drawTowerIcon(center.x, center.y, selectedTower, .78);
+            drawTowerVisual(center.x, center.y, selectedTower, .78);
         }
         if (!hover) {
             ctx.strokeStyle = "#fff";
@@ -424,69 +601,370 @@
 
     function drawTower(tower) {
         const center = towerCenter(tower);
-        const spec = towerTypes[tower.type];
-        ctx.shadowColor = "rgba(4, 17, 20, .5)";
-        ctx.shadowBlur = 8;
-        ctx.shadowOffsetY = 4;
-        ctx.beginPath();
-        ctx.arc(center.x, center.y, 22, 0, Math.PI * 2);
-        ctx.fillStyle = "#152d30";
-        ctx.fill();
-        ctx.shadowColor = "transparent";
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetY = 0;
-        ctx.strokeStyle = spec.color;
-        ctx.lineWidth = 3.5;
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(center.x, center.y, 16, 0, Math.PI * 2);
-        ctx.strokeStyle = "rgba(255, 255, 255, .16)";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        drawTowerIcon(center.x, center.y, tower.type, 1);
+        drawTowerVisual(center.x, center.y, tower.type, 1);
     }
 
-    function drawTowerIcon(x, y, type, scale) {
-        const color = towerTypes[type].color;
+    function drawTowerVisual(x, y, type, scale) {
         ctx.save();
         ctx.translate(x, y);
         ctx.scale(scale, scale);
-        ctx.fillStyle = color;
-        if (type === "arrow") {
-            ctx.fillRect(-3, -13, 6, 25);
-            ctx.beginPath();
-            ctx.moveTo(-11, 1); ctx.lineTo(0, 12); ctx.lineTo(11, 1); ctx.lineTo(7, 0); ctx.lineTo(0, 6); ctx.lineTo(-7, 0);
-            ctx.fill();
-        } else if (type === "cannon") {
-            ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = "#6b3b37"; ctx.fillRect(-4, -15, 8, 18);
-        } else {
-            ctx.beginPath();
-            for (let i = 0; i < 8; i += 1) {
-                const angle = Math.PI * i / 4;
-                const radius = i % 2 ? 6 : 14;
-                const px = Math.cos(angle) * radius;
-                const py = Math.sin(angle) * radius;
-                i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
-            }
-            ctx.closePath(); ctx.fill();
-            ctx.fillStyle = "#e7faff"; ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.fill();
-        }
+        ctx.fillStyle = "rgba(4, 14, 14, .36)";
+        ctx.beginPath();
+        ctx.ellipse(2, 12, 21, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        drawTowerFoundation();
+        if (type === "arrow") drawArcherTower();
+        else if (type === "cannon") drawCannonTower();
+        else drawFrostTower();
         ctx.restore();
     }
 
-    function drawEnemy(enemy) {
+    function drawTowerFoundation() {
         ctx.beginPath();
-        ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
-        ctx.fillStyle = enemy.slowTime > 0 ? "#70c9ed" : "#e47767";
+        ctx.moveTo(-17, 4);
+        ctx.lineTo(-12, 0);
+        ctx.lineTo(12, 0);
+        ctx.lineTo(17, 4);
+        ctx.lineTo(17, 10);
+        ctx.lineTo(11, 14);
+        ctx.lineTo(-11, 14);
+        ctx.lineTo(-17, 10);
+        ctx.closePath();
+        ctx.fillStyle = "#55534a";
         ctx.fill();
-        ctx.strokeStyle = enemy.slowTime > 0 ? "#d7f6ff" : "#ffd3a3";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#292f2b";
+        ctx.lineWidth = 1.5;
         ctx.stroke();
-        ctx.fillStyle = "rgba(12, 24, 28, .8)";
-        ctx.fillRect(enemy.x - 9, enemy.y - 21, 18, 5);
-        ctx.fillStyle = "#75e0a1";
-        ctx.fillRect(enemy.x - 8, enemy.y - 20, 16 * Math.max(0, enemy.hp / enemy.maxHp), 3);
+
+        ctx.beginPath();
+        ctx.moveTo(-17, 4);
+        ctx.lineTo(-12, 0);
+        ctx.lineTo(12, 0);
+        ctx.lineTo(17, 4);
+        ctx.lineTo(11, 8);
+        ctx.lineTo(-11, 8);
+        ctx.closePath();
+        ctx.fillStyle = "#777468";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(228, 220, 188, .48)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.strokeStyle = "rgba(37, 39, 35, .58)";
+        ctx.lineWidth = .8;
+        ctx.beginPath();
+        ctx.moveTo(-5, 1); ctx.lineTo(-7, 5); ctx.lineTo(-2, 8);
+        ctx.moveTo(6, 1); ctx.lineTo(3, 5); ctx.lineTo(9, 7);
+        ctx.moveTo(-11, 9); ctx.lineTo(-6, 7);
+        ctx.stroke();
+    }
+
+    function drawWoodBeam(x1, y1, x2, y2, width, color) {
+        ctx.strokeStyle = "#382d24";
+        ctx.lineWidth = width + 1.5;
+        ctx.lineCap = "square";
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    }
+
+    function drawArcherTower() {
+        drawWoodBeam(-10, -14, -10, 3, 3.5, "#765333");
+        drawWoodBeam(10, -14, 10, 3, 3.5, "#60452e");
+        drawWoodBeam(-10, -13, 10, -13, 3, "#a27745");
+        drawWoodBeam(-10, -7, 10, -7, 2.5, "#805a35");
+        drawWoodBeam(-10, -13, -3, -7, 1.8, "#59412d");
+        drawWoodBeam(10, -13, 3, -7, 1.8, "#59412d");
+
+        ctx.fillStyle = "#4a3525";
+        ctx.fillRect(-14, -17, 28, 4);
+        ctx.fillStyle = "#9c7445";
+        ctx.fillRect(-13, -19, 26, 3);
+        ctx.strokeStyle = "rgba(226, 190, 126, .62)";
+        ctx.lineWidth = 1;
+        for (let plank = -9; plank <= 9; plank += 6) {
+            ctx.beginPath();
+            ctx.moveTo(plank, -18.5);
+            ctx.lineTo(plank, -16.5);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = "#65472d";
+        ctx.fillRect(-13, -29, 26, 11);
+        ctx.fillStyle = "#855e38";
+        ctx.fillRect(-11, -27, 22, 8);
+        ctx.fillStyle = "#ad8350";
+        ctx.fillRect(-13, -31, 26, 3);
+        ctx.fillRect(-14, -34, 5, 5);
+        ctx.fillRect(-2.5, -34, 5, 5);
+        ctx.fillRect(9, -34, 5, 5);
+        ctx.fillStyle = "#483727";
+        ctx.fillRect(-8, -24, 4, 5);
+        ctx.fillRect(4, -24, 4, 5);
+        drawWoodBeam(-12, -30, 12, -30, 1.5, "#493727");
+        ctx.fillStyle = "#c0aa77";
+        ctx.fillRect(-1, -22, 2, 3);
+    }
+
+    function drawCannonTower() {
+        ctx.fillStyle = "#45463f";
+        ctx.beginPath();
+        ctx.moveTo(-16, 2);
+        ctx.lineTo(-13, -7);
+        ctx.lineTo(-9, -10);
+        ctx.lineTo(9, -10);
+        ctx.lineTo(13, -7);
+        ctx.lineTo(16, 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "#262d2a";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = "#716f62";
+        ctx.beginPath();
+        ctx.moveTo(-13, -6);
+        ctx.lineTo(-9, -11);
+        ctx.lineTo(9, -11);
+        ctx.lineTo(13, -6);
+        ctx.lineTo(10, -3);
+        ctx.lineTo(-10, -3);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "rgba(224, 216, 184, .38)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.fillStyle = "#63452e";
+        ctx.fillRect(-9, -5, 18, 8);
+        ctx.fillStyle = "#8c6740";
+        ctx.fillRect(-8, -5, 16, 3);
+        ctx.strokeStyle = "#352c24";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(-7, -4); ctx.lineTo(-7, 2);
+        ctx.moveTo(7, -4); ctx.lineTo(7, 2);
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(0, -11);
+        ctx.rotate(-.43);
+        ctx.fillStyle = "#343633";
+        ctx.fillRect(-4.2, -15, 8.4, 18);
+        ctx.fillStyle = "#77796f";
+        ctx.fillRect(-3, -14, 2, 15);
+        ctx.fillStyle = "#444740";
+        ctx.fillRect(-5.4, -16, 10.8, 3);
+        ctx.fillStyle = "#252a28";
+        ctx.beginPath();
+        ctx.ellipse(0, -14.5, 4.1, 1.9, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#a19a7f";
+        ctx.lineWidth = .8;
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.fillStyle = "#b28a53";
+        ctx.beginPath();
+        ctx.arc(-7, -2, 1.6, 0, Math.PI * 2);
+        ctx.arc(7, -2, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function drawFrostTower() {
+        drawWoodBeam(-8, -5, -8, 2, 2.5, "#604631");
+        drawWoodBeam(8, -5, 8, 2, 2.5, "#604631");
+        drawWoodBeam(-8, -4, 8, -4, 3, "#82603b");
+        drawWoodBeam(-8, 0, 8, 0, 2, "#61472f");
+        ctx.fillStyle = "#876846";
+        ctx.fillRect(-10, -8, 20, 4);
+        ctx.fillStyle = "#b08a59";
+        ctx.fillRect(-9, -9, 18, 2);
+
+        ctx.fillStyle = "#554c3e";
+        ctx.fillRect(-3.5, -14, 7, 7);
+        ctx.fillStyle = "#887757";
+        ctx.fillRect(-4.5, -15, 9, 2);
+        ctx.fillStyle = "#344d56";
+        ctx.beginPath();
+        ctx.moveTo(0, -36);
+        ctx.lineTo(7, -25);
+        ctx.lineTo(5, -16);
+        ctx.lineTo(-5, -16);
+        ctx.lineTo(-7, -25);
+        ctx.closePath();
+        ctx.fill();
+        const crystal = ctx.createLinearGradient(-7, -25, 7, -25);
+        crystal.addColorStop(0, "#6a9c9b");
+        crystal.addColorStop(.5, "#b8d5c6");
+        crystal.addColorStop(1, "#608c93");
+        ctx.fillStyle = crystal;
+        ctx.beginPath();
+        ctx.moveTo(0, -36);
+        ctx.lineTo(5, -25);
+        ctx.lineTo(3, -17);
+        ctx.lineTo(-3, -17);
+        ctx.lineTo(-5, -25);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "rgba(227, 247, 226, .78)";
+        ctx.lineWidth = .9;
+        ctx.beginPath();
+        ctx.moveTo(0, -33);
+        ctx.lineTo(1, -25);
+        ctx.lineTo(-1, -19);
+        ctx.stroke();
+        ctx.fillStyle = "rgba(199, 236, 218, .24)";
+        ctx.beginPath();
+        ctx.arc(0, -25, 12, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function drawEnemy(enemy) {
+        const nextPoint = route[Math.min(enemy.segment + 1, route.length - 1)];
+        const direction = Math.atan2(nextPoint.y - enemy.y, nextPoint.x - enemy.x);
+        const step = Math.sin(elapsed * 10 + enemy.segment) * Math.min(1, enemy.speed / 65);
+        const slowed = enemy.slowTime > 0;
+        const cloak = slowed ? "#667f88" : "#51483d";
+        const cloakShade = slowed ? "#435d67" : "#39362f";
+        const tunic = slowed ? "#8ba6a8" : "#80664b";
+        const skin = slowed ? "#b3c9c7" : "#c49b78";
+
+        ctx.fillStyle = "rgba(9, 22, 21, .32)";
+        ctx.beginPath();
+        ctx.ellipse(enemy.x, enemy.y + 8, 9, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(enemy.x, enemy.y);
+        ctx.rotate(direction + Math.PI / 2);
+
+        if (slowed) {
+            ctx.strokeStyle = "rgba(190, 225, 232, .5)";
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.arc(0, 0, 14, elapsed * 2, elapsed * 2 + Math.PI * 1.45);
+            ctx.stroke();
+        }
+
+        ctx.strokeStyle = "#302e2a";
+        ctx.lineWidth = 2.2;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(-3, 4);
+        ctx.lineTo(-4 + step * 2, 8);
+        ctx.lineTo(-7 + step * 2, 9);
+        ctx.moveTo(3, 4);
+        ctx.lineTo(4 - step * 2, 8);
+        ctx.lineTo(7 - step * 2, 9);
+        ctx.stroke();
+
+        ctx.fillStyle = "#403a32";
+        ctx.beginPath();
+        ctx.moveTo(-4, -4);
+        ctx.quadraticCurveTo(-9, -5, -10, 0);
+        ctx.lineTo(-7, 3);
+        ctx.lineTo(-4, 1);
+        ctx.moveTo(4, -4);
+        ctx.quadraticCurveTo(9, -5, 10, 0);
+        ctx.lineTo(7, 3);
+        ctx.lineTo(4, 1);
+        ctx.fill();
+        ctx.strokeStyle = "#302e2a";
+        ctx.lineWidth = 1.1;
+        ctx.stroke();
+
+        ctx.fillStyle = tunic;
+        ctx.beginPath();
+        ctx.moveTo(-4, -5);
+        ctx.lineTo(-5, -3);
+        ctx.lineTo(-6, 3);
+        ctx.lineTo(-3, 5);
+        ctx.lineTo(3, 5);
+        ctx.lineTo(6, 3);
+        ctx.lineTo(5, -3);
+        ctx.lineTo(4, -5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "#39332c";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.fillStyle = cloak;
+        ctx.beginPath();
+        ctx.moveTo(-4, -4);
+        ctx.lineTo(-8, -2);
+        ctx.lineTo(-9, 4);
+        ctx.lineTo(-7, 7);
+        ctx.lineTo(7, 7);
+        ctx.lineTo(9, 4);
+        ctx.lineTo(8, -2);
+        ctx.lineTo(4, -4);
+        ctx.lineTo(3, 2);
+        ctx.lineTo(-3, 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = cloakShade;
+        ctx.lineWidth = 1.1;
+        ctx.stroke();
+
+        ctx.strokeStyle = "#c0a475";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(-5, 2);
+        ctx.lineTo(5, 2);
+        ctx.stroke();
+        ctx.fillStyle = "#d1b782";
+        ctx.beginPath();
+        ctx.fillRect(-1, 1, 2, 2);
+
+        ctx.fillStyle = skin;
+        ctx.beginPath();
+        ctx.arc(0, -8, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = cloakShade;
+        ctx.beginPath();
+        ctx.moveTo(-5, -8);
+        ctx.quadraticCurveTo(-5, -14, 0, -14);
+        ctx.quadraticCurveTo(5, -14, 5, -8);
+        ctx.lineTo(3, -9);
+        ctx.lineTo(0, -10);
+        ctx.lineTo(-3, -9);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "#302e2a";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = skin;
+        ctx.beginPath();
+        ctx.moveTo(-3, -8);
+        ctx.lineTo(3, -8);
+        ctx.lineTo(2, -5);
+        ctx.lineTo(-2, -5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#453a32";
+        ctx.fillRect(1, -7, 1.2, 1);
+        ctx.restore();
+
+        const health = Math.max(0, enemy.hp / enemy.maxHp);
+        ctx.fillStyle = "rgba(13, 24, 24, .86)";
+        ctx.fillRect(enemy.x - 10, enemy.y - 23, 20, 4);
+        ctx.fillStyle = health > .45 ? "#8de09a" : "#f2c56f";
+        ctx.fillRect(enemy.x - 9, enemy.y - 22, 18 * health, 2);
+        ctx.strokeStyle = "rgba(244, 246, 222, .68)";
+        ctx.lineWidth = .7;
+        ctx.strokeRect(enemy.x - 10, enemy.y - 23, 20, 4);
     }
 
     function drawProjectile(projectile) {

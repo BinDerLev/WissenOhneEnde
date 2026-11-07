@@ -309,9 +309,9 @@ function escapeHTML(value) {
     })[character]);
 }
 
-const gamesGridElement = document.getElementById('gamesGrid');
-if (gamesGridElement) {
-    gamesGridElement.innerHTML = gameCatalog.map(game => `
+const gamesGrid = document.getElementById('gamesGrid');
+if (gamesGrid) {
+    gamesGrid.innerHTML = gameCatalog.map(game => `
         <article class="game-card" data-game-href="${escapeHTML(game.href)}" data-category="${escapeHTML(game.categories.join(' '))}">
             <a href="${escapeHTML(game.href)}" class="game-card-link" data-game-href="${escapeHTML(game.href)}">
                 <div class="game-image">
@@ -434,8 +434,6 @@ window.addEventListener('scroll', () => {
 // Game card click tracking
 document.querySelectorAll('.game-card-link').forEach(card => {
     card.addEventListener('click', (e) => {
-        const gameName = card.querySelector('h3').textContent;
-        console.log(`🎮 Spieler startet: ${gameName}`);
         createRipple(e, card);
     });
 });
@@ -518,24 +516,10 @@ if (hero) {
         hero.style.backgroundPosition = `${x}px ${y}px`;
     });
 }
-// Load page animation
-window.addEventListener('load', () => {
-    console.log('🎮 GameHub loaded successfully!');
-    document.body.style.opacity = '1';
-});
 // Performance: Add will-change for animations
 gameCards.forEach(card => {
     card.style.willChange = 'transform, opacity';
 });
-// Random game recommendation on page load
-function getRandomGame() {
-    if (gameCards.length > 0) {
-        const randomIndex = Math.floor(Math.random() * gameCards.length);
-        const randomGame = gameCards[randomIndex].querySelector('h3').textContent;
-        console.log(`🎲 Spiel-Empfehlung: Versuche ${randomGame}!`);
-    }
-}
-window.addEventListener('load', getRandomGame);
 // Mobile menu close on link click
 if (navMenu) {
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -544,18 +528,15 @@ if (navMenu) {
         });
     });
 }
-// Prevent animations on page load
-if (document.readyState === 'loading') {
+if (document.readyState !== 'loading') {
+    document.body.style.opacity = '1';
+} else {
     document.addEventListener('DOMContentLoaded', () => {
         document.body.style.opacity = '1';
     });
-} else {
-    document.body.style.opacity = '1';
 }
-console.log('🚀 GameHub JavaScript initialized!');
 
 const platformLockedNotice = document.getElementById('platformLockedNotice');
-const gamesGrid = document.getElementById('gamesGrid');
 const unlocked = localStorage.getItem('gamehub-lern-app-unlocked') === 'true';
 const playsLeft = Number(localStorage.getItem('gamehub-plays-left') || 0);
 

@@ -1,0 +1,28 @@
+# IDE and editor metadata
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# Tooling and dependency caches
+node_modules/
+
+# Local environment files
+.env
+.env.*
+
+# Temporary and generated files
+*.log
+*.tmp
+*.bak
+*.orig
+*.rej
+
+# Local OS files
+.DS_Store
+Thumbs.db
+
+# Project build leftovers
+coverage/
+.cache/
