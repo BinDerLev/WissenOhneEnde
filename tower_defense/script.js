@@ -590,7 +590,7 @@
             ctx.strokeStyle = "rgba(230, 250, 255, .25)";
             ctx.lineWidth = 1;
             ctx.stroke();
-            drawTowerVisual(center.x, center.y, selectedTower, .78);
+            drawTowerVisual(center.x, center.y, selectedTower, .92);
         }
         if (!hover) {
             ctx.strokeStyle = "#fff";
@@ -601,7 +601,7 @@
 
     function drawTower(tower) {
         const center = towerCenter(tower);
-        drawTowerVisual(center.x, center.y, tower.type, 1);
+        drawTowerVisual(center.x, center.y, tower.type, 1.15);
     }
 
     function drawTowerVisual(x, y, type, scale) {
@@ -610,7 +610,7 @@
         ctx.scale(scale, scale);
         ctx.fillStyle = "rgba(4, 14, 14, .36)";
         ctx.beginPath();
-        ctx.ellipse(2, 12, 21, 8, 0, 0, Math.PI * 2);
+        ctx.ellipse(3, 14, 24, 9, 0, 0, Math.PI * 2);
         ctx.fill();
 
         drawTowerFoundation();
@@ -622,28 +622,28 @@
 
     function drawTowerFoundation() {
         ctx.beginPath();
-        ctx.moveTo(-17, 4);
-        ctx.lineTo(-12, 0);
-        ctx.lineTo(12, 0);
-        ctx.lineTo(17, 4);
-        ctx.lineTo(17, 10);
-        ctx.lineTo(11, 14);
-        ctx.lineTo(-11, 14);
-        ctx.lineTo(-17, 10);
+        ctx.moveTo(-22, 3);
+        ctx.lineTo(-14, -3);
+        ctx.lineTo(14, -3);
+        ctx.lineTo(22, 3);
+        ctx.lineTo(22, 11);
+        ctx.lineTo(13, 17);
+        ctx.lineTo(-13, 17);
+        ctx.lineTo(-22, 11);
         ctx.closePath();
         ctx.fillStyle = "#55534a";
         ctx.fill();
         ctx.strokeStyle = "#292f2b";
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.8;
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(-17, 4);
-        ctx.lineTo(-12, 0);
-        ctx.lineTo(12, 0);
-        ctx.lineTo(17, 4);
-        ctx.lineTo(11, 8);
-        ctx.lineTo(-11, 8);
+        ctx.moveTo(-22, 3);
+        ctx.lineTo(-14, -3);
+        ctx.lineTo(14, -3);
+        ctx.lineTo(22, 3);
+        ctx.lineTo(13, 9);
+        ctx.lineTo(-13, 9);
         ctx.closePath();
         ctx.fillStyle = "#777468";
         ctx.fill();
@@ -651,12 +651,31 @@
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        ctx.strokeStyle = "rgba(37, 39, 35, .58)";
-        ctx.lineWidth = .8;
+        ctx.fillStyle = "#666457";
         ctx.beginPath();
-        ctx.moveTo(-5, 1); ctx.lineTo(-7, 5); ctx.lineTo(-2, 8);
-        ctx.moveTo(6, 1); ctx.lineTo(3, 5); ctx.lineTo(9, 7);
-        ctx.moveTo(-11, 9); ctx.lineTo(-6, 7);
+        ctx.moveTo(-22, 3);
+        ctx.lineTo(-13, 9);
+        ctx.lineTo(-13, 17);
+        ctx.lineTo(-22, 11);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#46483f";
+        ctx.beginPath();
+        ctx.moveTo(13, 9);
+        ctx.lineTo(22, 3);
+        ctx.lineTo(22, 11);
+        ctx.lineTo(13, 17);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = "rgba(37, 39, 35, .64)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(-8, 1); ctx.lineTo(-10, 4); ctx.lineTo(-5, 7);
+        ctx.moveTo(7, 1); ctx.lineTo(4, 5); ctx.lineTo(10, 7);
+        ctx.moveTo(-18, 8); ctx.lineTo(-14, 6);
+        ctx.moveTo(16, 11); ctx.lineTo(19, 9);
+        ctx.moveTo(-20, 12); ctx.lineTo(-15, 15);
         ctx.stroke();
     }
 
@@ -677,155 +696,278 @@
     }
 
     function drawArcherTower() {
-        drawWoodBeam(-10, -14, -10, 3, 3.5, "#765333");
-        drawWoodBeam(10, -14, 10, 3, 3.5, "#60452e");
-        drawWoodBeam(-10, -13, 10, -13, 3, "#a27745");
-        drawWoodBeam(-10, -7, 10, -7, 2.5, "#805a35");
-        drawWoodBeam(-10, -13, -3, -7, 1.8, "#59412d");
-        drawWoodBeam(10, -13, 3, -7, 1.8, "#59412d");
+        drawWoodBeam(-13, -14, -15, 3, 4, "#63462d");
+        drawWoodBeam(13, -14, 15, 3, 4, "#513c29");
+        drawWoodBeam(-13, -14, 13, -14, 3.5, "#9a7040");
+        drawWoodBeam(-15, 2, 15, 2, 4, "#795735");
+        drawWoodBeam(-13, -12, -6, 1, 2.2, "#765333");
+        drawWoodBeam(13, -12, 6, 1, 2.2, "#60452e");
 
-        ctx.fillStyle = "#4a3525";
-        ctx.fillRect(-14, -17, 28, 4);
-        ctx.fillStyle = "#9c7445";
-        ctx.fillRect(-13, -19, 26, 3);
-        ctx.strokeStyle = "rgba(226, 190, 126, .62)";
+        ctx.fillStyle = "#493727";
+        ctx.beginPath();
+        ctx.moveTo(-19, -4);
+        ctx.lineTo(-14, -9);
+        ctx.lineTo(14, -9);
+        ctx.lineTo(19, -4);
+        ctx.lineTo(15, 1);
+        ctx.lineTo(-15, 1);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#a17b49";
+        ctx.beginPath();
+        ctx.moveTo(-19, -5);
+        ctx.lineTo(-14, -10);
+        ctx.lineTo(14, -10);
+        ctx.lineTo(19, -5);
+        ctx.lineTo(14, 0);
+        ctx.lineTo(-14, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "rgba(231, 198, 142, .55)";
         ctx.lineWidth = 1;
-        for (let plank = -9; plank <= 9; plank += 6) {
+        ctx.stroke();
+        for (let plank = -13; plank <= 13; plank += 6) {
+            ctx.strokeStyle = "rgba(72, 51, 32, .56)";
+            ctx.lineWidth = .8;
             ctx.beginPath();
-            ctx.moveTo(plank, -18.5);
-            ctx.lineTo(plank, -16.5);
+            ctx.moveTo(plank, -8);
+            ctx.lineTo(plank, -1);
             ctx.stroke();
         }
 
-        ctx.fillStyle = "#65472d";
-        ctx.fillRect(-13, -29, 26, 11);
-        ctx.fillStyle = "#855e38";
-        ctx.fillRect(-11, -27, 22, 8);
-        ctx.fillStyle = "#ad8350";
-        ctx.fillRect(-13, -31, 26, 3);
-        ctx.fillRect(-14, -34, 5, 5);
-        ctx.fillRect(-2.5, -34, 5, 5);
-        ctx.fillRect(9, -34, 5, 5);
-        ctx.fillStyle = "#483727";
-        ctx.fillRect(-8, -24, 4, 5);
-        ctx.fillRect(4, -24, 4, 5);
-        drawWoodBeam(-12, -30, 12, -30, 1.5, "#493727");
-        ctx.fillStyle = "#c0aa77";
-        ctx.fillRect(-1, -22, 2, 3);
+        ctx.fillStyle = "#684a2e";
+        ctx.beginPath();
+        ctx.moveTo(-15, -12);
+        ctx.lineTo(-11, -28);
+        ctx.lineTo(11, -28);
+        ctx.lineTo(15, -12);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#89633a";
+        ctx.beginPath();
+        ctx.moveTo(-12, -13);
+        ctx.lineTo(-9, -25);
+        ctx.lineTo(9, -25);
+        ctx.lineTo(12, -13);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "rgba(217, 177, 115, .45)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(-7, -23); ctx.lineTo(-6, -14);
+        ctx.moveTo(0, -23); ctx.lineTo(0, -13);
+        ctx.moveTo(7, -23); ctx.lineTo(6, -14);
+        ctx.stroke();
+
+        ctx.fillStyle = "#493727";
+        ctx.beginPath();
+        ctx.moveTo(-18, -28);
+        ctx.lineTo(-13, -34);
+        ctx.lineTo(13, -34);
+        ctx.lineTo(18, -28);
+        ctx.lineTo(13, -24);
+        ctx.lineTo(-13, -24);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#a17a47";
+        ctx.beginPath();
+        ctx.moveTo(-18, -30);
+        ctx.lineTo(-13, -37);
+        ctx.lineTo(13, -37);
+        ctx.lineTo(18, -30);
+        ctx.lineTo(13, -26);
+        ctx.lineTo(-13, -26);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "#513a27";
+        ctx.lineWidth = 1.3;
+        ctx.stroke();
+        ctx.fillStyle = "#55402b";
+        for (const merlonX of [-13, -4, 5, 14]) {
+            ctx.fillRect(merlonX - 2, -40, 5, 7);
+            ctx.fillStyle = "#bd9862";
+            ctx.fillRect(merlonX - 2, -40, 5, 1.5);
+            ctx.fillStyle = "#55402b";
+        }
+        drawWoodBeam(-14, -30, 14, -30, 1.5, "#59412d");
+        ctx.fillStyle = "#352b22";
+        ctx.fillRect(-8, -22, 5, 7);
+        ctx.fillRect(4, -22, 5, 7);
+        ctx.fillStyle = "#c3a577";
+        ctx.fillRect(-7, -21, 1, 5);
+        ctx.fillRect(5, -21, 1, 5);
     }
 
     function drawCannonTower() {
         ctx.fillStyle = "#45463f";
         ctx.beginPath();
-        ctx.moveTo(-16, 2);
-        ctx.lineTo(-13, -7);
-        ctx.lineTo(-9, -10);
-        ctx.lineTo(9, -10);
-        ctx.lineTo(13, -7);
-        ctx.lineTo(16, 2);
+        ctx.moveTo(-20, 4);
+        ctx.lineTo(-17, -11);
+        ctx.lineTo(-10, -17);
+        ctx.lineTo(10, -17);
+        ctx.lineTo(17, -11);
+        ctx.lineTo(20, 4);
         ctx.closePath();
         ctx.fill();
         ctx.strokeStyle = "#262d2a";
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.8;
         ctx.stroke();
 
         ctx.fillStyle = "#716f62";
         ctx.beginPath();
-        ctx.moveTo(-13, -6);
-        ctx.lineTo(-9, -11);
-        ctx.lineTo(9, -11);
-        ctx.lineTo(13, -6);
-        ctx.lineTo(10, -3);
-        ctx.lineTo(-10, -3);
+        ctx.moveTo(-17, -10);
+        ctx.lineTo(-10, -18);
+        ctx.lineTo(10, -18);
+        ctx.lineTo(17, -10);
+        ctx.lineTo(11, -5);
+        ctx.lineTo(-11, -5);
         ctx.closePath();
         ctx.fill();
         ctx.strokeStyle = "rgba(224, 216, 184, .38)";
         ctx.lineWidth = 1;
         ctx.stroke();
+        ctx.strokeStyle = "rgba(39, 43, 39, .7)";
+        ctx.lineWidth = .9;
+        ctx.beginPath();
+        ctx.moveTo(-14, -10); ctx.lineTo(-10, -14); ctx.lineTo(-5, -13);
+        ctx.moveTo(5, -14); ctx.lineTo(10, -11); ctx.lineTo(14, -9);
+        ctx.moveTo(-12, -6); ctx.lineTo(-9, -10);
+        ctx.stroke();
 
         ctx.fillStyle = "#63452e";
-        ctx.fillRect(-9, -5, 18, 8);
-        ctx.fillStyle = "#8c6740";
-        ctx.fillRect(-8, -5, 16, 3);
-        ctx.strokeStyle = "#352c24";
-        ctx.lineWidth = 1.4;
         ctx.beginPath();
-        ctx.moveTo(-7, -4); ctx.lineTo(-7, 2);
-        ctx.moveTo(7, -4); ctx.lineTo(7, 2);
+        ctx.moveTo(-12, -6);
+        ctx.lineTo(-9, -11);
+        ctx.lineTo(9, -11);
+        ctx.lineTo(12, -6);
+        ctx.lineTo(9, 3);
+        ctx.lineTo(-9, 3);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#8c6740";
+        ctx.beginPath();
+        ctx.moveTo(-12, -7);
+        ctx.lineTo(-9, -12);
+        ctx.lineTo(9, -12);
+        ctx.lineTo(12, -7);
+        ctx.lineTo(8, -4);
+        ctx.lineTo(-8, -4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "#352c24";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-9, -5); ctx.lineTo(-9, 2);
+        ctx.moveTo(9, -5); ctx.lineTo(9, 2);
         ctx.stroke();
 
         ctx.save();
-        ctx.translate(0, -11);
-        ctx.rotate(-.43);
-        ctx.fillStyle = "#343633";
-        ctx.fillRect(-4.2, -15, 8.4, 18);
-        ctx.fillStyle = "#77796f";
-        ctx.fillRect(-3, -14, 2, 15);
-        ctx.fillStyle = "#444740";
-        ctx.fillRect(-5.4, -16, 10.8, 3);
+        ctx.translate(0, -14);
+        ctx.rotate(-.58);
+        ctx.fillStyle = "#272a28";
+        ctx.fillRect(-5.3, -20, 10.6, 24);
+        ctx.fillStyle = "#686b63";
+        ctx.fillRect(-3.6, -18, 2.2, 19);
+        ctx.fillStyle = "#41443f";
+        ctx.fillRect(-6.5, -20, 13, 4);
         ctx.fillStyle = "#252a28";
         ctx.beginPath();
-        ctx.ellipse(0, -14.5, 4.1, 1.9, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, -18.5, 5, 2.4, 0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = "#a19a7f";
-        ctx.lineWidth = .8;
+        ctx.strokeStyle = "#aaa18a";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.strokeStyle = "#302e2a";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(-8, 3); ctx.lineTo(-8, 6);
+        ctx.moveTo(8, 3); ctx.lineTo(8, 6);
         ctx.stroke();
         ctx.restore();
 
-        ctx.fillStyle = "#b28a53";
+        ctx.fillStyle = "#a88a5a";
         ctx.beginPath();
-        ctx.arc(-7, -2, 1.6, 0, Math.PI * 2);
-        ctx.arc(7, -2, 1.6, 0, Math.PI * 2);
+        ctx.arc(-9, -2, 1.8, 0, Math.PI * 2);
+        ctx.arc(9, -2, 1.8, 0, Math.PI * 2);
         ctx.fill();
     }
 
     function drawFrostTower() {
-        drawWoodBeam(-8, -5, -8, 2, 2.5, "#604631");
-        drawWoodBeam(8, -5, 8, 2, 2.5, "#604631");
-        drawWoodBeam(-8, -4, 8, -4, 3, "#82603b");
-        drawWoodBeam(-8, 0, 8, 0, 2, "#61472f");
-        ctx.fillStyle = "#876846";
-        ctx.fillRect(-10, -8, 20, 4);
+        drawWoodBeam(-12, -9, -13, 3, 3.2, "#604631");
+        drawWoodBeam(12, -9, 13, 3, 3.2, "#4e3b2b");
+        drawWoodBeam(-12, -9, 12, -9, 3.2, "#82603b");
+        drawWoodBeam(-13, 2, 13, 2, 3.5, "#61472f");
+        drawWoodBeam(-12, -7, -5, 1, 2, "#705132");
+        drawWoodBeam(12, -7, 5, 1, 2, "#604631");
+        ctx.fillStyle = "#7a6142";
+        ctx.beginPath();
+        ctx.moveTo(-17, -8);
+        ctx.lineTo(-12, -13);
+        ctx.lineTo(12, -13);
+        ctx.lineTo(17, -8);
+        ctx.lineTo(12, -3);
+        ctx.lineTo(-12, -3);
+        ctx.closePath();
+        ctx.fill();
         ctx.fillStyle = "#b08a59";
-        ctx.fillRect(-9, -9, 18, 2);
+        ctx.fillRect(-11, -12, 22, 2);
+        ctx.strokeStyle = "rgba(53, 39, 26, .6)";
+        ctx.lineWidth = 1;
+        for (let plank = -8; plank <= 8; plank += 5) {
+            ctx.beginPath();
+            ctx.moveTo(plank, -10);
+            ctx.lineTo(plank, -4);
+            ctx.stroke();
+        }
 
         ctx.fillStyle = "#554c3e";
-        ctx.fillRect(-3.5, -14, 7, 7);
-        ctx.fillStyle = "#887757";
-        ctx.fillRect(-4.5, -15, 9, 2);
+        ctx.beginPath();
+        ctx.moveTo(-7, -13);
+        ctx.lineTo(-9, -29);
+        ctx.lineTo(-4, -36);
+        ctx.lineTo(5, -34);
+        ctx.lineTo(9, -19);
+        ctx.lineTo(6, -13);
+        ctx.closePath();
+        ctx.fill();
         ctx.fillStyle = "#344d56";
         ctx.beginPath();
-        ctx.moveTo(0, -36);
-        ctx.lineTo(7, -25);
-        ctx.lineTo(5, -16);
-        ctx.lineTo(-5, -16);
-        ctx.lineTo(-7, -25);
+        ctx.moveTo(-3, -39);
+        ctx.lineTo(6, -31);
+        ctx.lineTo(10, -20);
+        ctx.lineTo(5, -14);
+        ctx.lineTo(-6, -17);
+        ctx.lineTo(-9, -29);
         ctx.closePath();
         ctx.fill();
-        const crystal = ctx.createLinearGradient(-7, -25, 7, -25);
-        crystal.addColorStop(0, "#6a9c9b");
-        crystal.addColorStop(.5, "#b8d5c6");
-        crystal.addColorStop(1, "#608c93");
+        const crystal = ctx.createLinearGradient(-8, -28, 8, -28);
+        crystal.addColorStop(0, "#568b8c");
+        crystal.addColorStop(.46, "#d0e0cb");
+        crystal.addColorStop(1, "#5e8a91");
         ctx.fillStyle = crystal;
         ctx.beginPath();
-        ctx.moveTo(0, -36);
-        ctx.lineTo(5, -25);
-        ctx.lineTo(3, -17);
-        ctx.lineTo(-3, -17);
-        ctx.lineTo(-5, -25);
+        ctx.moveTo(-3, -39);
+        ctx.lineTo(2, -32);
+        ctx.lineTo(7, -22);
+        ctx.lineTo(4, -16);
+        ctx.lineTo(-5, -19);
+        ctx.lineTo(-7, -29);
         ctx.closePath();
         ctx.fill();
-        ctx.strokeStyle = "rgba(227, 247, 226, .78)";
-        ctx.lineWidth = .9;
+        ctx.strokeStyle = "rgba(226, 241, 220, .8)";
+        ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(0, -33);
-        ctx.lineTo(1, -25);
-        ctx.lineTo(-1, -19);
+        ctx.moveTo(-2, -36);
+        ctx.lineTo(1, -30);
+        ctx.lineTo(3, -24);
+        ctx.moveTo(-5, -28);
+        ctx.lineTo(1, -26);
         ctx.stroke();
-        ctx.fillStyle = "rgba(199, 236, 218, .24)";
+        ctx.strokeStyle = "rgba(179, 214, 210, .55)";
+        ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.arc(0, -25, 12, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(-5, -15); ctx.lineTo(0, -12); ctx.lineTo(6, -15);
+        ctx.stroke();
     }
 
     function drawEnemy(enemy) {

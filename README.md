@@ -1,30 +1,20 @@
 # LernLabor
 
-LernLabor ist eine browserbasierte Lern-App für Mathe und Deutsch (Klassen 1–5) mit einem GameHub.
+LernLabor ist eine kostenlose Lern- und Spieleplattform für Mathe und Deutsch in den Klassen 1 bis 5. Du kannst direkt im Browser üben und dir abgeschlossene Lerneinheiten mit Münzen für Spiele im GameHub verdienen.
 
-## Lokal starten
+## LernLabor öffnen
 
-Im Projektverzeichnis einen statischen Webserver starten:
+Rufe [binderlev.github.io/WissenOhneEnde](https://binderlev.github.io/WissenOhneEnde/) auf. Eine Installation oder ein Benutzerkonto ist nicht erforderlich.
 
-```sh
-python3 -m http.server 8000
-```
+## Schnellstart
 
-Dann <http://localhost:8000> im Browser öffnen. Beenden mit `Ctrl+C`.
+1. Wähle **„Jetzt lernen“**.
+2. Suche Fach, Klassenstufe und Thema aus.
+3. Bearbeite alle acht Aufgaben einer Einheit, um eine Münze zu erhalten.
+4. Öffne **„Zu den Spielen“** und starte mit einer Münze eine Spielrunde.
 
-## Tests
+## Ausführliche Bedienungsanleitung
 
-Die vorhandenen Tests laufen mit Node.js; im Projektverzeichnis ausführen:
+Die [Bedienungsanleitung auf der Website](bedienungsanleitung.html) erklärt Schritt für Schritt, wie du lernst, Aufgaben beantwortest, Spiele suchst und filterst, Favoriten speicherst und deinen Fortschritt ansiehst. Sie enthält außerdem Hinweise zur Elternansicht und zur lokalen Speicherung deiner Daten.
 
-```sh
-node test_curriculum.js
-```
-
-Sie prüfen unter anderem Lerninhalte, Spielfortschritt und GameHub-Katalog, Suche und Filter.
-
-## Ein Spiel zum GameHub hinzufügen
-
-1. Lege einen Spielordner mit einer `index.html` und einem Bild für die Spielkarte an.
-2. Ergänze den `gameCatalog` in `script.js` um einen Eintrag. `href` und `image` sind Pfade relativ zum Projektverzeichnis. Fülle außerdem `imageAlt`, `title`, `type`, `description`, `rating`, `score`, `categories` und `tags` aus.
-3. Verwende für `categories` die vorhandenen Filterwerte `action`, `puzzle`, `strategy` und/oder `adventure`. So kann das Spiel über den passenden Genre-Filter gefunden werden.
-4. Prüfe, dass Spiel- und Bildpfad stimmen, und führe `node test_curriculum.js` aus. Der GameHub-Test kontrolliert, dass Katalogeinträge auf vorhandene Spiele und Bilder verweisen.
+**[Zur ausführlichen Anleitung](bedienungsanleitung.html)**
