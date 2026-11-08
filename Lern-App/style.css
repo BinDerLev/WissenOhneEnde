@@ -115,7 +115,7 @@ a:focus-visible {
 
 .parent-button {
   min-height: 44px;
-  padding: 0 16px;
+  padding: 10px 16px;
   border: 1px solid #cedce1;
   border-radius: 12px;
   background: var(--white);
@@ -123,6 +123,7 @@ a:focus-visible {
   cursor: pointer;
   font-size: 13px;
   font-weight: 700;
+  text-decoration: none;
   transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
 }
 
@@ -1020,7 +1021,7 @@ h1 {
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 520px) {
   .topbar {
     gap: 6px;
   }
