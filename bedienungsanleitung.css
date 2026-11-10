@@ -11,8 +11,8 @@
     --green-dark: #4f6250;
     --green-pale: #e9ede5;
     --blue: #70899a;
-    --blue-dark: #536d7e;
-    --blue-pale: #e9eff2;
+    --blue-dark: #456580;
+    --blue-pale: #d8e8f0;
     --blue-line: #d7e1e5;
     --line: #e4e3da;
     --white: #fffefa;
@@ -348,9 +348,9 @@ h1 {
 .callout {
     margin-top: 22px;
     padding: 18px 20px;
-    border-left: 4px solid var(--green);
+    border-left: 4px solid var(--blue-dark);
     border-radius: 0 14px 14px 0;
-    background: var(--green-pale);
+    background: var(--blue-pale);
 }
 
 .callout strong {
