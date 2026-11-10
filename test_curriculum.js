@@ -39,6 +39,14 @@ function createElement() {
       },
       contains(name) {
         return classes.has(name);
+      },
+      toggle(name, force) {
+        if (force === undefined) {
+          if (classes.has(name)) { classes.delete(name); return false; }
+          classes.add(name); return true;
+        }
+        if (force) { classes.add(name); return true; }
+        classes.delete(name); return false;
       }
     },
     dataset: {},
@@ -82,23 +90,42 @@ function createLearningContext(storageValues = {}) {
     if (!elements.has(selector)) elements.set(selector, createElement());
     return elements.get(selector);
   };
+  const keydownListeners = [];
   const document = {
     createElement: () => createElement(),
     querySelector: getElement,
     querySelectorAll: () => [],
-    getElementById: getElement
+    getElementById: getElement,
+    addEventListener(type, listener) {
+      if (type === "keydown") keydownListeners.push(listener);
+    },
+    removeEventListener() {},
+    activeElement: null
+  };
+  const dispatchKeyDown = (event) => {
+    keydownListeners.forEach((listener) => listener(event));
   };
   const localStorage = createLocalStorage(storageValues);
+  const clipboardTexts = [];
   const context = vm.createContext({
     console: { log() {}, warn() {}, error() {} },
     document,
     localStorage,
     Date,
     Intl,
-    Math
+    Math,
+    setTimeout(callback) { callback(); },
+    navigator: {
+      clipboard: {
+        writeText(text) {
+          clipboardTexts.push(String(text));
+          return Promise.resolve();
+        }
+      }
+    }
   });
   new vm.Script(learningAppSource, { filename: learningAppPath }).runInContext(context);
-  return { context, localStorage };
+  return { context, localStorage, clipboardTexts, dispatchKeyDown };
 }
 
 function createGameHubContext(storageValues = {}) {
@@ -635,11 +662,14 @@ test("generated questions have valid shapes and math answers match every curricu
           assert.equal(typeof question.text, "string", `${label} has no task text`);
           assert.ok(question.text.trim(), `${label} has empty task text`);
           assert.ok(
-            typeof question.answer === "string" || typeof question.answer === "number",
+            typeof question.answer === "string" || typeof question.answer === "number" ||
+              (Array.isArray(question.answer) && question.answer.every((option) => typeof option === "string")),
             `${label} answer must be text or a numeric result`
           );
           assert.ok(
-            typeof question.answer === "string" ? question.answer.trim() : Number.isFinite(question.answer),
+            Array.isArray(question.answer)
+              ? question.answer.every((option) => option.trim())
+              : typeof question.answer === "string" ? question.answer.trim() : Number.isFinite(question.answer),
             `${label} has an empty or invalid answer`
           );
           assert.equal(typeof question.hint, "string", `${label} has no hint`);
@@ -664,7 +694,26 @@ test("generated questions have valid shapes and math answers match every curricu
             const endings = tense === "Präsens"
               ? { ich: "e", du: "st", er: "t", wir: "en", ihr: "t", sie: "en" }
               : { ich: "te", du: "test", er: "te", wir: "ten", ihr: "tet", sie: "ten" };
-            assert.equal(question.answer, `${verb.slice(0, -2)}${endings[pronoun]}`, `${label} answer disagrees with the conjugation prompt`);
+            const elErn = /(?:eln|ern)$/.test(verb);
+            const stem = elErn ? verb.slice(0, -1) : verb.slice(0, -2);
+            if (pronoun === "sie") {
+              // „sie“ ist vieldeutig: Singular- und Pluralform sind beide korrekt
+              const singular = tense === "Präteritum" ? `${stem}te` : `${stem}${endings.er}`;
+              const plural = tense === "Präteritum"
+                ? `${stem}ten`
+                : (elErn ? verb : `${stem}${endings.wir}`);
+              assert.deepEqual(question.answer, [singular, plural], `${label} answer disagrees with the conjugation prompt`);
+            } else if (tense === "Präsens" && elErn) {
+              // Verben auf -eln/-ern: wir behalten den Infinitiv, bei „ich“ fällt das Stamm-e weg
+              const expected = pronoun === "wir"
+                ? verb
+                : pronoun === "ich"
+                  ? `${verb.replace(/e([lr])n$/, "$1")}e`
+                  : `${stem}${endings[pronoun]}`;
+              assert.equal(question.answer, expected, `${label} answer disagrees with the conjugation prompt`);
+            } else {
+              assert.equal(question.answer, `${stem}${endings[pronoun]}`, `${label} answer disagrees with the conjugation prompt`);
+            }
           } else if (topic.skill === "de-wordorder") {
             const words = question.text.split(": ")[1].split(" / ").map((word) => word.toLowerCase()).sort();
             const answerWords = question.answer.toLowerCase().replace(/[,.!?]/g, "").split(/\s+/).sort();
@@ -676,7 +725,9 @@ test("generated questions have valid shapes and math answers match every curricu
           } else if (topic.skill === "de-words") {
             const operands = question.text.match(/'([^']+)' und '([^']+)'/);
             assert.ok(operands, `${label} does not identify its compound-word inputs`);
-            const expected = `${operands[1]}${operands[2]}`;
+            // Komposita: Fugenregel spiegeln (Hund → Hunde-, Schule → Schul-)
+            const fuges = { Hund: "Hunde", Schule: "Schul", Gedanke: "Gedanken", Freiheit: "Freiheits" };
+            const expected = `${fuges[operands[1]] || operands[1]}${operands[2]}`.toLowerCase();
             assert.equal(question.answer, expected.charAt(0).toUpperCase() + expected.slice(1), `${label} answer disagrees with its inputs`);
           }
           generatedCount += 1;
@@ -692,4 +743,68 @@ test("generated questions have valid shapes and math answers match every curricu
     0
   );
   assert.equal(generatedCount, topicCount * 4, "every curriculum topic should be sampled four times");
+});
+
+test("the exercise error-report button copies question, answer and context to the clipboard", () => {
+  const { context, clipboardTexts } = createLearningContext();
+  useDeterministicRandom(context, 0x5f3c);
+
+  vm.runInContext('progress.subject = "german"; progress.grade = 5; startLesson(0);', context);
+  const lessonHtml = vm.runInContext("lessonView.innerHTML", context);
+  assert.ok(lessonHtml.includes('id="report-button"'), "the exercise view has no report button");
+  assert.ok(lessonHtml.includes("Fehler melden"), "the report button has no label");
+
+  vm.runInContext(`
+    activeLesson = {
+      topic: germanCurriculum[5][0],
+      topicIndex: 0,
+      questions: [{
+        text: "Setze „sammeln“ für „sie“ ins Präteritum: sie ___",
+        answer: ["sammelte", "sammelten"],
+        hint: "Bestimme zuerst den Wortstamm und ergänze die passende Verbendung."
+      }],
+      position: 0,
+      correct: 0,
+      firstAttempts: [false],
+      submissions: ["sammelt"],
+      resolved: false
+    };
+    reportExerciseError(document.querySelector("#report-button"));
+  `, context);
+
+  assert.equal(clipboardTexts.length, 1, "reporting did not copy exactly one report");
+  const report = clipboardTexts[0];
+  assert.ok(report.includes("Fehlermeldung aus der Lern-App"), "report has no header");
+  assert.ok(report.includes("Fach: Deutsch, Klasse 5"), "report omits subject and grade");
+  assert.ok(report.includes('Thema: "Grammatik: Zeiten (Präsens, Präteritum)" (skill: de-grammar)'), "report omits topic and skill");
+  assert.ok(report.includes("Aufgabe 1 von 1 · Erstversuch: falsch"), "report omits exercise progress");
+  assert.ok(report.includes("Setze „sammeln“ für „sie“ ins Präteritum: sie ___"), "report omits the question text");
+  assert.ok(report.includes('Zuletzt eingegebene Antwort: "sammelt"'), "report omits the submitted answer");
+  assert.ok(report.includes("Als Lösung hinterlegt: sammelte  |  sammelten"), "report omits the stored solutions");
+  assert.ok(report.includes("Lern-App/script.js"), "report omits the source context");
+});
+
+test("pressing Enter after a correct answer advances to the next exercise", () => {
+  const { context, dispatchKeyDown } = createLearningContext();
+  useDeterministicRandom(context, 0x70c11);
+
+  vm.runInContext(`
+    progress.subject = "math";
+    progress.grade = 1;
+    startLesson(0);
+  `, context);
+  assert.equal(vm.runInContext("activeLesson.position", context), 0, "lesson should start at the first exercise");
+  assert.equal(vm.runInContext("activeLesson.questions.length", context), 8, "lesson should offer eight exercises");
+
+  vm.runInContext("checkAnswer(null, String(activeLesson.questions[0].answer))", context);
+  assert.equal(vm.runInContext("activeLesson.resolved", context), true, "a correct answer should resolve the exercise");
+  assert.equal(vm.runInContext("activeLesson.position", context), 0, "resolving alone should not advance");
+  assert.equal(vm.runInContext("activeLesson.firstAttempts[0]", context), true, "the correct answer should count as a first-attempt hit");
+
+  dispatchKeyDown({ key: "Enter", shiftKey: false, preventDefault() {} });
+  assert.equal(vm.runInContext("activeLesson.position", context), 1, "Enter should advance to the next exercise");
+  assert.equal(vm.runInContext("activeLesson.resolved", context), false, "the next exercise starts unresolved");
+
+  dispatchKeyDown({ key: "Enter", shiftKey: false, preventDefault() {} });
+  assert.equal(vm.runInContext("activeLesson.position", context), 1, "Enter must not skip an unresolved exercise");
 });

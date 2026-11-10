@@ -702,6 +702,12 @@ h1 {
   margin-top: 12px;
 }
 
+.exercise-actions-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .hint-button {
   padding: 8px 0;
   border: 0;

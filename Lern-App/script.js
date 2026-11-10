@@ -575,6 +575,14 @@ const germanWords = [
   { word: "untersuchen", type: "Verb" }, { word: "ungewöhnlich", type: "Adjektiv" }
 ];
 
+// Fugenelemente für Komposita: erste Wortbestandteil + Fuge (Hund → Hunde-, Schule → Schul-)
+const germanNounFuges = {
+  Hund: "Hunde",
+  Schule: "Schul",
+  Gedanke: "Gedanken",
+  Freiheit: "Freiheits"
+};
+
 const germanSentences = [
   { words: ["Der", "Hund", "bellt", "laut"], answer: "Der Hund bellt laut." },
   { words: ["Mia", "liest", "ein", "Buch"], answer: "Mia liest ein Buch." },
@@ -683,9 +691,28 @@ function makeGermanQuestion(topic) {
       const verb = pickRandom(germanRegularVerbs);
       const person = pickRandom(germanPersons);
       const tense = progress.grade < 5 ? "present" : "past";
-      const ending = person[tense];
-      const answer = `${verb.slice(0, -2)}${ending}`;
       const tenseLabel = tense === "present" ? "Präsens" : "Präteritum";
+      // Verben auf -eln/-ern behalten die Endsilbe im Stamm: sammeln → sammel-, wandern → wander-
+      const elErn = verb.endsWith("eln") || verb.endsWith("ern");
+      const stem = elErn ? verb.slice(0, -1) : verb.slice(0, -2);
+      let answer;
+      if (person.pronoun === "sie") {
+        // „sie“ ist vieldeutig: Singular- und Pluralform sind beide korrekt (sie sammelte / sie sammelten)
+        answer = tense === "past"
+          ? [`${stem}te`, `${stem}ten`]
+          : [`${stem}${germanPersons[2].present}`, elErn ? verb : `${stem}en`];
+      } else if (elErn && tense === "present") {
+        if (person.pronoun === "wir") {
+          answer = verb;
+        } else if (person.pronoun === "ich") {
+          // Stamm-e fällt vor der Endung -e weg: sammle, wandre
+          answer = `${verb.replace(/e([lr])n$/, "$1")}e`;
+        } else {
+          answer = `${stem}${person.present}`;
+        }
+      } else {
+        answer = `${stem}${tense === "past" ? person.past : person.present}`;
+      }
       return { text: `Setze „${verb}“ für „${person.pronoun}“ ins ${tenseLabel}: ${person.pronoun} ___`, answer, hint: "Bestimme zuerst den Wortstamm und ergänze die passende Verbendung." };
     }
     case "de-punctuation": {
@@ -701,7 +728,7 @@ function makeGermanQuestion(topic) {
         const subject = possible.length ? possible[0] : item.words[0];
         const distractorPool = germanWords.filter(w => w.type === "Nomen").map(w => w.word).filter(w => w !== subject);
         const distractor = distractorPool.length ? pickRandom(distractorPool) : "Die Katze";
-        return { text: `Lese: "${item.answer}"\nFrage: Wer handelt im Satz? Wähle die richtige Antwort: A) ${subject}  B) ${distractor}`, answer: subject, hint: "Lies den Satz und finde das handelnde Wort (meist ein Nomen)." };
+        return { text: `Lies: "${item.answer}"\nFrage: Wer handelt im Satz? Wähle die richtige Antwort: A) ${subject}  B) ${distractor}`, answer: subject, hint: "Lies den Satz und finde das handelnde Wort (meist ein Nomen)." };
       }
       if (progress.grade <= 6) {
         // mittleres Niveau: kleine Textpassage + einfache Hauptaussage (MC)
@@ -712,7 +739,7 @@ function makeGermanQuestion(topic) {
           const j = Math.floor(Math.random() * (i + 1));
           [opts[i], opts[j]] = [opts[j], opts[i]];
         }
-        return { text: `Lese: "${item.text}"\nFrage: ${item.question}`, answer: item.answer, options: opts, hint: "Lies den Text genau und wähle die passende Antwort." };
+        return { text: `Lies: "${item.text}"\nFrage: ${item.question}`, answer: item.answer, options: opts, hint: "Lies den Text genau und wähle die passende Antwort." };
       }
       // grade >= 7 : anspruchsvollere Kurztexte mit MCQ
       const adv = pickRandom(germanAdvancedTexts);
@@ -721,16 +748,18 @@ function makeGermanQuestion(topic) {
         const j = Math.floor(Math.random() * (i + 1));
         [optsAdv[i], optsAdv[j]] = [optsAdv[j], optsAdv[i]];
       }
-      return { text: `Lese: "${adv.text}"\nFrage: ${adv.question}`, answer: adv.answer, options: optsAdv, hint: "Achte auf die Kernaussage des Textes und wähle die beste Antwort." };
+      return { text: `Lies: "${adv.text}"\nFrage: ${adv.question}`, answer: adv.answer, options: optsAdv, hint: "Achte auf die Kernaussage des Textes und wähle die beste Antwort." };
     }
     case "de-words": {
       // Komposita bilden: zwei Nomen zusammenfügen
       const nouns = germanWords.filter(w => w.type === "Nomen").map(w => w.word);
       const a = pickRandom(nouns);
       const b = pickRandom(nouns.filter(n => n !== a));
-      const compound = `${a}${b}`.replace(/\s+/g, "");
+      // Komposita: erster Bestandteil groß, Rest klein, mit korrekter Fuge (Hundeschule, Gedankenschule)
+      const fuge = germanNounFuges[a] || a;
+      const compound = `${fuge}${b}`.replace(/\s+/g, "").toLowerCase();
       const answer = compound.charAt(0).toUpperCase() + compound.slice(1);
-      return { text: `Was entsteht, wenn man die Wörter together '${a}' und '${b}' verbindet? Schreibe das zusammengesetzte Wort.`, answer, hint: "Setze die beiden Wörter ohne Leerzeichen zusammen (Kompositum)." };
+      return { text: `Was entsteht, wenn man die Wörter '${a}' und '${b}' verbindet? Schreibe das zusammengesetzte Wort.`, answer, hint: "Bilde das Kompositum und setze die beiden Wörter ohne Leerzeichen zusammen. Achte auf die Fuge (das Bindeglied zwischen den Wörtern)." };
     }
     case "de-capitalization": {
       // Groß-/Kleinschreibung üben: zeige kleingeschriebenen Satz, Antworte mit korrekter Großschreibung
@@ -756,6 +785,83 @@ function makeUniqueQuestions(topic, count) {
   return questions;
 }
 
+function buildErrorReport() {
+  const { topic, questions, position, firstAttempts, submissions } = activeLesson;
+  const question = questions[position];
+  const subject = progress.subject === "german" ? "Deutsch" : "Mathe";
+  const firstAttempt = firstAttempts[position] === null
+    ? "noch nicht beantwortet"
+    : firstAttempts[position] ? "richtig" : "falsch";
+  const submitted = submissions[position] === null || submissions[position] === undefined
+    ? "(keine Antwort eingegeben)"
+    : `"${submissions[position]}"`;
+  const expected = Array.isArray(question.answer) ? question.answer.join("  |  ") : String(question.answer);
+  const options = question.options ? `\nAntwortoptionen: ${question.options.join("  |  ")}\n` : "";
+  return [
+    "Fehlermeldung aus der Lern-App (WissenOhneEnde)",
+    "",
+    `Zeitpunkt: ${new Intl.DateTimeFormat("de-DE", { dateStyle: "medium", timeStyle: "short" }).format(new Date())}`,
+    `Fach: ${subject}, Klasse ${progress.grade}`,
+    `Thema: "${topic.title}" (skill: ${topic.skill})`,
+    `Aufgabe ${position + 1} von ${questions.length} · Erstversuch: ${firstAttempt}`,
+    options,
+    "Frage:",
+    question.text,
+    "",
+    `Zuletzt eingegebene Antwort: ${submitted}`,
+    `Als Lösung hinterlegt: ${expected}`,
+    `Tipp: ${question.hint}`,
+    "",
+    "Kontext für die Bearbeitung:",
+    `Die Aufgabe wurde von makeQuestion()/makeGermanQuestion() in Lern-App/script.js erzeugt (skill "${topic.skill}").`,
+    "Bitte prüfe, ob die hinterlegte Lösung stimmt bzw. ob eine gültige Eingabe fälschlich abgelehnt wurde."
+  ].join("\n");
+}
+
+function copyToClipboard(text) {
+  return new Promise((resolve) => {
+    const fallbackCopy = () => {
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        const copied = document.execCommand("copy");
+        document.body.removeChild(textarea);
+        resolve(copied);
+      } catch (error) {
+        resolve(false);
+      }
+    };
+    if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => resolve(true), fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
+  });
+}
+
+function reportExerciseError(button) {
+  copyToClipboard(buildErrorReport()).then((copied) => {
+    if (button) {
+      button.disabled = true;
+      button.textContent = copied ? "Bericht kopiert" : "Kopieren nicht möglich";
+      setTimeout(() => {
+        button.textContent = "Fehler melden";
+        button.disabled = false;
+      }, 2500);
+    }
+    if (!copied) {
+      const hintText = document.querySelector("#hint-text");
+      hintText.textContent = `Kopieren ist hier nicht möglich. Markiere den folgenden Text und kopiere ihn manuell:\n\n${buildErrorReport()}`;
+      hintText.hidden = false;
+    }
+  });
+}
+
 function startLesson(topicIndex) {
   const topics = (progress.subject === "german" ? germanCurriculum : curriculum)[progress.grade];
   const topic = topics[topicIndex];
@@ -767,6 +873,7 @@ function startLesson(topicIndex) {
     position: 0,
     correct: 0,
     firstAttempts: Array(count).fill(null),
+    submissions: Array(count).fill(null),
     resolved: false
   };
   renderLesson();
@@ -816,7 +923,10 @@ function renderLesson() {
       `}
       <p class="feedback" id="feedback" aria-live="polite"></p>
       <div class="exercise-actions">
-        <button class="hint-button" id="hint-button" type="button">Tipp ansehen</button>
+        <div class="exercise-actions-left">
+          <button class="hint-button" id="hint-button" type="button">Tipp ansehen</button>
+          <button class="hint-button" id="report-button" type="button">Fehler melden</button>
+        </div>
         <button class="secondary-button" id="next-button" type="button" hidden>Nächste Aufgabe →</button>
       </div>
       <p class="hint-text" id="hint-text" hidden>${question.hint}</p>
@@ -840,6 +950,9 @@ function renderLesson() {
     const hint = document.querySelector("#hint-text");
     hint.hidden = !hint.hidden;
     document.querySelector("#hint-button").textContent = hint.hidden ? "Tipp ansehen" : "Tipp verbergen";
+  });
+  document.querySelector("#report-button").addEventListener("click", (event) => {
+    reportExerciseError(event.currentTarget);
   });
   document.querySelector("#next-button").addEventListener("click", nextQuestion);
   const answerInputEl = document.querySelector("#answer-input");
@@ -872,18 +985,19 @@ function checkAnswer(event, submittedAnswer) {
   } else {
     rawSubmitted = "";
   }
+  activeLesson.submissions[activeLesson.position] = rawSubmitted;
 
   const answer = typeof question.answer === "number" ? parseAnswer(rawSubmitted) : rawSubmitted.trim().replace(/\s+/g, " ");
-  const expected = typeof question.answer === "string" && !question.caseSensitive
-    ? question.answer.toLocaleLowerCase("de-DE")
-    : question.answer;
+  const expectedAnswers = (Array.isArray(question.answer) ? question.answer : [question.answer]).map((expected) =>
+    typeof expected === "string" && !question.caseSensitive ? expected.toLocaleLowerCase("de-DE") : expected
+  );
   const submitted = typeof answer === "string" && !question.caseSensitive
     ? answer.toLocaleLowerCase("de-DE")
     : answer;
 
   const isCorrect = typeof question.answer === "number"
     ? Number.isFinite(answer) && Math.abs(answer - question.answer) < 0.011
-    : submitted === expected;
+    : expectedAnswers.includes(submitted);
 
   if (firstAttempt) {
     activeLesson.firstAttempts[activeLesson.position] = isCorrect;
@@ -900,7 +1014,11 @@ function checkAnswer(event, submittedAnswer) {
     // hide/disable input or option buttons
     const submitBtn = document.querySelector("#answer-form button");
     if (submitBtn) submitBtn.hidden = true;
-    if (input) input.disabled = true;
+    // Eingabefeld bleibt fokusierbar (nur schreibgeschützt), damit ein erneutes Enter die nächste Aufgabe lädt
+    if (input) {
+      input.readOnly = true;
+      input.focus();
+    }
     const optionsList = document.getElementById('options-list');
     if (optionsList) {
       optionsList.querySelectorAll('.option-button').forEach(b => b.disabled = true);
@@ -1002,6 +1120,19 @@ homeLink.addEventListener("click", (event) => {
   event.preventDefault();
   renderDashboard();
 });
+
+// Enter im gelösten Zustand springt zur nächsten Aufgabe (wie „Nächste Aufgabe“)
+function handleEnterKeyAdvance(event) {
+  if (event.key !== "Enter" || event.shiftKey) return;
+  if (!activeLesson || !activeLesson.resolved || lessonView.hidden) return;
+  if (!document.querySelector("#answer-form") && !document.getElementById("options-list")) return;
+  const focusedElement = document.activeElement;
+  const inputFocused = focusedElement && focusedElement.id === "answer-input";
+  if (focusedElement && focusedElement !== document.body && !inputFocused) return;
+  event.preventDefault();
+  nextQuestion();
+}
+document.addEventListener("keydown", handleEnterKeyAdvance);
 
 renderDashboard();
 

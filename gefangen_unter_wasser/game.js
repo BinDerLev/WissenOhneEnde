@@ -447,7 +447,7 @@ function solvePuzzle(command) {
         return '<span class="success">✓ Richtig! Du hast das Rätsel gelöst!</span>';
     } else {
         // FALSCH! Versuche es später nochmal
-        return '<span class="warning">✗ Falsch! Das ist nicht die richtige Antwort. Versuche es mit einer anderen antwort nochmal.</span>';
+        return '<span class="warning">✗ Falsch! Das ist nicht die richtige Antwort. Versuche es noch einmal mit einer anderen Antwort.</span>';
     }
 }
 
