@@ -22,11 +22,11 @@ const gameCatalog = [
         imageAlt: 'Gefangen Unter Wasser',
         title: 'Gefangen Unter Wasser',
         type: 'Abenteuer • Puzzle',
-        description: 'Tauche in eine mysteriöse Unterwasserwelt ein, löse Rätsel und find den Schatz!',
+        description: 'Tauche in eine mysteriöse Unterwasserwelt ein, löse drei Rätsel und find den Schatz!',
         rating: '⭐⭐⭐⭐⭐',
         score: '5/5',
         categories: ['adventure'],
-        tags: ['Abenteuer', 'Rätsel']
+        tags: ['Abenteuer', 'Rätsel', 'Action']
     },
     {
         href: 'chess/index.html',

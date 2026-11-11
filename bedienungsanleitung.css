@@ -13,6 +13,7 @@
     --blue: #70899a;
     --blue-dark: #456580;
     --blue-pale: #d8e8f0;
+    --blue-pale-2: #e5eef1;
     --blue-line: #d7e1e5;
     --line: #e4e3da;
     --white: #fffefa;
@@ -137,7 +138,7 @@ summary:focus-visible {
 .site-footer a:hover {
     transform: translateY(-1px);
     border-color: #b0c5cd;
-    background: var(--blue-pale);
+    background: var(--blue-pale-2);
 }
 
 .page-shell {
