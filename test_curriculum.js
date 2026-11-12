@@ -218,10 +218,10 @@ function test(name, callback) {
   console.log(`OK: ${name}`);
 }
 
-test("both curricula contain expanded, complete topics for grades 1–5 only", () => {
+test("both curricula contain expanded, complete topics for grades 1–6 only", () => {
   const { context } = createLearningContext();
   const curricula = vm.runInContext("[curriculum, germanCurriculum]", context);
-  const expectedGrades = Array.from({ length: 5 }, (_, index) => index + 1);
+  const expectedGrades = Array.from({ length: 6 }, (_, index) => index + 1);
 
   for (const [subjectIndex, curriculum] of curricula.entries()) {
     const subject = subjectIndex === 0 ? "math" : "german";
@@ -239,10 +239,10 @@ test("both curricula contain expanded, complete topics for grades 1–5 only", (
   }
 });
 
-test("the grade selector offers only grades 1–5", () => {
+test("the grade selector offers only grades 1–6", () => {
   const grades = [...learningAppHtml.matchAll(/<option value="(\d+)">Klasse \d+<\/option>/g)]
     .map(([, grade]) => Number(grade));
-  assert.deepEqual(grades, [1, 2, 3, 4, 5]);
+  assert.deepEqual(grades, [1, 2, 3, 4, 5, 6]);
 });
 
 test("invalid saved progress falls back safely while valid session history is retained", () => {
@@ -516,6 +516,55 @@ function germanNumber(value) {
 
 function assertNumericQuestionMatchesTask(skill, question) {
   const patterns = {
+    "fraction-add": { expression: /Berechne (\d+)\/(\d+) \+ (\d+)\/(\d+)/, calculate: ([, a, b, c, d]) => Number(a) / Number(b) + Number(c) / Number(d) },
+    "fraction-subtract": { expression: /Berechne (\d+)\/(\d+) − (\d+)\/(\d+)/, calculate: ([, a, b, c, d]) => Number(a) / Number(b) - Number(c) / Number(d) },
+    "fraction-multiply": { expression: /Berechne (\d+)\/(\d+) × (\d+)\/(\d+)/, calculate: ([, a, b, c, d]) => Number(a) * Number(c) / (Number(b) * Number(d)) },
+    "fraction-divide": { expression: /Berechne (\d+)\/(\d+) ÷ (\d+)\/(\d+)/, calculate: ([, a, b, c, d]) => Number(a) * Number(d) / (Number(b) * Number(c)) },
+    reduce: {
+      expression: /Kürze (\d+)\/(\d+) vollständig/,
+      calculate: ([, a, b]) => { let x = Number(a); let y = Number(b); while (y) [x, y] = [y, x % y]; return Number(a) / x; }
+    },
+    "decimal-multiply": { expression: /Berechne (\d+,\d) × (\d+,\d)/, calculate: ([, a, b]) => germanNumber(a) * germanNumber(b) },
+    "decimal-divide": { expression: /Berechne (\d+,\d) ÷ (\d+)/, calculate: ([, a, b]) => germanNumber(a) / Number(b) },
+    volume: { expression: /Quader ist (\d+) cm lang, (\d+) cm breit und (\d+) cm hoch/, calculate: ([, a, b, c]) => Number(a) * Number(b) * Number(c) },
+    mean: { expression: /Mittel von (\d+), (\d+) und (\d+)/, calculate: ([, a, b, c]) => (Number(a) + Number(b) + Number(c)) / 3 },
+    term: { expression: /Berechne (\d+) \+ (\d+) × (\d+)/, calculate: ([, a, b, c]) => Number(a) + Number(b) * Number(c) },
+    "double-half": {
+      expression: /(Halbiere|Verdopple) (\d+)\./,
+      calculate: ([, operation, value]) => operation === "Halbiere" ? Number(value) / 2 : Number(value) * 2
+    },
+    complement: {
+      expression: /Welche Zahl fehlt\? (\d+) \+ ___ = (\d+)/,
+      calculate: ([, left, total]) => Number(total) - Number(left)
+    },
+    missing: {
+      expression: /Welche Zahl fehlt\? (\d+) \+ ___ = (\d+)/,
+      calculate: ([, left, total]) => Number(total) - Number(left)
+    },
+    "number-compare": {
+      expression: /Welche Zahl ist größer: (\d+) oder (\d+)\?/,
+      calculate: ([, left, right]) => Math.max(Number(left), Number(right))
+    },
+    division: {
+      expression: /Wie viel ist (\d+) ÷ (\d+)\?/,
+      calculate: ([, dividend, divisor]) => Number(dividend) / Number(divisor)
+    },
+    coins: {
+      expression: /(\d+) Münzen zu 10 Cent und (\d+) Münzen zu 20 Cent/,
+      calculate: ([, tens, twenties]) => Number(tens) * 10 + Number(twenties) * 20
+    },
+    time: {
+      expression: /beginnt um (\d+):00 Uhr und endet um (\d+):00 Uhr/,
+      calculate: ([, start, end]) => Number(end) - Number(start)
+    },
+    "fraction-compare": {
+      expression: /größeren Bruch: (\d+)\/(\d+) oder (\d+)\/(\d+)/,
+      calculate: ([, a, b, c, d]) => Number(a) / Number(b) > Number(c) / Number(d) ? Number(a) : Number(c)
+    },
+    data: {
+      expression: /wählen (\d+) Kinder Äpfel und (\d+) Kinder Birnen\. (.*)/,
+      calculate: ([, apples, pears, task]) => task.includes("mehr") ? Number(pears) - Number(apples) : Number(apples) + Number(pears)
+    },
     add: {
       expression: /Wie viel ist (-?\d+) ([+−]) (-?\d+)\?/,
       calculate: ([, left, operator, right]) => operator === "+" ? Number(left) + Number(right) : Number(left) - Number(right)
@@ -541,8 +590,8 @@ function assertNumericQuestionMatchesTask(skill, question) {
       calculate: ([, numerator, denominator, whole]) => Number(numerator) * Number(whole) / Number(denominator)
     },
     decimal: {
-      expression: /Wie viel ist (\d+,\d) \+ (\d+,\d)\?/,
-      calculate: ([, left, right]) => Math.round((germanNumber(left) + germanNumber(right)) * 10) / 10
+      expression: /Wie viel ist (\d+,\d) ([+−]) (\d+,\d)\?/,
+      calculate: ([, left, operator, right]) => Math.round((operator === "+" ? germanNumber(left) + germanNumber(right) : germanNumber(left) - germanNumber(right)) * 10) / 10
     },
     geometry: {
       expression: /Ein Rechteck ist (\d+) cm lang und (\d+) cm breit\. Wie groß ist (sein Umfang in cm|seine Fläche in cm²)\?/,
@@ -600,7 +649,7 @@ function assertNumericQuestionMatchesTask(skill, question) {
   const match = question.text.match(rule.expression);
   assert.ok(match, `${skill} question does not match its expected task form: ${question.text}`);
   const expected = rule.calculate(match);
-  assert.equal(question.answer, expected, `${skill} answer disagrees with task: ${question.text}`);
+  assert.ok(Math.abs(question.answer - expected) < 1e-10, `${skill} answer disagrees with task: ${question.text}`);
 
   if (question.solution) {
     const displayedAnswer = Number.isInteger(expected)
@@ -614,6 +663,49 @@ function assertNumericQuestionMatchesTask(skill, question) {
     );
   }
 }
+
+test("spelling lessons use grade-specific everyday words without difficult loanwords", () => {
+  const { context } = createLearningContext();
+  const pools = vm.runInContext("germanSpellingPairsByGrade", context);
+  const excluded = /Portemon|Portmonee|Rhythmus|Bibliothek|Galerie|Ketchup/;
+  for (let grade = 1; grade <= 6; grade += 1) {
+    assert.ok(pools[grade].length >= 8);
+    assert.equal(new Set(pools[grade].map(([wrong]) => wrong)).size, pools[grade].length);
+    assert.ok(pools[grade].every(([wrong, answer]) => wrong !== answer && !excluded.test(answer)));
+    vm.runInContext(`progress.grade = ${grade}; progress.subject = "german";`, context);
+    for (let index = 0; index < pools[grade].length; index += 1) {
+      vm.runInContext(`Math.random = () => ${(index + 0.5) / pools[grade].length}`, context);
+      const question = context.makeGermanQuestion({ skill: "de-spelling" });
+      assert.equal(question.answer, pools[grade][index][1]);
+      assert.ok(question.hint.length > 0);
+    }
+  }
+  assert.ok(pools[4].some(([, answer]) => answer === "Häuser"));
+  assert.ok(pools[4].some(([, answer]) => answer === "klein"));
+});
+
+test("reported Portemonnaie answer is accepted and a corrected attempt retains its first-attempt result", () => {
+  const { context } = createLearningContext();
+  vm.runInContext(`
+    activeLesson = {
+      questions: [{ text: "Schreibe das Wort richtig: Portemonai", answer: "Portemonnaie" }],
+      position: 0, correct: 0, firstAttempts: [null], submissions: [], resolved: false
+    };
+    checkAnswer(null, "Portemonnaie");
+  `, context);
+  assert.equal(vm.runInContext("activeLesson.resolved", context), true);
+  assert.equal(vm.runInContext("activeLesson.firstAttempts[0]", context), true);
+  vm.runInContext(`
+    activeLesson.resolved = false;
+    activeLesson.firstAttempts = [null];
+    activeLesson.correct = 0;
+    checkAnswer(null, "Portemonai");
+    checkAnswer(null, "Portemonnaie");
+  `, context);
+  assert.equal(vm.runInContext("activeLesson.resolved", context), true);
+  assert.equal(vm.runInContext("activeLesson.firstAttempts[0]", context), false);
+  assert.equal(vm.runInContext("activeLesson.submissions[0]", context), "Portemonnaie");
+});
 
 test("every lesson offers eight distinct exercises for each subject and grade", () => {
   const { context } = createLearningContext();
@@ -629,7 +721,7 @@ test("every lesson offers eight distinct exercises for each subject and grade", 
         const questions = context.makeUniqueQuestions(topic, exerciseCount);
         assert.equal(questions.length, exerciseCount, `${subject} grade ${grade} topic ${topicIndex} has the wrong exercise count`);
         assert.equal(
-          new Set(questions.map((question) => question.text)).size,
+          new Set(questions.map((question) => context.questionIdentity(question))).size,
           questions.length,
           `${subject} grade ${grade} topic ${topicIndex} contains duplicate exercises`
         );
@@ -684,10 +776,10 @@ test("generated questions have valid shapes and math answers match every curricu
           if (subjectIndex === 0) {
             assert.equal(typeof question.answer, "number", `${label} answer should be numeric`);
             assert.ok(Number.isFinite(question.answer), `${label} answer is not finite`);
-            assertNumericQuestionMatchesTask(topic.skill, question);
-          } else if (topic.skill === "de-wordclass") {
+            assertNumericQuestionMatchesTask(topic.mode || topic.skill, question);
+          } else if (topic.skill === "de-wordclass" && !topic.mode) {
             assert.ok(["Nomen", "Verb", "Adjektiv"].includes(question.answer), `${label} has an invalid word class`);
-          } else if (topic.skill === "de-grammar") {
+          } else if (topic.skill === "de-grammar" && !topic.mode) {
             const match = question.text.match(/Setze „(\w+)“ für „(ich|du|er|wir|ihr|sie)“ ins (Präsens|Präteritum):/);
             assert.ok(match, `${label} has an invalid conjugation prompt`);
             const [, verb, pronoun, tense] = match;
@@ -702,7 +794,7 @@ test("generated questions have valid shapes and math answers match every curricu
               const plural = tense === "Präteritum"
                 ? `${stem}ten`
                 : (elErn ? verb : `${stem}${endings.wir}`);
-              assert.deepEqual(question.answer, [singular, plural], `${label} answer disagrees with the conjugation prompt`);
+              assert.deepEqual(Array.from(question.answer), [singular, plural], `${label} answer disagrees with the conjugation prompt`);
             } else if (tense === "Präsens" && elErn) {
               // Verben auf -eln/-ern: wir behalten den Infinitiv, bei „ich“ fällt das Stamm-e weg
               const expected = pronoun === "wir"
@@ -722,7 +814,7 @@ test("generated questions have valid shapes and math answers match every curricu
             if (!question.options) {
               assert.ok(question.text.includes(question.answer), `${label} answer is not supported by its reading task`);
             }
-          } else if (topic.skill === "de-words") {
+          } else if (topic.skill === "de-words" && !topic.mode) {
             const operands = question.text.match(/'([^']+)' und '([^']+)'/);
             assert.ok(operands, `${label} does not identify its compound-word inputs`);
             // Komposita: Fugenregel spiegeln (Hund → Hunde-, Schule → Schul-)
@@ -743,6 +835,118 @@ test("generated questions have valid shapes and math answers match every curricu
     0
   );
   assert.equal(generatedCount, topicCount * 4, "every curriculum topic should be sampled four times");
+});
+
+test("lesson identities ignore sentence shuffles, option order and commutative operands", () => {
+  const { context } = createLearningContext();
+  assert.equal(context.questionIdentity({ text: "Wie viel ist 3 + 7?" }), context.questionIdentity({ text: "Wie viel ist 7 + 3?" }));
+  assert.equal(context.questionIdentity({ text: "Wie viel ist 4 × 8?" }), context.questionIdentity({ text: "Wie viel ist 8 × 4?" }));
+  useDeterministicRandom(context, 0x45a7);
+  vm.runInContext('progress.grade = 4; progress.subject = "german";', context);
+  for (const skill of ["de-wordorder", "de-reading"]) {
+    const identities = new Set();
+    const texts = new Set();
+    for (let sample = 0; sample < 150; sample += 1) {
+      const question = context.makeGermanQuestion({ skill });
+      identities.add(context.questionIdentity(question));
+      texts.add(question.text);
+    }
+    assert.equal(identities.size, skill === "de-wordorder" ? 8 : 9);
+    if (skill === "de-wordorder") assert.ok(texts.size > identities.size, "different word shuffles must share an identity");
+  }
+});
+
+test("reassigned learning objectives do not inherit progress from earlier unrelated exercises", () => {
+  const { context } = createLearningContext();
+  const oldKey = context.topicProgressKey("math", 5, 5, { skill: "percent" });
+  const newKey = context.topicProgressKey("math", 5, 5, { skill: "percent", mode: "data" });
+  assert.equal(oldKey, "5-5");
+  assert.equal(newKey, "5-5:data");
+  assert.notEqual(oldKey, newKey);
+  assert.equal(context.topicProgressKey("german", 3, 4, { mode: "word-family" }), "german-3-4:word-family");
+});
+
+test("question generation terminates when randomness repeatedly selects the same item", () => {
+  const { context } = createLearningContext();
+  vm.runInContext('progress.subject = "german"; progress.grade = 4; Math.random = () => 0;', context);
+  const questions = context.makeUniqueQuestions({ skill: "de-spelling" }, 8);
+  assert.equal(questions.length, 1);
+  assert.equal(questions[0].answer, "Häuser");
+});
+
+test("focused objectives produce correct answers and every lesson stays distinct across random seeds", () => {
+  const { context } = createLearningContext();
+  const curricula = vm.runInContext("[curriculum, germanCurriculum]", context);
+  for (const seed of [1, 42, 20261112, 0xdeadbeef]) {
+    useDeterministicRandom(context, seed);
+    for (const [subjectIndex, curriculum] of curricula.entries()) {
+      for (const [grade, topics] of Object.entries(curriculum)) {
+        vm.runInContext(`progress.grade = ${grade}; progress.subject = "${subjectIndex ? "german" : "math"}";`, context);
+        for (const topic of topics) {
+          const questions = context.makeUniqueQuestions(topic, 8);
+          assert.equal(questions.length, 8, `${seed}: grade ${grade}: ${topic.title}`);
+          assert.equal(new Set(questions.map(context.questionIdentity)).size, 8);
+          for (const question of questions) {
+            if (!subjectIndex) {
+              assertNumericQuestionMatchesTask(topic.mode || topic.skill, question);
+              if (topic.skill === "add" && !topic.mode) {
+                const operands = question.text.match(/Wie viel ist (\d+) ([+−]) (\d+)/);
+                const limit = topic.maxNumber || [0, 20, 100, 1000, 1000000, 1000000, 1000000][grade];
+                assert.ok(Number(operands[1]) <= limit && Number(operands[3]) <= limit && question.answer <= limit);
+                if (topic.operation) assert.equal(operands[2], topic.operation === "subtract" ? "−" : "+");
+              }
+              if (topic.written) assert.ok(Number(question.text.match(/ist (\d+)/)[1]) >= 12);
+            }
+          }
+        }
+      }
+    }
+  }
+  vm.runInContext("progress.grade = 5", context);
+  const tenses = new Set(Array.from({ length: 100 }, () => context.makeGermanQuestion({ skill: "de-grammar" }).text.includes("Präteritum") ? "past" : "present"));
+  assert.equal(tenses.size, 2);
+});
+
+test("grade six selection persists and both subjects start complete lessons", () => {
+  const { context, localStorage } = createLearningContext({ "mathekompass-progress": JSON.stringify({ grade: 6, subject: "german" }) });
+  assert.equal(vm.runInContext("progress.grade", context), 6);
+  useDeterministicRandom(context, 606);
+  for (const subject of ["math", "german"]) {
+    vm.runInContext(`progress.subject = "${subject}"; startLesson(0); persistProgress();`, context);
+    assert.equal(vm.runInContext("activeLesson.questions.length", context), 8);
+    assert.ok(vm.runInContext("lessonView.innerHTML", context).includes("AUFGABE 1 VON 8"));
+  }
+  const restored = createLearningContext({ "mathekompass-progress": localStorage.getItem("mathekompass-progress") });
+  assert.equal(vm.runInContext("progress.grade", restored.context), 6);
+});
+
+test("exact fraction answers are accepted while nearby wrong values are rejected", () => {
+  const { context } = createLearningContext();
+  vm.runInContext(`
+    activeLesson = { questions: [{ text: "Berechne 1/6 + 1/6.", answer: 1/3, numericTolerance: 1e-9 }], position: 0, correct: 0, firstAttempts: [null], submissions: [], resolved: false };
+    checkAnswer(null, "0,33");
+  `, context);
+  assert.equal(vm.runInContext("activeLesson.resolved", context), false);
+  vm.runInContext('checkAnswer(null, "2/6")', context);
+  assert.equal(vm.runInContext("activeLesson.resolved", context), true);
+  vm.runInContext('progress.grade = 6; progress.subject = "math"; startLesson(0);', context);
+  assert.ok(vm.runInContext("lessonView.innerHTML", context).includes('inputmode="text"'));
+});
+
+test("grade six spelling accepts both standard variants and comma tasks contain commas", () => {
+  const { context } = createLearningContext();
+  useDeterministicRandom(context, 616);
+  vm.runInContext('progress.grade = 6; progress.subject = "german";', context);
+  const spelling = vm.runInContext('germanSpellingPairsByGrade[6].find(([wrong]) => wrong === "selbststendig")', context);
+  for (const variant of ["selbstständig", "selbständig"]) {
+    context.variants = spelling[1];
+    context.variant = variant;
+    vm.runInContext('activeLesson = { questions: [{ answer: variants }], position: 0, correct: 0, firstAttempts: [null], submissions: [], resolved: false }; checkAnswer(null, variant);', context);
+    assert.equal(vm.runInContext("activeLesson.resolved", context), true);
+  }
+  const punctuation = context.makeUniqueQuestions({ skill: "de-punctuation" }, 8);
+  assert.equal(punctuation.length, 8);
+  assert.ok(punctuation.every((question) => question.answer.includes(",")));
 });
 
 test("the exercise error-report button copies question, answer and context to the clipboard", () => {

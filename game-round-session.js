@@ -1,7 +1,17 @@
 (() => {
     let finished = false;
+    let returnTimer = null;
+    let returnNotice = null;
 
     window.GameRoundSession = Object.freeze({
+        restart() {
+            window.clearTimeout(returnTimer);
+            returnTimer = null;
+            returnNotice?.remove();
+            returnNotice = null;
+            delete document.body.dataset.roundFinished;
+            finished = false;
+        },
         finish() {
             if (finished) return;
             finished = true;
@@ -12,9 +22,10 @@
             notice.setAttribute("aria-live", "assertive");
             notice.textContent = "Runde beendet. Du wirst gleich zur Spiele-Plattform zurückgeleitet.";
             document.body.appendChild(notice);
+            returnNotice = notice;
             document.body.dataset.roundFinished = "true";
 
-            window.setTimeout(() => {
+            returnTimer = window.setTimeout(() => {
                 window.location.replace("../index.html");
             }, 1800);
         }

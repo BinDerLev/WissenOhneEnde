@@ -252,6 +252,8 @@ function update() {
 
 // Startet ein neues Spiel und setzt Punkte, Leben und Steine zurück.
 function startGame() {
+    window.GameRoundSession.restart();
+    clearPressedKeys();
     cancelAnimationFrame(animationId);
     animationId = null;
     score = 0;

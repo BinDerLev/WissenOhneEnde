@@ -1,4 +1,3 @@
-//Hier gibt es einen Fehler er ist das:
 const exercisesPerLesson = 8;
 
 const curriculum = {
@@ -93,7 +92,7 @@ const germanTopicTemplates = [
   { title: "Wortschatz", skill: "de-vocabulary", icon: "↔", description: "Bedeutungen, Synonyme und passende Wörter finden.", explanation: "Synonyme haben eine ähnliche Bedeutung. Lies die Antwortmöglichkeiten genau und suche das passende Wort." },
   { title: "Grammatik", skill: "de-grammar", icon: "G", description: "Verben passend zu Person und Zeitform verwenden.", explanation: "Die Verbform passt sich an die Person und die Zeitform an. Achte auf die Endung des Verbs." },
   { title: "Zeichensetzung", skill: "de-punctuation", icon: ".,", description: "Satzzeichen sicher setzen.", explanation: "Aussagesätze enden mit einem Punkt, Fragen mit einem Fragezeichen. Kommas trennen zum Beispiel Aufzählungen und Nebensätze." },
-  { title: "Lesen mit Verständnis", skill: "de-reading", icon: "📖", description: "Kurze Texte lesen und Fragen zum Inhalt beantworten.", explanation: "Lies den Text aufmerksam, markiere wichtige Informationen und beantworte die Fragen mit vollständigen Sätzen." },
+  { title: "Lesen mit Verständnis", skill: "de-reading", icon: "📖", description: "Kurze Texte lesen und Fragen zum Inhalt beantworten.", explanation: "Lies den Text aufmerksam, markiere wichtige Informationen und beantworte die Frage mit dem gesuchten Wort oder wähle eine Antwort." },
   { title: "Komposita & Wortbildung", skill: "de-words", icon: "🔗", description: "Wörter zusammensetzen und Wortteile erkennen.", explanation: "Untersuche zusammengesetzte Wörter (Komposita) und finde Bedeutungsteile wie Vorsilben oder Endungen." },
   { title: "Groß‑ und Kleinschreibung", skill: "de-capitalization", icon: "A", description: "Regeln zur Großschreibung üben.", explanation: "Nomen werden im Deutschen großgeschrieben. Achte außerdem auf Satzanfänge und Eigennamen." },
   { title: "Synonyme & Antonyme", skill: "de-vocabulary", icon: "↔", description: "Wortbedeutungen vergleichen und Gegenteile finden.", explanation: "Finde Wörter mit ähnlicher Bedeutung (Synonyme) und solche mit entgegengesetzter Bedeutung (Antonyme)." }
@@ -140,6 +139,75 @@ const germanCurriculum = {
     { title: "Satzzeichen im Text", skill: "de-punctuation", icon: ".,", description: "Punkte, Fragezeichen und einfache Kommas setzen.", explanation: "Achte darauf, ob ein Satz eine Aussage, eine Frage oder eine Aufzählung enthält.", difficulty: "easy" }
   ]
 };
+
+// Spezifische Lernziele statt mehrerer Titel für denselben Aufgabengenerator.
+// Indizes bleiben erhalten; neue Lernziele erhalten einen eigenen Fortschrittsschlüssel.
+function configureTopic(topics, index, changes) {
+  Object.assign(topics[index], changes);
+}
+for (const grade of [1, 2]) {
+  configureTopic(curriculum[grade], grade === 1 ? 3 : 4, { mode: "double-half" });
+}
+configureTopic(curriculum[1], 8, { mode: "complement" });
+configureTopic(curriculum[1], 9, { mode: "number-compare" });
+configureTopic(curriculum[2], 2, { title: "Uhrzeit und Zeitspannen", mode: "time", description: "Volle Stunden und Zeitspannen bestimmen.", explanation: "Eine Stunde hat 60 Minuten. Zähle die Stunden vom Beginn bis zum Ende." });
+configureTopic(curriculum[2], 6, { mode: "coins" });
+configureTopic(curriculum[1], 7, { title: "Vielecke untersuchen", description: "Ecken und Seiten von Vielecken zählen.", explanation: "Zähle die Ecken und Seiten. Ein Dreieck hat drei, ein Viereck vier." });
+configureTopic(curriculum[4], 1, { title: "Geldbeträge addieren", moneyContext: true, description: "Einfache Geldbeträge in Euro addieren.", explanation: "Stelle die Kommas untereinander. Zehn Cent sind 0,10 Euro." });
+configureTopic(curriculum[4], 6, { title: "Geldbeträge subtrahieren", moneyContext: true, operation: "subtract", description: "Differenzen zwischen Geldbeträgen berechnen.", explanation: "Stelle die Kommas untereinander und ziehe den kleineren Betrag vom größeren ab." });
+configureTopic(curriculum[4], 7, { title: "Meter in Zentimeter umrechnen", description: "Ganze Meter in Zentimeter umwandeln.", explanation: "Ein Meter sind 100 Zentimeter. Multipliziere die Meterzahl mit 100." });
+configureTopic(curriculum[2], 7, { title: "Fehlende Zahlen", mode: "missing", description: "Die fehlende Zahl einer Plusaufgabe finden.", explanation: "Überlege, wie viel bis zum Ergebnis fehlt. Die Umkehraufgabe hilft." });
+configureTopic(curriculum[3], 3, { operation: "subtract" });
+configureTopic(curriculum[3], 4, { measure: "perimeter" });
+configureTopic(curriculum[3], 8, { maxNumber: 100 });
+configureTopic(curriculum[3], 9, { title: "Teilen ohne Rest", mode: "division", description: "Mengen gleichmäßig aufteilen.", explanation: "Nutze die passende Malaufgabe als Probe für deine Geteiltaufgabe." });
+configureTopic(curriculum[4], 0, { written: true });
+configureTopic(curriculum[4], 3, { operation: "add" });
+configureTopic(curriculum[4], 8, { mode: "fraction-compare" });
+configureTopic(curriculum[5], 4, { measure: "area" });
+configureTopic(curriculum[5], 5, { title: "Daten auswerten", mode: "data", description: "Häufigkeiten aus einer kleinen Erhebung auswerten.", explanation: "Lies die Angaben genau. Addiere Häufigkeiten für die Gesamtzahl oder vergleiche sie durch Subtraktion." });
+configureTopic(curriculum[5], 7, { title: "Teilen und prüfen", mode: "division", description: "Größere Zahlen durch einstellige Zahlen teilen.", explanation: "Teile schrittweise und prüfe dein Ergebnis mit der passenden Malaufgabe." });
+for (const grade of [1, 2, 3, 4]) {
+  curriculum[grade].push({ title: "Daten und Häufigkeiten", skill: "add", mode: "data", icon: "▥", description: "Angaben aus einer kleinen Erhebung lesen und vergleichen.", explanation: "Lies die Anzahlen ab. Für die Gesamtzahl addierst du die Werte; für den Unterschied subtrahierst du.", difficulty: "easy" });
+}
+configureTopic(germanCurriculum[1], 4, { mode: "syllables", title: "Silben zählen", description: "Wörter in Sprechsilben zerlegen.", explanation: "Sprich ein Wort langsam und klatsche jede Silbe mit." });
+configureTopic(germanCurriculum[1], 5, { mode: "verb-find" });
+configureTopic(germanCurriculum[2], 1, { title: "Wortarten bestimmen", description: "Einzelne Wörter als Nomen, Verb oder Adjektiv bestimmen.", explanation: "Nomen benennen, Verben sagen, was jemand tut, und Adjektive beschreiben Eigenschaften." });
+configureTopic(germanCurriculum[2], 2, { title: "Sätze ordnen", description: "Wörter zu einfachen Aussagesätzen ordnen.", explanation: "Achte auf den Satzanfang, die Stellung des Verbs und den Punkt am Ende." });
+configureTopic(germanCurriculum[2], 3, { title: "Wörter mit ähnlicher Bedeutung", description: "Einfache Synonyme erkennen.", explanation: "Wähle ein Wort, das ungefähr dasselbe bedeutet." });
+configureTopic(germanCurriculum[2], 4, { mode: "verb-find", title: "Tunwörter im Satz", description: "Das Verb in einem kurzen Satz finden.", explanation: "Frage: Was tut die Person oder das Tier?" });
+configureTopic(germanCurriculum[3], 1, { title: "Satzbau: Aussagesätze", description: "Einfache Aussagesätze aus Wörtern bilden.", explanation: "Achte auf den Satzanfang, die Stellung des Verbs und den Punkt am Ende." });
+configureTopic(germanCurriculum[3], 4, { mode: "word-family", description: "Wörter mit demselben Wortstamm erkennen.", explanation: "Wörter einer Wortfamilie haben einen gemeinsamen Stamm: spielen, Spiel und Spieler." });
+configureTopic(germanCurriculum[5], 2, { title: "Zusammengesetzte Nomen bilden", description: "Zwei Nomen zu einem gebräuchlichen Wort verbinden.", explanation: "Verbinde die Wörter in der angegebenen Reihenfolge. Manchmal brauchst du ein Bindeglied, zum Beispiel Hunde + Hütte." });
+
+// NRW: Grundschule (Lehrpläne 2021), danach Gymnasium G9 (Kernlehrpläne 2019).
+// Die Zuordnung innerhalb der Doppeljahrgänge bleibt eine didaktische Auswahl.
+curriculum[4].push({ title: "Teilen durch einstellige Zahlen", skill: "multiply", mode: "division", icon: "÷", description: "Mehrstellige Zahlen ohne Rest durch einstellige Zahlen teilen.", explanation: "Teile schrittweise. Prüfe mit der Multiplikation, ob dein Ergebnis stimmt.", difficulty: "hard" });
+
+// Ausgewählte Lernziele der NRW-Erprobungsstufe (5/6), vertieft in Klasse 6.
+const gradeSixMathTopics = [
+  ["Brüche addieren", "fraction-add", "Addiere Brüche mit gleichem Nenner."],
+  ["Brüche subtrahieren", "fraction-subtract", "Subtrahiere Brüche mit gleichem Nenner."],
+  ["Brüche multiplizieren", "fraction-multiply", "Multipliziere Zähler mit Zähler und Nenner mit Nenner."],
+  ["Brüche dividieren", "fraction-divide", "Multipliziere mit dem Kehrwert des zweiten Bruchs."],
+  ["Brüche kürzen", "reduce", "Teile Zähler und Nenner durch denselben gemeinsamen Teiler."],
+  ["Dezimalzahlen multiplizieren", "decimal-multiply", "Multipliziere zunächst ohne Komma und beachte danach die Nachkommastellen."],
+  ["Dezimalzahlen dividieren", "decimal-divide", "Teile den Dezimalbetrag durch die angegebene ganze Zahl."],
+  ["Volumen von Quadern", "volume", "Multipliziere Länge, Breite und Höhe. Das Ergebnis steht in Kubikzentimetern."],
+  ["Arithmetisches Mittel", "mean", "Addiere die Werte und teile die Summe durch ihre Anzahl."],
+  ["Punkt vor Strich", "term", "Berechne zuerst die Multiplikation, danach die Addition."]
+];
+curriculum[6] = gradeSixMathTopics.map(([title, mode, explanation]) => ({ title, mode, skill: "add", icon: "∑", description: explanation, explanation, difficulty: "medium" }));
+curriculum[6].push({ title: "Dreisatz im Alltag", skill: "ratio", icon: "↗", description: "Gleichbleibende Stückpreise für andere Anzahlen nutzen.", explanation: "Berechne zuerst den Preis für ein Stück und dann den Preis für die gesuchte Anzahl.", difficulty: "medium" });
+germanCurriculum[6] = [
+  { title: "Rechtschreibstrategien", skill: "de-spelling", icon: "Ä", description: "Wortstämme und typische Stolperstellen prüfen.", explanation: "Verlängere Wörter, suche verwandte Wörter oder zerlege das Wort in seine Bestandteile.", difficulty: "medium" },
+  { title: "Sieben Wortarten", skill: "de-wordclass", mode: "wordclass-six", icon: "W", description: "Auch Artikel, Pronomen, Konjunktionen und Adverbien erkennen.", explanation: "Bestimme die Funktion des markierten Wortes im Satz.", difficulty: "medium" },
+  { title: "Satzglieder bestimmen", skill: "de-grammar", mode: "sentence-member", icon: "S", description: "Subjekt, Prädikat, Objekte und adverbiale Bestimmungen unterscheiden.", explanation: "Frage: Wer oder was? Was geschieht? Wem? Wen oder was? Wann oder wo?", difficulty: "medium" },
+  { title: "Zeiten wiederholen", skill: "de-grammar", icon: "G", description: "Präsens und Präteritum regelmäßiger Verben bilden.", explanation: "Achte auf Person, Wortstamm und die Endung der verlangten Zeitform.", difficulty: "medium" },
+  { title: "Kommas in Satzgefügen", skill: "de-punctuation", icon: ",", description: "Haupt- und Nebensätze sowie Aufzählungen richtig abtrennen.", explanation: "Trenne Nebensätze durch Kommas vom Hauptsatz. In Aufzählungen steht ein Komma zwischen gleichrangigen Teilen.", difficulty: "medium" },
+  { title: "Texte verstehen und einordnen", skill: "de-reading", mode: "reading-six", icon: "📖", description: "Aussagen, Textabsichten und sprachliche Bilder erkennen.", explanation: "Belege deine Auswahl mit den Informationen im Text. Unterscheide eine Information von einer Meinung oder Aufforderung.", difficulty: "medium" },
+  { title: "Medien und Quellen", skill: "de-reading", mode: "media-six", icon: "M", description: "Quellen, Werbung und verantwortlichen Mediengebrauch beurteilen.", explanation: "Prüfe Herkunft und Absicht einer Nachricht. Vergleiche Quellen und schütze persönliche Daten.", difficulty: "medium" }
+];
 
 const icons = {
   add: ["＋", "−"], compare: ["?", "→"], shapes: ["△", "□"],
@@ -229,7 +297,7 @@ if (!saved || typeof saved !== "object") {
 const savedSessions = Array.isArray(saved.sessions) ? saved.sessions : [];
 const progress = {
   // Saved progress outside the supported grade range falls back to grade 1.
-  grade: Number.isInteger(saved.grade) && saved.grade >= 1 && saved.grade <= 5 ? saved.grade : 1,
+  grade: Number.isInteger(saved.grade) && saved.grade >= 1 && saved.grade <= 6 ? saved.grade : 1,
   subject: saved.subject === "german" ? "german" : "math",
   completed: Number.isInteger(saved.completed) && saved.completed >= 0 ? saved.completed : 0,
   topics: saved.topics && typeof saved.topics === "object" ? saved.topics : {},
@@ -291,6 +359,11 @@ function syncPlatformUnlock(coinBalance) {
   return true;
 }
 
+function topicProgressKey(subject, grade, index, topic) {
+  const base = subject === "math" ? `${grade}-${index}` : `german-${grade}-${index}`;
+  return topic.mode ? `${base}:${topic.mode}` : base;
+}
+
 function renderDashboard() {
   dashboard.hidden = false;
   lessonView.hidden = true;
@@ -312,7 +385,7 @@ function renderDashboard() {
   const topics = (progress.subject === "german" ? germanCurriculum : curriculum)[progress.grade];
   topicCount.textContent = `${topics.length} Themen`;
   topicGrid.innerHTML = topics.map((topic, index) => {
-    const key = progress.subject === "math" ? `${progress.grade}-${index}` : `german-${progress.grade}-${index}`;
+    const key = topicProgressKey(progress.subject, progress.grade, index, topic);
     const done = progress.topics[key] || 0;
     const icon = icons[topic.skill]?.[0] || topic.icon;
     const taskCount = exercisesPerLesson;
@@ -434,22 +507,112 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function makeFocusedMathQuestion(topic) {
+  if (!topic.mode) return null;
+  const grade = progress.grade;
+  const limit = grade === 1 ? 20 : grade === 2 ? 100 : grade === 3 ? 1000 : 1000000;
+  const a = randomInt(1, Math.floor(Math.min(limit / 3, 50)));
+  const b = randomInt(1, Math.min(limit - 2 * a, 50));
+  switch (topic.mode) {
+    case "fraction-add":
+    case "fraction-subtract":
+    case "fraction-multiply":
+    case "fraction-divide": {
+      const denominator = randomInt(3, 12);
+      const left = randomInt(1, denominator - 1);
+      const right = randomInt(1, topic.mode === "fraction-subtract" ? left : denominator - 1);
+      const other = topic.mode === "fraction-add" || topic.mode === "fraction-subtract" ? denominator : randomInt(2, 12);
+      const operator = { "fraction-add": "+", "fraction-subtract": "−", "fraction-multiply": "×", "fraction-divide": "÷" }[topic.mode];
+      const answer = operator === "+" ? (left + right) / denominator : operator === "−" ? (left - right) / denominator : operator === "×" ? left * right / (denominator * other) : left * other / (denominator * right);
+      return { text: `Berechne ${left}/${denominator} ${operator} ${right}/${other}. Gib das genaue Ergebnis als Bruch oder endliche Dezimalzahl ein.`, answer, allowFraction: true, numericTolerance: 1e-9, hint: topic.explanation };
+    }
+    case "reduce": {
+      const denominator = pickRandom([3, 5, 7, 11]);
+      const numerator = randomInt(1, denominator - 1);
+      const factor = randomInt(2, 9);
+      return { text: `Kürze ${numerator * factor}/${denominator * factor} vollständig. Wie lautet der Zähler?`, answer: numerator, hint: "Teile Zähler und Nenner durch ihren größten gemeinsamen Teiler." };
+    }
+    case "decimal-multiply": {
+      const left = randomInt(11, 99);
+      const right = randomInt(11, 99);
+      return { text: `Berechne ${(left / 10).toFixed(1).replace(".", ",")} × ${(right / 10).toFixed(1).replace(".", ",")}.`, answer: left * right / 100, numericTolerance: 1e-9, hint: topic.explanation };
+    }
+    case "decimal-divide": {
+      const divisor = randomInt(2, 9);
+      const result = randomInt(11, 99);
+      return { text: `Berechne ${(result * divisor / 10).toFixed(1).replace(".", ",")} ÷ ${divisor}.`, answer: result / 10, numericTolerance: 1e-9, hint: topic.explanation };
+    }
+    case "volume": {
+      const height = randomInt(2, 12);
+      return { text: `Ein Quader ist ${a} cm lang, ${b} cm breit und ${height} cm hoch. Wie groß ist sein Volumen in cm³?`, answer: a * b * height, hint: topic.explanation };
+    }
+    case "mean": {
+      const c = randomInt(1, 30);
+      return { text: `Bestimme das arithmetische Mittel von ${a}, ${b} und ${c}. Gib bei Bedarf einen Bruch ein.`, answer: (a + b + c) / 3, allowFraction: true, numericTolerance: 1e-9, hint: topic.explanation };
+    }
+    case "term": {
+      const c = randomInt(2, 12);
+      return { text: `Berechne ${a} + ${b} × ${c}.`, answer: a + b * c, hint: topic.explanation };
+    }
+    case "double-half": {
+      const n = randomInt(1, grade === 1 ? 10 : 50);
+      const halve = Math.random() < 0.5;
+      return { text: halve ? `Halbiere ${n * 2}.` : `Verdopple ${n}.`, answer: halve ? n : n * 2, hint: halve ? "Teile in zwei gleich große Teile." : "Addiere die Zahl zu sich selbst." };
+    }
+    case "complement": {
+      const n = randomInt(0, 10);
+      return { text: `Welche Zahl fehlt? ${n} + ___ = 10`, answer: 10 - n, hint: "Ergänze bis zehn." };
+    }
+    case "number-compare":
+      return { text: `Welche Zahl ist größer: ${a} oder ${a + b}?`, answer: a + b, hint: "Die größere Zahl liegt auf dem Zahlenstrahl weiter rechts." };
+    case "missing":
+      return { text: `Welche Zahl fehlt? ${a} + ___ = ${a + b}`, answer: b, hint: "Ziehe die bekannte Zahl vom Ergebnis ab." };
+    case "division": {
+      const divisor = randomInt(2, 9);
+      const result = randomInt(2, grade < 4 ? 10 : 99);
+      return { text: `Wie viel ist ${divisor * result} ÷ ${divisor}?`, answer: result, hint: `Welche Zahl ergibt mal ${divisor} den Wert ${divisor * result}?` };
+    }
+    case "coins": {
+      const tens = randomInt(1, 4);
+      const twenties = randomInt(1, 3);
+      return { text: `Du hast ${tens} Münzen zu 10 Cent und ${twenties} Münzen zu 20 Cent. Wie viele Cent sind das zusammen?`, answer: tens * 10 + twenties * 20, hint: "Zähle zuerst die Zehn-Cent-Münzen, dann die Zwanzig-Cent-Münzen. Addiere die Beträge." };
+    }
+    case "time": {
+      const start = randomInt(6, 16);
+      const duration = randomInt(1, 5);
+      return { text: `Ein Ausflug beginnt um ${start}:00 Uhr und endet um ${start + duration}:00 Uhr. Wie viele Stunden dauert er?`, answer: duration, hint: "Zähle die vollen Stunden zwischen Beginn und Ende." };
+    }
+    case "fraction-compare": {
+      const denominator = randomInt(3, 12);
+      const numerator = randomInt(1, denominator - 1);
+      return { text: `Welcher Zähler gehört zum größeren Bruch: ${numerator}/${denominator} oder ${numerator + 1}/${denominator}? Gib nur den Zähler ein.`, answer: numerator + 1, hint: "Bei gleichem Nenner ist der Bruch mit dem größeren Zähler größer." };
+    }
+    case "data": {
+      const difference = Math.random() < 0.5;
+      return { text: `Bei einer Umfrage wählen ${a} Kinder Äpfel und ${a + b} Kinder Birnen. ${difference ? "Wie viele Kinder mehr wählen Birnen als Äpfel?" : "Wie viele Kinder haben insgesamt abgestimmt?"}`, answer: difference ? b : 2 * a + b, hint: difference ? "Berechne den Unterschied der beiden Anzahlen." : "Addiere die beiden Anzahlen." };
+    }
+    default: return null;
+  }
+}
+
 function makeQuestion(topic) {
+  const focused = makeFocusedMathQuestion(topic);
+  if (focused) return focused;
   let a;
   let b;
 
   switch (topic.skill) {
-    case "add":
-      a = randomInt(1, progress.grade === 1 ? 10 : progress.grade < 5 ? 99 : 500);
-      b = randomInt(1, progress.grade === 1 ? 10 : progress.grade < 5 ? 99 : 500);
-      if (progress.grade <= 2 && Math.random() < 0.5) {
-        [a, b] = [Math.max(a, b), Math.min(a, b)];
-        return { text: `Wie viel ist ${a} − ${b}?`, answer: a - b, hint: "Starte bei der größeren Zahl und gehe so viele Schritte zurück.", solution: `${a} − ${b} = ${a - b}` };
-      }
-      if (progress.grade === 2) b = randomInt(1, 100 - a);
-      return { text: `Wie viel ist ${a} + ${b}?`, answer: a + b, hint: "Zerlege die Zahlen in Zehner und Einer.", solution: `${a} + ${b} = ${a + b}` };
+    case "add": {
+      const limit = topic.maxNumber || [0, 20, 100, 1000, 1000000, 1000000, 1000000][progress.grade];
+      const subtract = topic.operation === "subtract" || (!topic.operation && Math.random() < 0.5);
+      a = randomInt(1, limit - 1);
+      b = randomInt(1, subtract ? a : limit - a);
+      const answer = subtract ? a - b : a + b;
+      const operator = subtract ? "−" : "+";
+      return { text: `Wie viel ist ${a} ${operator} ${b}?`, answer, hint: "Rechne stellenweise und prüfe durch Überschlagen.", solution: `${a} ${operator} ${b} = ${answer}` };
+    }
     case "compare":
-      a = randomInt(2, 15);
+      a = randomInt(2, progress.grade === 1 ? 5 : 15);
       b = a + randomInt(1, 5);
       return { text: `Welche Zahl kommt als Nächstes? ${a}, ${a + (b - a)}, ${b + (b - a)}, …`, answer: b + 2 * (b - a), hint: "Finde heraus, wie viel jedes Mal dazukommt.", solution: `Es kommen jeweils ${b - a} dazu. Die nächste Zahl ist ${b + 2 * (b - a)}.` };
     case "shapes": {
@@ -459,31 +622,35 @@ function makeQuestion(topic) {
       return { text: `Wie viele ${feature} hat ein ${shape}?`, answer: sides, hint: "Bei Vielecken ist die Anzahl der Ecken genauso groß wie die Anzahl der Seiten.", solution: `Ein ${shape} hat ${sides} ${feature}.` };
     }
     case "multiply":
-      a = randomInt(2, progress.grade < 4 ? 10 : 12);
-      b = randomInt(2, progress.grade < 4 ? 10 : 12);
+      a = randomInt(topic.written ? 12 : 2, topic.written ? 999 : 10);
+      b = randomInt(2, topic.written ? 99 : 10);
       return { text: `Wie viel ist ${a} × ${b}?`, answer: a * b, hint: `Du kannst ${a} Gruppen mit je ${b} zählen.`, solution: `${a} × ${b} = ${a * b}` };
     case "money":
       a = randomInt(2, 8);
       b = randomInt(2, 9);
       return { text: `Ein Heft kostet ${a} €. Wie viel kosten ${b} Hefte? (in €)`, answer: a * b, hint: `Addiere den Preis ${b} Mal oder multipliziere.`, solution: `${a} × ${b} € = ${a * b} €` };
     case "fractions": {
-      const denominator = [2, 3, 4, 5][randomInt(0, 3)];
+      const denominator = progress.grade <= 4 ? pickRandom([2, 4]) : pickRandom([2, 3, 4, 5]);
       const multiplier = randomInt(2, 10);
-      const numerator = randomInt(1, denominator);
+      const numerator = randomInt(1, denominator - 1);
       const whole = denominator * multiplier;
       const answer = numerator * multiplier;
-      return { text: `Wie viel ist ${numerator}/${denominator} von ${whole}?`, answer, hint: `Teile ${whole} zuerst durch ${denominator}.`, solution: `${whole} : ${denominator} × ${numerator} = ${answer}` };
+      return { text: `${progress.grade <= 4 ? "Eine Strecke ist " + whole + " cm lang. " : ""}Wie viel ist ${numerator}/${denominator} von ${whole}?${progress.grade <= 4 ? " Gib die Länge in cm an." : ""}`, answer, hint: `Teile ${whole} zuerst durch ${denominator}.`, solution: `${whole} : ${denominator} × ${numerator} = ${answer}` };
     }
     case "decimal": {
-      const left = randomInt(10, 99) / 10;
-      const right = randomInt(10, 99) / 10;
-      const answer = Math.round((left + right) * 10) / 10;
-      return { text: `Wie viel ist ${left.toFixed(1).replace(".", ",")} + ${right.toFixed(1).replace(".", ",")}?`, answer, hint: "Stelle die Kommas untereinander.", solution: `${left.toFixed(1).replace(".", ",")} + ${right.toFixed(1).replace(".", ",")} = ${answer.toFixed(1).replace(".", ",")}` };
+      const x = randomInt(10, 99);
+      const y = randomInt(10, 99);
+      const subtract = topic.operation === "subtract";
+      const left = (subtract ? Math.max(x, y) : x) / 10;
+      const right = (subtract ? Math.min(x, y) : y) / 10;
+      const answer = Math.round((subtract ? left - right : left + right) * 10) / 10;
+      const operator = subtract ? "−" : "+";
+      return { text: `${topic.moneyContext ? "Rechne mit Geldbeträgen (in €). " : ""}Wie viel ist ${left.toFixed(1).replace(".", ",")} ${operator} ${right.toFixed(1).replace(".", ",")}?`, answer, hint: "Stelle die Kommas untereinander.", solution: `${left.toFixed(1).replace(".", ",")} ${operator} ${right.toFixed(1).replace(".", ",")} = ${answer.toFixed(1).replace(".", ",")}` };
     }
     case "geometry":
       a = randomInt(2, 12);
       b = randomInt(2, 12);
-      if (Math.random() < 0.5) {
+      if (topic.measure === "perimeter" || (topic.measure !== "area" && Math.random() < 0.5)) {
         return { text: `Ein Rechteck ist ${a} cm lang und ${b} cm breit. Wie groß ist sein Umfang in cm?`, answer: 2 * (a + b), hint: "Der Umfang ist die Summe aller vier Seiten.", solution: `2 × (${a} + ${b}) = ${2 * (a + b)} cm` };
       }
       return { text: `Ein Rechteck ist ${a} cm lang und ${b} cm breit. Wie groß ist seine Fläche in cm²?`, answer: a * b, hint: "Fläche = Länge × Breite.", solution: `${a} × ${b} = ${a * b} cm²` };
@@ -556,15 +723,48 @@ function pickRandom(items) {
   return items[randomInt(0, items.length - 1)];
 }
 
-const germanSpellingPairs = [
-  ["Fusball", "Fußball"], ["Schwimmbat", "Schwimmbad"], ["Fahrrat", "Fahrrad"],
-  ["Feriehn", "Ferien"], ["Bibilothek", "Bibliothek"], ["Abendteuer", "Abenteuer"],
-  ["Kaze", "Katze"], ["Schuhle", "Schule"],
-  ["warscheinlich", "wahrscheinlich"], ["nähmlich", "nämlich"], ["Rhytmus", "Rhythmus"],
-  ["Portemonai", "Portemonnaie"], ["Maschiene", "Maschine"], ["Gallerie", "Galerie"],
-  ["Ketschup", "Ketchup"], ["Terasse", "Terrasse"], ["Packet", "Paket"],
-  ["Standart", "Standard"], ["Akuu", "Akku"], ["interesant", "interessant"]
+// Eigene Wortlisten je Klassenstufe: keine schwer ableitbaren Fremdwörter.
+// Pro Stufe mindestens acht Wörter für eine vollständige, abwechslungsreiche Lektion.
+const germanSpellingPairsByGrade = {
+  1: [
+    ["Kaze", "Katze"], ["Schuhle", "Schule"], ["Hunt", "Hund"], ["Buhm", "Baum"],
+    ["Bluhme", "Blume"], ["Sone", "Sonne"], ["Bal", "Ball"], ["Mausz", "Maus"]
+  ],
+  2: [
+    ["Fusball", "Fußball"], ["Schwimmbat", "Schwimmbad"], ["Fahrrat", "Fahrrad"],
+    ["Feriehn", "Ferien"], ["Muter", "Mutter"], ["Waser", "Wasser"],
+    ["Kinnt", "Kind"], ["Broot", "Brot"]
+  ],
+  3: [
+    ["Bletter", "Blätter"], ["Hende", "Hände"], ["Kelte", "Kälte"], ["Welder", "Wälder"],
+    ["Bine", "Biene"], ["Wisse", "Wiese"], ["Brif", "Brief"], ["Schtuhl", "Stuhl"]
+  ],
+  4: [
+    ["Heuser", "Häuser"], ["Beume", "Bäume"], ["Treume", "Träume"], ["Meuse", "Mäuse"],
+    ["leuft", "läuft"], ["Ferienn", "Ferien"], ["klain", "klein"], ["Zait", "Zeit"],
+    ["Schlüsel", "Schlüssel"], ["Frühstük", "Frühstück"]
+  ],
+  5: [
+    ["warscheinlich", "wahrscheinlich"], ["nähmlich", "nämlich"], ["Abendteuer", "Abenteuer"],
+    ["interesant", "interessant"], ["plözlich", "plötzlich"], ["gefärlich", "gefährlich"],
+    ["Herschaft", "Herrschaft"], ["Verwantschaft", "Verwandtschaft"]
+  ]
+};
+
+germanSpellingPairsByGrade[6] = [
+  ["entäuschen", "enttäuschen"], ["wiedersprechen", "widersprechen"], ["Verwandschaft", "Verwandtschaft"],
+  ["unentlich", "unendlich"], ["Erlebniss", "Erlebnis"], ["Geheimniss", "Geheimnis"],
+  ["Hoffnug", "Hoffnung"], ["Beschreibungg", "Beschreibung"], ["zuverläsig", "zuverlässig"], ["selbststendig", ["selbstständig", "selbständig"]]
 ];
+
+const germanSpellingHintsByGrade = {
+  1: "Sprich das Wort langsam. Achte auf jeden Laut und auf doppelte Buchstaben.",
+  2: "Achte auf doppelte Buchstaben. Verlängere Wörter: Aus Hund wird Hunde.",
+  3: "Achte auf ä und ie. Suche ein verwandtes Wort: Hand hilft dir bei Hände.",
+  4: "Suche ein verwandtes Wort: Haus hilft dir bei Häuser. Achte auch auf ei, ie und doppelte Buchstaben.",
+  6: "Prüfe den Wortstamm und die Wortbausteine. Verlängere Wörter und leite sie von verwandten Wörtern ab.",
+  5: "Suche verwandte Wörter und prüfe den Wortstamm. Achte auf Dehnungszeichen und doppelte Buchstaben."
+};
 
 const germanWords = [
   { word: "Hund", type: "Nomen" }, { word: "springen", type: "Verb" },
@@ -650,6 +850,11 @@ const germanPunctuationQuestions = [
   { text: "Nachdem der Regen aufgehört hatte gingen alle nach draußen", answer: "Nachdem der Regen aufgehört hatte, gingen alle nach draußen.", hint: "Trenne den Nebensatz am Satzanfang mit einem Komma ab." }
 ];
 
+germanPunctuationQuestions.push(
+  { text: "Wenn es regnet nehmen wir den Bus", answer: "Wenn es regnet, nehmen wir den Bus.", hint: "Trenne den vorangestellten Nebensatz mit einem Komma ab." },
+  { text: "Bevor Mia geht packt sie ihre Tasche", answer: "Bevor Mia geht, packt sie ihre Tasche.", hint: "Nach dem Nebensatz mit „bevor“ steht ein Komma." }
+);
+
 const germanRegularVerbs = ["spielen", "lernen", "malen", "fragen", "lachen", "sagen", "kaufen", "kochen", "zeigen", "sammeln", "wandern", "turnen"];
 const germanPersons = [
   { pronoun: "ich", present: "e", past: "te" },
@@ -660,12 +865,129 @@ const germanPersons = [
   { pronoun: "sie", present: "en", past: "ten" }
 ];
 
+const germanSyllables = [
+  ["Mama", 2], ["Oma", 2], ["Banane", 3], ["Tomate", 3],
+  ["Elefant", 3], ["Hut", 1], ["Ball", 1], ["Schokolade", 4],
+  ["Nase", 2], ["Telefon", 3], ["Rose", 2], ["Hase", 2]
+];
+const germanVerbSentences = [
+  ["Mia malt ein Bild.", "malt"], ["Ben spielt im Garten.", "spielt"],
+  ["Der Hund bellt.", "bellt"], ["Die Katze schläft.", "schläft"],
+  ["Lina liest ein Buch.", "liest"], ["Oma kocht eine Suppe.", "kocht"],
+  ["Der Vogel singt.", "singt"], ["Das Kind lacht.", "lacht"],
+  ["Papa schwimmt im See.", "schwimmt"], ["Wir tanzen im Kreis.", "tanzen"]
+];
+const germanWordFamilies = [
+  ["spielen", "Spieler", "Spiegel"], ["fahren", "Fahrer", "Farbe"],
+  ["backen", "Bäcker", "Bagger"], ["laufen", "Läufer", "Lampe"],
+  ["wohnen", "Wohnung", "Wolke"], ["lesen", "Leser", "Leiter"],
+  ["malen", "Maler", "Mantel"], ["freundlich", "Freund", "Freitag"],
+  ["singen", "Sänger", "Sonne"], ["bauen", "Bauwerk", "Baum"]
+];
+const germanCompoundPairs = [
+  ["Haus", "Tür"], ["Garten", "Tor"], ["Regen", "Jacke"], ["Hand", "Schuh"],
+  ["Zahn", "Bürste"], ["Fuß", "Ball"], ["Schule", "Tasche"], ["Hund", "Hütte"],
+  ["Regen", "Bogen"], ["Haus", "Dach"], ["Garten", "Zaun"], ["Hand", "Tuch"]
+];
+const germanMainIdeaTexts = [
+  ["Auf dem Schulhof liegt Müll. Die Klasse sammelt Papier und Verpackungen auf. Danach ist der Hof sauber.", "Die Klasse säubert den Schulhof.", "Die Klasse baut einen Spielplatz."],
+  ["Lena sät Bohnen. Jeden Tag gießt sie die Erde. Bald wachsen kleine Pflanzen.", "Lena zieht Pflanzen groß.", "Lena kauft Gemüse ein."],
+  ["Im Winter finden Vögel wenig Futter. Ben füllt das Futterhaus. Nun kommen Meisen und Spatzen.", "Ben hilft Vögeln im Winter.", "Ben baut einen Schneemann."],
+  ["Die Kinder wollen die Straße überqueren. Sie warten auf Grün. Dann gehen sie gemeinsam hinüber.", "Die Kinder überqueren die Straße sicher.", "Die Kinder verpassen ihren Bus."],
+  ["Mia kann noch nicht gut schwimmen. Sie übt jede Woche im Kurs. Bald schafft sie eine ganze Bahn.", "Mia lernt durch regelmäßiges Üben schwimmen.", "Mia gewinnt einen Lauf."],
+  ["Die Bücherei veranstaltet einen Lesetag. Kinder stellen ihre Lieblingsbücher vor. Viele leihen danach ein Buch aus.", "Ein Lesetag macht Kindern Lust auf Bücher.", "Die Bücherei bleibt geschlossen."],
+  ["Es regnet seit Stunden. Der Weg steht unter Wasser. Die Wandergruppe nimmt deshalb einen anderen Weg.", "Die Wandergruppe ändert wegen des Regens ihren Weg.", "Die Wandergruppe sucht einen Badeplatz."],
+  ["Ein Fahrradreifen ist platt. Opa findet das Loch und flickt es. Nun kann Ali wieder fahren.", "Opa repariert Alis Fahrradreifen.", "Ali bekommt ein neues Fahrrad."],
+  ["In der Klasse ist es oft laut. Die Kinder vereinbaren Gesprächsregeln. Jetzt lassen sie einander ausreden.", "Gesprächsregeln helfen der Klasse beim Zuhören.", "Die Kinder üben ein Lied."]
+];
+
+const germanGradeSixCards = {
+  "wordclass-six": [
+    ["Bestimme die Wortart von „die“: Die Katze schläft.", "Artikel"],
+    ["Bestimme die Wortart von „sie“: Heute liest sie.", "Pronomen"],
+    ["Bestimme die Wortart von „weil“: Ich bleibe, weil es regnet.", "Konjunktion"],
+    ["Bestimme die Wortart von „heute“: Heute spielen wir.", "Adverb"],
+    ["Bestimme die Wortart von „liest“: Mia liest ein Buch.", "Verb"],
+    ["Bestimme die Wortart von „Buch“: Mia liest ein Buch.", "Nomen"],
+    ["Bestimme die Wortart von „spannende“: Das spannende Buch gefällt mir.", "Adjektiv"],
+    ["Bestimme die Wortart von „und“: Mia liest und Ben malt.", "Konjunktion"],
+    ["Bestimme die Wortart von „wir“: Wir gehen nach Hause.", "Pronomen"],
+    ["Bestimme die Wortart von „dort“: Dort steht mein Fahrrad.", "Adverb"]
+  ],
+  "sentence-member": [
+    ["Welches Satzglied ist „Mia“? Mia liest ein Buch.", "Subjekt"],
+    ["Welches Satzglied ist „liest“? Mia liest ein Buch.", "Prädikat"],
+    ["Welches Satzglied ist „ein Buch“? Mia liest ein Buch.", "Akkusativobjekt"],
+    ["Welches Satzglied ist „dem Kind“? Oma hilft dem Kind.", "Dativobjekt"],
+    ["Welches Satzglied ist „am Abend“? Wir spielen am Abend.", "Adverbiale Bestimmung der Zeit"],
+    ["Welches Satzglied ist „im Garten“? Wir spielen im Garten.", "Adverbiale Bestimmung des Ortes"],
+    ["Welches Satzglied ist „Der Hund“? Der Hund bellt laut.", "Subjekt"],
+    ["Welches Satzglied ist „einen Ball“? Ben wirft einen Ball.", "Akkusativobjekt"],
+    ["Welches Satzglied ist „seiner Freundin“? Ben gibt seiner Freundin ein Heft.", "Dativobjekt"],
+    ["Welches Satzglied ist „schläft“? Die Katze schläft auf dem Sofa.", "Prädikat"]
+  ],
+  "reading-six": [
+    ["Lies: Der Fuchs lobt den Gesang des Raben. Als der Rabe singt, fällt sein Käse herunter. Der Fuchs frisst ihn. Welche Lehre passt?", "Vorsicht vor eigennützigem Lob.", "Wer singt, bekommt immer eine Belohnung."],
+    ["Lies: Bienen bestäuben Blüten. So können sich bei vielen Pflanzen Früchte entwickeln. Welche Aussage trifft zu?", "Bienen tragen zur Entstehung vieler Früchte bei.", "Bienen stellen Früchte selbst her."],
+    ["Lies: Die Sonne lachte über dem Dorf. Welches sprachliche Mittel liegt vor?", "Personifikation", "Sachliche Mengenangabe"],
+    ["Lies: Sein Rucksack war schwer wie ein Stein. Welches sprachliche Mittel liegt vor?", "Vergleich", "Wörtliche Rede"],
+    ["Lies: Ich finde, unsere Pause sollte länger dauern. Was wird ausgedrückt?", "Eine Meinung", "Ein nachgewiesener Messwert"],
+    ["Lies: Am Samstag bleibt die Bücherei wegen Bauarbeiten geschlossen. Was ist die Absicht?", "Über eine Schließung informieren", "Für ein neues Buch werben"],
+    ["Lies: Bringe morgen bitte dein Sportzeug mit! Was ist die Absicht?", "Zu einer Handlung auffordern", "Ein vergangenes Erlebnis erzählen"],
+    ["Lies: Zuerst spannte Ali die Schnur. Danach befestigte er den Drachen. Schließlich lief er los. Welche Wörter ordnen den Ablauf?", "Zuerst, danach, schließlich", "Ali, Schnur, Drachen"],
+    ["Lies: Es war einmal eine Königin. Ein sprechender Vogel erfüllte ihr drei Wünsche. Welche Textsorte liegt nahe?", "Märchen", "Nachrichtenbericht"]
+  ],
+  "media-six": [
+    ["Eine Meldung nennt weder Autor noch Datum oder Quelle. Was ist sinnvoll?", "Die Aussage mit verlässlichen Quellen vergleichen.", "Die Meldung sofort als Tatsache verbreiten."],
+    ["Ein Beitrag verspricht ein Geschenk und verlangt deine Privatadresse. Was ist sinnvoll?", "Keine Daten eingeben und eine vertraute erwachsene Person fragen.", "Die Adresse sofort öffentlich posten."],
+    ["Ein Artikel ist mit „Anzeige“ gekennzeichnet. Was bedeutet das?", "Es handelt sich um Werbung.", "Alle Aussagen wurden wissenschaftlich bewiesen."],
+    ["Du übernimmst eine Information aus einem Sachtext für ein Referat. Was gehört dazu?", "Die Quelle angeben.", "Die Information als eigene Forschung ausgeben."],
+    ["Ein Foto einer Mitschülerin soll veröffentlicht werden. Was musst du beachten?", "Vorher die nötige Einwilligung klären.", "Fotos darf man immer ohne Nachfrage veröffentlichen."],
+    ["Zwei Webseiten nennen unterschiedliche Zahlen zu einem Ereignis. Was hilft beim Prüfen?", "Datum, Herkunft und Belege beider Angaben prüfen.", "Immer die größere Zahl auswählen."],
+    ["Eine Suchmaschine zeigt einen Treffer ganz oben. Was folgt daraus?", "Der Inhalt muss trotzdem geprüft werden.", "Der Inhalt ist deshalb garantiert richtig."],
+    ["Eine alte Nachricht wird ohne Datum erneut geteilt. Was solltest du prüfen?", "Ob die Meldung noch aktuell ist.", "Ob die Überschrift möglichst aufregend klingt."],
+    ["Du willst einen Text in eigenen Worten zusammenfassen. Was ist wichtig?", "Den Sinn erhalten und die Quelle nennen.", "Nur einzelne Wörter austauschen und die Quelle weglassen."]
+  ]
+};
+
+function makeFocusedGermanQuestion(topic) {
+  if (germanGradeSixCards[topic.mode]) {
+    const [text, answer, distractor] = pickRandom(germanGradeSixCards[topic.mode]);
+    const options = distractor ? [answer, distractor] : [...new Set(germanGradeSixCards[topic.mode].map((card) => card[1]))];
+    return { text, answer, options: shuffled(options), hint: topic.explanation };
+  }
+  if (topic.mode === "syllables") {
+    const [word, count] = pickRandom(germanSyllables);
+    return { text: `Wie viele Silben hat „${word}“?`, answer: count, hint: "Sprich das Wort langsam und klatsche bei jeder Silbe einmal." };
+  }
+  if (topic.mode === "verb-find") {
+    const [sentence, answer] = pickRandom(germanVerbSentences);
+    return { text: `Welches Wort ist das Tunwort (Verb)? ${sentence}`, answer, hint: "Frage: Was tut jemand? Schreibe nur das Verb." };
+  }
+  if (topic.mode === "word-family") {
+    const [word, answer, distractor] = pickRandom(germanWordFamilies);
+    return { text: `Welches Wort gehört zur Wortfamilie von „${word}“?`, answer, options: shuffled([answer, distractor]), hint: "Achte auf den gemeinsamen Wortstamm und die verwandte Bedeutung." };
+  }
+  return null;
+}
+
+function shuffled(items) {
+  const result = [...items];
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const other = randomInt(0, index);
+    [result[index], result[other]] = [result[other], result[index]];
+  }
+  return result;
+}
+
 function makeGermanQuestion(topic) {
+  const focused = makeFocusedGermanQuestion(topic);
+  if (focused) return focused;
   switch (topic.skill) {
     case "de-spelling": {
-      const pool = germanSpellingPairs.slice(0, progress.grade <= 2 ? 8 : progress.grade <= 4 ? 12 : germanSpellingPairs.length);
+      const pool = germanSpellingPairsByGrade[progress.grade];
       const [wrong, answer] = pickRandom(pool);
-      return { text: `Schreibe das Wort richtig: ${wrong}`, answer, hint: "Achte auf die Buchstaben, die im Wort oft verwechselt oder vergessen werden." };
+      return { text: `Schreibe das Wort richtig: ${wrong}`, answer, hint: germanSpellingHintsByGrade[progress.grade] };
     }
     case "de-wordclass": {
       const pool = germanWords.slice(0, progress.grade <= 2 ? 8 : progress.grade <= 4 ? 9 : germanWords.length);
@@ -680,7 +1002,7 @@ function makeGermanQuestion(topic) {
         const swapIndex = randomInt(0, index);
         [words[index], words[swapIndex]] = [words[swapIndex], words[index]];
       }
-      return { text: `Ordne die Wörter zu einem Satz: ${words.join(" / ")}`, answer: item.answer, caseSensitive: true, hint: "Achte auf die Satzstellung, den Satzanfang und das Satzzeichen am Ende." };
+      return { key: `sentence:${item.answer}`, text: `Ordne die Wörter zu einem Satz: ${words.join(" / ")}`, answer: item.answer, caseSensitive: true, hint: "Achte auf die Satzstellung, den Satzanfang und das Satzzeichen am Ende." };
     }
     case "de-vocabulary": {
       const pool = germanVocabulary.slice(0, progress.grade <= 2 ? 8 : progress.grade <= 4 ? 9 : germanVocabulary.length);
@@ -690,7 +1012,7 @@ function makeGermanQuestion(topic) {
     case "de-grammar": {
       const verb = pickRandom(germanRegularVerbs);
       const person = pickRandom(germanPersons);
-      const tense = progress.grade < 5 ? "present" : "past";
+      const tense = progress.grade < 5 || Math.random() < 0.5 ? "present" : "past";
       const tenseLabel = tense === "present" ? "Präsens" : "Präteritum";
       // Verben auf -eln/-ern behalten die Endsilbe im Stamm: sammeln → sammel-, wandern → wander-
       const elErn = verb.endsWith("eln") || verb.endsWith("ern");
@@ -716,50 +1038,30 @@ function makeGermanQuestion(topic) {
       return { text: `Setze „${verb}“ für „${person.pronoun}“ ins ${tenseLabel}: ${person.pronoun} ___`, answer, hint: "Bestimme zuerst den Wortstamm und ergänze die passende Verbendung." };
     }
     case "de-punctuation": {
-      const item = pickRandom(germanPunctuationQuestions.slice(0, progress.grade < 5 ? 8 : germanPunctuationQuestions.length));
+      const pool = progress.grade === 6 ? germanPunctuationQuestions.filter((item) => item.answer.includes(",")) : germanPunctuationQuestions.slice(0, progress.grade < 4 ? 8 : germanPunctuationQuestions.length);
+      const item = pickRandom(pool);
       return { text: `Setze Großschreibung und Satzzeichen richtig: ${item.text}`, answer: item.answer, caseSensitive: true, hint: item.hint };
     }
     case "de-reading": {
-      // Leseverständnis: wähle Schwierigkeitsgrad nach Klassenstufe
-      if (progress.grade < 5) {
-        // einfache Sätze wie vorher
-        const item = pickRandom(germanSentences.slice(0, 8));
-        const possible = item.words.filter(w => w[0] === w[0].toUpperCase() && !["Der","Die","Das","Ein","Eine"].includes(w));
-        const subject = possible.length ? possible[0] : item.words[0];
-        const distractorPool = germanWords.filter(w => w.type === "Nomen").map(w => w.word).filter(w => w !== subject);
-        const distractor = distractorPool.length ? pickRandom(distractorPool) : "Die Katze";
-        return { text: `Lies: "${item.answer}"\nFrage: Wer handelt im Satz? Wähle die richtige Antwort: A) ${subject}  B) ${distractor}`, answer: subject, hint: "Lies den Satz und finde das handelnde Wort (meist ein Nomen)." };
+      if (progress.grade === 1) {
+        const [sentence, verb] = pickRandom(germanVerbSentences);
+        return { key: `reading:${sentence}`, text: `Lies: "${sentence}"\nWelches Wort sagt, was jemand tut?`, answer: verb, hint: "Lies den Satz langsam. Was geschieht?" };
       }
-      if (progress.grade <= 6) {
-        // mittleres Niveau: kleine Textpassage + einfache Hauptaussage (MC)
-        const item = pickRandom(germanIntermediateTexts);
-        const opts = item.options.slice();
-        // shuffle options
-        for (let i = opts.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [opts[i], opts[j]] = [opts[j], opts[i]];
-        }
-        return { text: `Lies: "${item.text}"\nFrage: ${item.question}`, answer: item.answer, options: opts, hint: "Lies den Text genau und wähle die passende Antwort." };
+      if (progress.grade === 4) {
+        const [text, answer, distractor] = pickRandom(germanMainIdeaTexts);
+        return { key: `reading:${text}`, text: `Lies: "${text}"\nWelche Aussage fasst den ganzen Text am besten zusammen?`, answer, options: shuffled([answer, distractor]), hint: "Überlege, worum es im ganzen Text geht. Prüfe, ob die Aussage zum Text passt." };
       }
-      // grade >= 7 : anspruchsvollere Kurztexte mit MCQ
-      const adv = pickRandom(germanAdvancedTexts);
-      const optsAdv = adv.options.slice();
-      for (let i = optsAdv.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [optsAdv[i], optsAdv[j]] = [optsAdv[j], optsAdv[i]];
-      }
-      return { text: `Lies: "${adv.text}"\nFrage: ${adv.question}`, answer: adv.answer, options: optsAdv, hint: "Achte auf die Kernaussage des Textes und wähle die beste Antwort." };
+      const item = pickRandom(germanIntermediateTexts);
+      return { key: `reading:${item.text}`, text: `Lies: "${item.text}"\nFrage: ${item.question}`, answer: item.answer, options: shuffled(item.options), hint: "Suche im Text die Information, die zur Frage passt." };
     }
     case "de-words": {
       // Komposita bilden: zwei Nomen zusammenfügen
-      const nouns = germanWords.filter(w => w.type === "Nomen").map(w => w.word);
-      const a = pickRandom(nouns);
-      const b = pickRandom(nouns.filter(n => n !== a));
-      // Komposita: erster Bestandteil groß, Rest klein, mit korrekter Fuge (Hundeschule, Gedankenschule)
+      const [a, b] = pickRandom(germanCompoundPairs);
+      // Gebräuchliche Komposita mit passender Fuge (z. B. Hundehütte).
       const fuge = germanNounFuges[a] || a;
       const compound = `${fuge}${b}`.replace(/\s+/g, "").toLowerCase();
       const answer = compound.charAt(0).toUpperCase() + compound.slice(1);
-      return { text: `Was entsteht, wenn man die Wörter '${a}' und '${b}' verbindet? Schreibe das zusammengesetzte Wort.`, answer, hint: "Bilde das Kompositum und setze die beiden Wörter ohne Leerzeichen zusammen. Achte auf die Fuge (das Bindeglied zwischen den Wörtern)." };
+      return { text: `Was entsteht, wenn man die Wörter '${a}' und '${b}' in dieser Reihenfolge verbindet? Schreibe das zusammengesetzte Wort.`, answer, hint: "Bilde das Kompositum und setze die beiden Wörter ohne Leerzeichen zusammen. Achte auf die Fuge (das Bindeglied zwischen den Wörtern)." };
     }
     case "de-capitalization": {
       // Groß-/Kleinschreibung üben: zeige kleingeschriebenen Satz, Antworte mit korrekter Großschreibung
@@ -772,13 +1074,23 @@ function makeGermanQuestion(topic) {
   }
 }
 
+function questionIdentity(question) {
+  if (question.key) return question.key;
+  // Tauschaufgaben im selben Ablauf nicht als neue Aufgabe zählen.
+  const arithmetic = question.text.match(/^Wie viel ist (\d+) ([+×]) (\d+)\?$/);
+  if (arithmetic) return `${arithmetic[2]}:${[Number(arithmetic[1]), Number(arithmetic[3])].sort((a, b) => a - b).join(":")}`;
+  return question.text.normalize("NFC").trim().replace(/\s+/g, " ");
+}
+
 function makeUniqueQuestions(topic, count) {
   const questions = [];
   const seen = new Set();
-  while (questions.length < count) {
+  // Auch bei erschöpften Pools oder ungünstiger Zufallsfolge bleibt die App bedienbar.
+  for (let attempt = 0; questions.length < count && attempt < count * 256; attempt += 1) {
     const question = progress.subject === "german" ? makeGermanQuestion(topic) : makeQuestion(topic);
-    if (!seen.has(question.text)) {
-      seen.add(question.text);
+    const identity = questionIdentity(question);
+    if (!seen.has(identity)) {
+      seen.add(identity);
       questions.push(question);
     }
   }
@@ -917,7 +1229,7 @@ function renderLesson() {
       ` : `
         <form class="answer-form" id="answer-form">
            <label class="sr-only" for="answer-input">Deine Antwort</label>
-           <input class="answer-input" id="answer-input" name="answer" type="text" inputmode="${progress.subject === "math" ? "decimal" : "text"}" autocomplete="off" placeholder="Deine Antwort" required>
+           <input class="answer-input" id="answer-input" name="answer" type="text" inputmode="${progress.subject === "math" && !question.allowFraction ? "decimal" : "text"}" autocomplete="off" placeholder="Deine Antwort" required>
            <button class="primary-button" type="submit">Prüfen</button>
         </form>
       `}
@@ -996,7 +1308,7 @@ function checkAnswer(event, submittedAnswer) {
     : answer;
 
   const isCorrect = typeof question.answer === "number"
-    ? Number.isFinite(answer) && Math.abs(answer - question.answer) < 0.011
+    ? Number.isFinite(answer) && Math.abs(answer - question.answer) < (question.numericTolerance ?? 0.011)
     : expectedAnswers.includes(submitted);
 
   if (firstAttempt) {
@@ -1067,9 +1379,7 @@ function finishLesson() {
   progress.completed += 1;
   const currentCoinBalance = getCoinBalance();
   const coinBalance = currentCoinBalance === null ? null : currentCoinBalance + 1;
-  const key = progress.subject === "math"
-    ? `${progress.grade}-${topicIndex}`
-    : `german-${progress.grade}-${topicIndex}`;
+  const key = topicProgressKey(progress.subject, progress.grade, topicIndex, topic);
   progress.topics[key] = (progress.topics[key] || 0) + 1;
   progress.sessions.push({
     subject: progress.subject,

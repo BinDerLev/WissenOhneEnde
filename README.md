@@ -1,6 +1,6 @@
 # LernLabor
 
-LernLabor ist eine kostenlose Lern- und Spieleplattform für Mathe und Deutsch in den Klassen 1 bis 5. Du kannst direkt im Browser üben und dir abgeschlossene Lerneinheiten mit Münzen für Spiele im GameHub verdienen.
+LernLabor ist eine kostenlose Lern- und Spieleplattform für Mathe und Deutsch in den Klassen 1 bis 6. Du kannst direkt im Browser üben und dir abgeschlossene Lerneinheiten mit Münzen für Spiele im GameHub verdienen.
 
 ## LernLabor öffnen
 

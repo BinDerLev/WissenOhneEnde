@@ -22,6 +22,8 @@ let previousState = null;
 let previousScore = 0;
 let previousRandomState = null;
 let moveToken = 0;
+let animating = false;
+let previousCombo = 1;
 let mode = 'standard';
 let activeDailyDate = null;
 let todayDate = getLocalDateKey();
@@ -37,7 +39,7 @@ const WIN_VALUE = 2048;
 bestScoreDisplay.textContent = bestScore;
 comboDisplay.textContent = `x${combo}`;
 levelDisplay.textContent = level;
-goalDisplay.textContent = String(Math.max(2048, 2048 + (level - 1) * 1024));
+goalDisplay.textContent = String(Math.max(2048, 2048));
 newGameBtn.addEventListener('click', newGame);
 standardModeBtn.addEventListener('click', startStandardGame);
 dailyModeBtn.addEventListener('click', startDailyChallenge);
@@ -179,7 +181,7 @@ function updateHud() {
   scoreDisplay.textContent = score;
   comboDisplay.textContent = `x${combo}`;
   levelDisplay.textContent = level;
-  goalDisplay.textContent = String(Math.max(2048, 2048 + (level - 1) * 1024));
+  goalDisplay.textContent = String(Math.max(2048, 2048));
 
   if (score > bestScore) {
     bestScore = score;
@@ -201,8 +203,11 @@ function newGame() {
   if (roundFinished) return;
   checkDateBoundary();
   moveToken += 1;
+  animating = false;
+  gameBoard.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
   grid = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
   score = 0;
+  level = 1;
   combo = 1;
   gameOver = false;
   gameWon = false;
@@ -235,6 +240,7 @@ function addRandomTile() {
     const randomTile = emptyTiles[Math.floor(randomValue() * emptyTiles.length)];
     const fourChance = mode === 'daily' ? dailyConfig.fourChance : 10;
     grid[randomTile.i][randomTile.j] = randomValue() * 100 < fourChance ? 4 : 2;
+    return { row: randomTile.i, col: randomTile.j };
   }
 }
 
@@ -257,99 +263,102 @@ function handleKeyPress(e) {
   applyMove(direction);
 }
 
-function applyMove(direction) {
-  if (gameOver || gameWon) return;
-  const moveFunctions = {
-    up: moveUp,
-    down: moveDown,
-    left: moveLeft,
-    right: moveRight
+// Resolve each line in movement order. Every source tile has a destination,
+// and a newly merged tile cannot merge again during this move.
+function calculateMove(board, direction) {
+  const next = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(0));
+  const tracks = [];
+  const merges = [];
+  let points = 0;
+  const position = (line, offset) => {
+    if (direction === 'left') return { row: line, col: offset };
+    if (direction === 'right') return { row: line, col: GRID_SIZE - 1 - offset };
+    if (direction === 'up') return { row: offset, col: line };
+    return { row: GRID_SIZE - 1 - offset, col: line };
   };
-  const moved = moveFunctions[direction]();
-  if (!moved) return;
-  const token = moveToken;
-
-  setTimeout(() => {
-    if (token !== moveToken) return;
-    addRandomTile();
-    updateLevel();
-    checkGameState();
-    render();
-  }, 100);
+  for (let line = 0; line < GRID_SIZE; line++) {
+    const sources = [];
+    for (let offset = 0; offset < GRID_SIZE; offset++) {
+      const from = position(line, offset);
+      if (board[from.row][from.col]) sources.push({ from, value: board[from.row][from.col] });
+    }
+    let target = 0;
+    for (let index = 0; index < sources.length; index++) {
+      const source = sources[index];
+      const to = position(line, target++);
+      const pair = sources[index + 1];
+      tracks.push({ ...source, to });
+      let value = source.value;
+      if (pair && pair.value === source.value) {
+        tracks.push({ ...pair, to });
+        value *= 2;
+        points += value;
+        merges.push(to);
+        index++;
+      }
+      next[to.row][to.col] = value;
+    }
+  }
+  return { grid: next, tracks, merges, points,
+    moved: board.some((row, r) => row.some((value, c) => value !== next[r][c])) };
 }
 
-function moveLeft() { return move('left'); }
-function moveRight() { return move('right'); }
-function moveUp() { return move('up'); }
-function moveDown() { return move('down'); }
-
-function move(direction) {
+async function applyMove(direction) {
+  if (gameOver || gameWon || animating || roundFinished) return;
+  if (!['left', 'right', 'up', 'down'].includes(direction)) return;
+  const result = calculateMove(grid, direction);
+  if (!result.moved) return;
   previousState = grid.map(row => [...row]);
   previousScore = score;
+  previousCombo = combo;
   previousRandomState = mode === 'daily' ? dailyRandomState : null;
-
-  let moved = false;
-
-  if (direction === 'left' || direction === 'right') {
-    for (let i = 0; i < GRID_SIZE; i++) {
-      const row = [...grid[i]];
-      const result = direction === 'left' ? slideAndMerge(row) : slideAndMerge(row.reverse()).reverse();
-      if (!arraysEqual(row, result)) {
-        moved = true;
-        grid[i] = result;
-      }
-    }
-  } else {
-    for (let j = 0; j < GRID_SIZE; j++) {
-      const column = [];
-      for (let i = 0; i < GRID_SIZE; i++) {
-        column.push(grid[i][j]);
-      }
-
-      const result = direction === 'up' ? slideAndMerge(column) : slideAndMerge(column.reverse()).reverse();
-
-      if (!arraysEqual(column, result)) {
-        moved = true;
-        for (let i = 0; i < GRID_SIZE; i++) {
-          grid[i][j] = result[i];
-        }
-      }
-    }
-  }
-
-  if (!moved) {
-    previousState = null;
-    previousScore = score;
-    previousRandomState = null;
-  }
-
-  return moved;
+  animating = true;
+  const token = ++moveToken;
+  undoBtn.disabled = true;
+  await animateMove(result.tracks);
+  if (token !== moveToken) return;
+  grid = result.grid;
+  score += result.points;
+  combo = result.merges.length ? Math.min(9, combo + result.merges.length) : 1;
+  gameWon = grid.some(row => row.some(value => value >= WIN_VALUE));
+  const spawned = addRandomTile();
+  updateLevel();
+  render(spawned ? [spawned] : [], result.merges);
+  animating = false;
+  undoBtn.disabled = !undoAvailable;
+  checkGameState();
 }
 
-function slideAndMerge(line) {
-  let filtered = line.filter(val => val !== 0);
-
-  for (let i = 0; i < filtered.length - 1; i++) {
-    if (filtered[i] === filtered[i + 1]) {
-      const mergedValue = filtered[i] * 2;
-      filtered[i] = mergedValue;
-      filtered.splice(i + 1, 1);
-
-      score += mergedValue;
-      combo = Math.min(9, combo + 1);
-
-      if (mergedValue === WIN_VALUE && !gameWon) {
-        gameWon = true;
-      }
-    }
-  }
-
-  while (filtered.length < GRID_SIZE) filtered.push(0);
-  return filtered;
-}
-
-function arraysEqual(arr1, arr2) {
-  return arr1.every((val, idx) => val === arr2[idx]);
+async function animateMove(tracks) {
+  const cells = [...gameBoard.children];
+  const boardRect = gameBoard.getBoundingClientRect();
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const animations = [];
+  const ghosts = tracks.map(({ from, to, value }) => {
+    const start = cells[from.row * GRID_SIZE + from.col].getBoundingClientRect();
+    const end = cells[to.row * GRID_SIZE + to.col].getBoundingClientRect();
+    const tile = document.createElement('div');
+    tile.className = `game-tile moving-tile tile-${value}`;
+    tile.textContent = value;
+    tile.setAttribute('aria-hidden', 'true');
+    Object.assign(tile.style, {
+      left: `${start.left - boardRect.left - gameBoard.clientLeft}px`,
+      top: `${start.top - boardRect.top - gameBoard.clientTop}px`,
+      width: `${start.width}px`, height: `${start.height}px`
+    });
+    gameBoard.appendChild(tile);
+    animations.push(tile.animate([
+      { transform: 'translate(0, 0)' },
+      { transform: `translate(${end.left - start.left}px, ${end.top - start.top}px)` }
+    ], { duration: reducedMotion ? 0 : 220, easing: 'ease-in-out', fill: 'forwards' }).finished.catch(() => {}));
+    return tile;
+  });
+  cells.forEach(cell => {
+    cell.textContent = '';
+    cell.className = 'game-tile';
+  });
+  await Promise.all(animations);
+  ghosts.forEach(tile => tile.remove());
 }
 
 function updateLevel() {
@@ -416,7 +425,7 @@ function isGameOver() {
 }
 
 function undo() {
-  if (roundFinished || gameOver || gameWon) return;
+  if (roundFinished || gameOver || gameWon || animating) return;
   if (!previousState) return;
   if (!undoAvailable) return;
 
@@ -426,7 +435,8 @@ function undo() {
   if (mode === 'daily' && previousRandomState !== null) {
     dailyRandomState = previousRandomState;
   }
-  combo = 1;
+  combo = previousCombo;
+  updateLevel();
   previousState = null;
   previousRandomState = null;
   updateHud();
@@ -434,7 +444,8 @@ function undo() {
   render();
 }
 
-function render() {
+function render(spawned = [], merged = []) {
+  undoBtn.disabled = animating || !previousState || !undoAvailable || roundFinished;
   gameBoard.innerHTML = '';
 
   for (let i = 0; i < GRID_SIZE; i++) {
@@ -448,7 +459,8 @@ function render() {
       if (value !== 0) {
         tile.textContent = value;
         tile.className += ` tile-${value}`;
-        tile.classList.add('new');
+        if (spawned.some(cell => cell.row === i && cell.col === j)) tile.classList.add('new');
+        if (merged.some(cell => cell.row === i && cell.col === j)) tile.classList.add('merge');
       }
 
       gameBoard.appendChild(tile);

@@ -173,3 +173,9 @@ kbd {
     .game-controls { align-items: flex-start; }
     .help { flex-direction: column; }
 }
+
+/* Der Neustart bleibt während der angekündigten Rückkehr bedienbar. */
+body[data-round-finished="true"]::after,
+.game-round-return-notice {
+  pointer-events: none;
+}
