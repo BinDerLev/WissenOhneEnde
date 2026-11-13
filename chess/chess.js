@@ -1,11 +1,12 @@
 const boardEl = document.getElementById('board')
 const statusEl = document.getElementById('status')
 const restartBtn = document.getElementById('restart')
+const lastMoveEl = document.getElementById('last-move')
 
 const PIECE_UNICODE = {
-  p: '♟', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚',
-  P: '♙', R: '♖', N: '♘', B: '♗', Q: '♕', K: '♔'
+  p: '♟', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚'
 }
+const PIECE_NAMES = { p: 'Bauer', r: 'Turm', n: 'Springer', b: 'Läufer', q: 'Dame', k: 'König' }
 
 let board = []
 let turn = 'w' // 'w' or 'b'
@@ -15,10 +16,22 @@ let focusedSquare = [7, 0]
 let gameOver = false
 let roundFinished = false
 let aiThinking = false
+let animating = false
+let lastMove = null
+let gameVersion = 0
+let aiTimer = null
+const activeAnimations = new Set()
 let castling = { w: {k: true, q: true}, b: {k: true, q: true} }
 let enPassant = null // {r,c} square that can be captured into this move, or null
 
 function init() {
+  gameVersion++
+  clearTimeout(aiTimer)
+  aiTimer = null
+  activeAnimations.forEach(animation => animation.cancel())
+  activeAnimations.clear()
+  animating = false
+  lastMove = null
   board = [
     ['R','N','B','Q','K','B','N','R'],
     ['P','P','P','P','P','P','P','P'],
@@ -41,8 +54,8 @@ function init() {
 }
 
 function renderBoard() {
+  const hadBoardFocus = boardEl.contains(document.activeElement)
   boardEl.innerHTML = ''
-  const pieceNames = { p: 'Bauer', r: 'Turm', n: 'Springer', b: 'Läufer', q: 'Dame', k: 'König' }
   for (let r = 0; r < 8; r++) {
     const rank = document.createElement('div')
     rank.className = 'rank'
@@ -58,11 +71,29 @@ function renderBoard() {
       const p = board[r][c]
       const squareName = `${'abcdefgh'[c]}${8 - r}`
       const pieceDescription = p
-        ? `${pieceNames[p.toLowerCase()]} ${pieceColor(p) === 'w' ? 'weiß' : 'schwarz'}`
+        ? `${PIECE_NAMES[p.toLowerCase()]} ${pieceColor(p) === 'w' ? 'weiß' : 'schwarz'}`
         : 'leeres Feld'
-      sq.setAttribute('aria-label', `${squareName}, ${pieceDescription}`)
+      const moveMarker = lastMove && (
+        lastMove.from[0] === r && lastMove.from[1] === c ? 'Von' :
+        lastMove.to[0] === r && lastMove.to[1] === c ? 'Nach' : null
+      )
+      sq.setAttribute('aria-label', `${squareName}, ${pieceDescription}${moveMarker ? `, ${moveMarker === 'Von' ? 'Startfeld' : 'Zielfeld'} des letzten Zugs` : ''}`)
       sq.setAttribute('aria-selected', 'false')
-      if (p) sq.textContent = PIECE_UNICODE[p]
+      if (p) {
+        const piece = document.createElement('span')
+        piece.className = `piece piece-${pieceColor(p) === 'w' ? 'white' : 'black'}`
+        piece.textContent = PIECE_UNICODE[p.toLowerCase()] + '\uFE0E'
+        piece.setAttribute('aria-hidden', 'true')
+        sq.appendChild(piece)
+      }
+      if (moveMarker) {
+        sq.classList.add(moveMarker === 'Von' ? 'last-move-from' : 'last-move-to')
+        const marker = document.createElement('span')
+        marker.className = 'move-marker'
+        marker.textContent = moveMarker
+        marker.setAttribute('aria-hidden', 'true')
+        sq.appendChild(marker)
+      }
       sq.addEventListener('click', onSquareClick)
       sq.addEventListener('keydown', onSquareKeyDown)
       rank.appendChild(sq)
@@ -70,7 +101,8 @@ function renderBoard() {
     boardEl.appendChild(rank)
   }
   highlightSelection()
-      if (searchInput && searchInput.value && searchInput.value.trim()) performSearch()
+  updateLastMove()
+  if (hadBoardFocus) getSquare(focusedSquare).focus()
 }
 
 function onSquareKeyDown(e) {
@@ -97,7 +129,7 @@ function onSquareKeyDown(e) {
 }
 
 function onSquareClick(e) {
-  if (gameOver) return
+  if (gameOver || animating || aiThinking || turn !== 'b') return
   const r = +e.currentTarget.dataset.r
   const c = +e.currentTarget.dataset.c
   focusedSquare = [r, c]
@@ -199,13 +231,81 @@ function allLegalMovesForColor(color) {
   return moves
 }
 
-function doMove(move) {
+function getSquare([r, c]) {
+  return boardEl.querySelector(`.square[data-r="${r}"][data-c="${c}"]`)
+}
+
+function squareName([r, c]) {
+  return `${'abcdefgh'[c]}${8 - r}`
+}
+
+function updateLastMove() {
+  if (!lastMove) {
+    lastMoveEl.textContent = 'Noch kein Zug. Danach zeigen „Von“ und „Nach“ den letzten Zug.'
+    return
+  }
+  const player = pieceColor(lastMove.piece) === 'w' ? 'KI (Weiß)' : 'Du (Schwarz)'
+  const promotion = lastMove.promoted ? ' · Umwandlung zur Dame' : ''
+  const castlingMove = lastMove.castling ? ' · Rochade (König und Turm)' : ''
+  lastMoveEl.textContent = `Letzter Zug: ${player} · ${PIECE_NAMES[lastMove.piece.toLowerCase()]} ${squareName(lastMove.from)} → ${squareName(lastMove.to)}${castlingMove}${promotion}`
+}
+
+async function animateMove(move, piece) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  const tracks = [move]
+  if (piece.toLowerCase() === 'k' && Math.abs(move.to[1] - move.from[1]) === 2) {
+    const kingside = move.to[1] > move.from[1]
+    tracks.push({ from: [move.from[0], kingside ? 7 : 0], to: [move.from[0], kingside ? 5 : 3] })
+  }
+  await Promise.all(tracks.map(async track => {
+    const source = getSquare(track.from)
+    const target = getSquare(track.to)
+    const element = source.querySelector('.piece')
+    if (!element || !element.animate) return
+    const start = source.getBoundingClientRect()
+    const end = target.getBoundingClientRect()
+    const animation = element.animate([
+      { transform: 'translate(0, 0)' },
+      { transform: `translate(${end.left - start.left}px, ${end.top - start.top}px)` }
+    ], { duration: 650, easing: 'ease-in-out', fill: 'forwards' })
+    source.classList.add('move-source')
+    element.classList.add('piece-moving')
+    activeAnimations.add(animation)
+    try {
+      await animation.finished
+    } catch {
+      // A restart cancels the animation and invalidates this move.
+    }
+  }))
+}
+
+async function doMove(move) {
+  if (gameOver || animating) return
+  const version = gameVersion
+  const piece = board[move.from[0]][move.from[1]]
+  if (!piece || pieceColor(piece) !== turn) return
+  animating = true
+  selected = null
+  legalMoves = []
+  highlightSelection()
+  updateStatus()
+  await animateMove(move, piece)
+  if (version !== gameVersion) return
+  activeAnimations.forEach(animation => animation.cancel())
+  activeAnimations.clear()
   applyMoveOnBoard(board, move)
   // promotion
   const [tr,tc]=move.to
   const moved = board[tr][tc]
   if (moved === 'P' && tr===7) board[tr][tc]='Q'
   if (moved === 'p' && tr===0) board[tr][tc]='q'
+  lastMove = {
+    from: [...move.from], to: [...move.to], piece,
+    promoted: moved !== board[tr][tc],
+    castling: piece.toLowerCase() === 'k' && Math.abs(tc - move.from[1]) === 2
+  }
+  animating = false
+  aiThinking = false
 
   // switch
   turn = (turn==='w') ? 'b' : 'w'
@@ -225,7 +325,9 @@ function doMove(move) {
     // Anzeige: KI denkt während Wartezeit
     aiThinking = true
     updateStatus()
-    setTimeout(aiMoveRandom, delay)
+    aiTimer = setTimeout(() => {
+      if (version === gameVersion) aiMoveRandom()
+    }, delay)
   }
 }
 
@@ -289,6 +391,8 @@ function applyMoveOnBoard(bd, move, updateGlobal = true) {
 }
 
 function aiMoveRandom() {
+  if (gameOver || animating || !aiThinking || turn !== 'w') return
+  aiTimer = null
   const color = 'w'
 
   // Bestimme Tiefe und Verhalten aus dem Difficulty-Selector
@@ -405,15 +509,6 @@ function aiMoveRandom() {
     const moves = allLegalMovesForColor('w')
     if (moves.length===0){ aiThinking = false; checkGameState(); updateStatus(); return }
 
-   let bestMove = null
-   let bestScore = -Infinity
-    for (const mv of moves){
-      const nb = cloneBoard(board)
-      applyMoveOnBoard(nb,mv,false)
-      const score = -negamax(nb, MAX_DEPTH-1, -Infinity, Infinity, 'b')
-     if (score>bestScore){ bestScore = score; bestMove = mv }
-   }
-
     // Berechne Bewertung für alle Züge
     const scored = []
     for (const mv of moves){
@@ -446,19 +541,7 @@ function aiMoveRandom() {
       finalMove = nonCaptures.length>0 ? nonCaptures[Math.floor(Math.random()*nonCaptures.length)] : moves[Math.floor(Math.random()*moves.length)]
     }
 
-    applyMoveOnBoard(board, finalMove)
-    // AI hat beendet => Denken aus
-    aiThinking = false
-   // promotion
-   const [tr,tc]=bestMove.to
-    const moved = board[tr][tc]
-    // Promotion für weiße Bauern: erreichen der letzten Reihe (r==7)
-    if (moved === 'P' && tr===7) board[tr][tc]='Q'
-
-   turn = 'b'
-  renderBoard()
-  checkGameState()
-  updateStatus()
+    return doMove(finalMove)
 }
 
 function checkGameState() {
@@ -474,13 +557,14 @@ function checkGameState() {
     if (!roundFinished) {
       roundFinished = true
       restartBtn.disabled = true
-      window.GameRoundSession.finish()
+      window.GameRoundSession.finish(color === 'w' && isKingInCheck(color, board))
     }
   }
 }
 
 function updateStatus() {
   if (gameOver) return
+  if (animating) { statusEl.textContent = turn === 'w' ? 'KI zieht…' : 'Deine Figur zieht…'; return }
   if (aiThinking) { statusEl.textContent = 'KI denkt…'; return }
   statusEl.textContent = (turn==='w') ? 'Weiß am Zug' : 'Schwarz am Zug'
 }
@@ -679,60 +763,5 @@ document.addEventListener('keydown', (e) => {
     closeRulesBtn.focus()
   }
 })
-
-// Suche: Felder oder Figuren hervorheben
-const searchInput = document.getElementById('search')
-const searchBtn = document.getElementById('search-btn')
-const clearSearchBtn = document.getElementById('clear-search')
-
-function coordToRC(coord) {
-  // coord like e4 -> c=4, r = 8 - rank
-  if (!/^[a-h][1-8]$/i.test(coord)) return null
-  const file = coord[0].toLowerCase()
-  const rank = parseInt(coord[1],10)
-  const c = file.charCodeAt(0) - 'a'.charCodeAt(0)
-  const r = 8 - rank
-  return [r,c]
-}
-
-function performSearch() {
-  const q = (searchInput && searchInput.value) ? searchInput.value.trim() : ''
-  document.querySelectorAll('.square').forEach(sq=>sq.classList.remove('search-hit'))
-  if (!q) { statusEl.textContent = (turn==='w') ? 'Weiß am Zug' : 'Schwarz am Zug'; return }
-  // coordinate search
-  const coord = coordToRC(q)
-  let hits = []
-  if (coord) {
-    const [r,c] = coord
-    const sq = document.querySelector(`.square[data-r='${r}'][data-c='${c}']`)
-    if (sq) { sq.classList.add('search-hit'); hits.push([r,c]) }
-  } else {
-    const map = {
-      'bauer':'p','p':'p','pawn':'p',
-      'turm':'r','r':'r','rook':'r',
-      'springer':'n','n':'n','knight':'n',
-      'läufer':'b','läufer':'b','b':'b','bishop':'b',
-      'dame':'q','q':'q','queen':'q',
-      'könig':'k','k':'k','king':'k'
-    }
-    const key = q.toLowerCase()
-    const piece = map[key]
-    if (piece) {
-      for (let r=0;r<8;r++) for (let c=0;c<8;c++) {
-        const p = board[r][c]
-        if (!p) continue
-        if (p.toLowerCase()===piece) {
-          const sq = document.querySelector(`.square[data-r='${r}'][data-c='${c}']`)
-          if (sq) { sq.classList.add('search-hit'); hits.push([r,c]) }
-        }
-      }
-    }
-  }
-  statusEl.textContent = hits.length>0 ? `${hits.length} Treffer für "${q}"` : `Keine Treffer für "${q}"`
-}
-
-if (searchBtn) searchBtn.addEventListener('click', performSearch)
-if (clearSearchBtn) clearSearchBtn.addEventListener('click', ()=>{ if (searchInput) searchInput.value=''; document.querySelectorAll('.square').forEach(sq=>sq.classList.remove('search-hit')); updateStatus() })
-if (searchInput) searchInput.addEventListener('keydown',(e)=>{ if (e.key==='Enter') performSearch() })
 
 init()

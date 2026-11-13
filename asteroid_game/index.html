@@ -3,55 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asteroids</title>
+    <meta name="theme-color" content="#090e18">
+    <title>Asteroids · LernLabor Arcade</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="icon" type="image/png" href="logo.png">
     <link rel="stylesheet" href="../gamehub-nav.css">
 </head>
 <body>
     <a class="gamehub-back-link" href="../index.html">← Zurück zum LernLabor</a>
-    <div class="container">
-        <h1>⭐ ASTEROIDS</h1>
-        <div class="game-info">
-            <div class="score-box">
-                <span>Score:</span>
-                <div id="score">0</div>
+    <main class="container">
+        <header class="page-header">
+            <div>
+                <p class="eyebrow">LernLabor / Arcade 01</p>
+                <h1>ASTEROIDS<span aria-hidden="true">.</span></h1>
+                <p class="subtitle">Ein Schiff. Ein Asteroidenfeld. Dein nächster Rekord.</p>
             </div>
-            <div class="wave-box">
-                <span>Wave:</span>
-                <div id="wave">1</div>
+            <span class="edition">VECTOR<br>FLIGHT CLUB</span>
+        </header>
+
+        <section class="game-shell" id="gameShell" aria-label="Asteroids-Spiel">
+            <div class="cockpit">
+                <div class="game-info" aria-label="Spielstand">
+                    <div class="stat"><span>Punkte</span><strong id="score">0</strong></div>
+                    <div class="stat"><span>Rekord</span><strong id="bestScore">0</strong></div>
+                    <div class="stat"><span>Welle</span><strong id="wave">01</strong></div>
+                    <div class="stat stat-lives"><span>Schiffe</span><strong id="lives">3</strong></div>
+                </div>
+                <button id="fullscreenBtn" class="btn btn-fullscreen" type="button" aria-pressed="false" aria-label="Spielfeld im Vollbild öffnen" title="Vollbild öffnen">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>
+                    <span id="fullscreenLabel">Vollbild</span>
+                </button>
             </div>
-            <div class="lives-box">
-                <span>Lives:</span>
-                <div id="lives">3</div>
+
+            <div class="arena">
+                <canvas id="gameCanvas" width="1000" height="640" role="img" aria-label="Asteroids-Spielfeld. Steuerung mit Pfeiltasten oder W, A, D und Leertaste." tabindex="0"></canvas>
+                <div class="game-overlay" id="gameOverlay" role="status" aria-live="polite">
+                    <span class="overlay-kicker" id="overlayKicker">Bereit zum Abheben?</span>
+                    <h2 id="overlayTitle">Der Weltraum wartet.</h2>
+                    <p id="overlayText">Starte deinen Flug und halte das Asteroidenfeld frei.</p>
+                </div>
+                <div class="game-notice" id="gameNotice" role="status" aria-live="polite" hidden></div>
+                <span class="arena-coordinate" aria-hidden="true">SECTOR / 001</span>
             </div>
-            <div class="best-box">
-                <span>Best:</span>
-                <div id="bestScore">0</div>
+
+            <div class="flight-deck">
+                <div class="controls">
+                    <button id="startBtn" class="btn btn-start" type="button">Flug starten <span aria-hidden="true">↗</span></button>
+                    <button id="pauseBtn" class="btn" type="button" disabled>Pause</button>
+                    <button id="resetBtn" class="btn btn-reset" type="button">Neustart</button>
+                </div>
+                <div class="weapon-status" aria-label="Feuerrate: maximal fünf Schüsse pro Sekunde, vier Kugeln gleichzeitig">
+                    <span class="ammo" id="ammo" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                    <span>5 SCHUSS / SEK.</span>
+                </div>
             </div>
-        </div>
-        <canvas id="gameCanvas" width="800" height="600" role="img" aria-label="Asteroids-Spielfeld" tabindex="0"></canvas>
-        <div class="touch-controls" role="group" aria-label="Asteroids-Steuerung">
-            <button type="button" data-key="arrowleft" aria-label="Nach links drehen">↶ Drehen</button>
-            <button type="button" data-key="arrowup" aria-label="Beschleunigen">↑ Schub</button>
-            <button type="button" data-action="shoot" aria-label="Schießen">● Schießen</button>
-            <button type="button" data-key="arrowright" aria-label="Nach rechts drehen">↷ Drehen</button>
-        </div>
-        <div class="controls">
-            <button id="startBtn" class="btn btn-start">Start Game</button>
-            <button id="pauseBtn" class="btn btn-pause" disabled>Pause</button>
-            <button id="resetBtn" class="btn btn-reset">Neustart</button>
-        </div>
-        <div class="instructions">
-            <h3>Anleitung:</h3>
-            <p>📱 Nutze auf dem Handy die Steuerflächen für Drehen, Schub und Schießen.</p>
-            <p>⬆️ <strong>Pfeiltaste UP / W</strong> - Raumschiff vorwärts bewegen</p>
-            <p>⬅️➡️ <strong>Pfeiltasten LEFT/RIGHT / A/D</strong> - Raumschiff drehen</p>
-            <p>🔫 <strong>Leerzeichen</strong> - Schießen</p>
-            <p>💥 Zerstöre alle Asteroiden um zur nächsten Wave zu gelangen</p>
-            <p>❤️ Du hast 3 Leben - Asteroiden zerstören das Schiff</p>
-        </div>
-    </div>
+            <div class="touch-controls" role="group" aria-label="Asteroids-Steuerung">
+                <button type="button" data-key="arrowleft" aria-label="Nach links drehen">↶<span>Links</span></button>
+                <button type="button" data-key="arrowup" aria-label="Beschleunigen">↑<span>Schub</span></button>
+                <button type="button" data-key="arrowright" aria-label="Nach rechts drehen">↷<span>Rechts</span></button>
+                <button type="button" data-action="shoot" class="touch-fire" aria-label="Schießen, zum Dauerfeuer gedrückt halten">◎<span>Feuer</span></button>
+            </div>
+        </section>
+
+        <section class="flight-guide" aria-label="Spielanleitung">
+            <div class="guide-controls">
+                <h2>Dein Flugplan</h2>
+                <div class="key-guide"><span><kbd>←</kbd><kbd>→</kbd> Drehen <small>A / D</small></span><span><kbd>↑</kbd> Schub <small>W</small></span><span><kbd class="space-key">Leertaste</kbd> Feuer halten</span><span><kbd>P</kbd> Pause</span></div>
+                <p>Zerstöre alle Asteroiden und UFOs für die nächste Welle. Drei Schiffe, drei Chancen. Auf dem Handy nutzt du die Steuerflächen.</p>
+            </div>
+            <div class="ufo-guide">
+                <h2>Ungebetene Gäste</h2>
+                <p><span class="ufo-dot large"></span><strong>Großes UFO</strong><span>Streufeuer · 200 P.</span></p>
+                <p><span class="ufo-dot small"></span><strong>Kleines UFO</strong><span>Zielt auf dich · 1.000 P.</span></p>
+            </div>
+        </section>
+        <footer class="page-footer"><span>Weniger Gravitation. Mehr Konzentration.</span><span>Viel Glück, Pilot.</span></footer>
+    </main>
     <script src="../game-round-session.js"></script>
     <script src="script.js"></script>
 </body>

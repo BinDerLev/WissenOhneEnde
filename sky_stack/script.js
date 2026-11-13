@@ -256,7 +256,7 @@ function winChallenge() {
     gameMessage.textContent = `Geschafft! Du hast den 12. Block gesetzt und die Präzisions-Challenge gewonnen.`;
   }
   draw();
-  window.GameRoundSession.finish();
+  window.GameRoundSession.finish(true);
 }
 
 function drawBackground() {

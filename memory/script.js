@@ -200,7 +200,7 @@ function finishGame() {
         messageElement.textContent = `Geschafft in ${formatTime(elapsedSeconds)} mit ${moves} Zügen – du erreichst ${score} Punkte.`;
     }
     renderStats();
-    window.GameRoundSession.finish();
+    window.GameRoundSession.finish(true);
 }
 
 function chooseCard(card, index) {

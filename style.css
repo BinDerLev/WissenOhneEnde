@@ -545,9 +545,12 @@ body {
 }
 
 .game-image img {
-    width: 72%;
+    width: auto;
+    max-width: 72%;
     height: 72%;
+    aspect-ratio: 1;
     object-fit: contain;
+    border-radius: 18%;
 }
 
 .game-info {

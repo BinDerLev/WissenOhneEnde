@@ -308,6 +308,7 @@ async function applyMove(direction) {
   if (!['left', 'right', 'up', 'down'].includes(direction)) return;
   const result = calculateMove(grid, direction);
   if (!result.moved) return;
+  undoAvailable = true;
   previousState = grid.map(row => [...row]);
   previousScore = score;
   previousCombo = combo;
@@ -339,7 +340,7 @@ async function animateMove(tracks) {
     const end = cells[to.row * GRID_SIZE + to.col].getBoundingClientRect();
     const tile = document.createElement('div');
     tile.className = `game-tile moving-tile tile-${value}`;
-    tile.textContent = value;
+    setTileLabel(tile, value);
     tile.setAttribute('aria-hidden', 'true');
     Object.assign(tile.style, {
       left: `${start.left - boardRect.left - gameBoard.clientLeft}px`,
@@ -388,10 +389,10 @@ function finishRound() {
   if (roundFinished) return;
   roundFinished = true;
   newGameBtn.disabled = true;
-  undoBtn.disabled = true;
+  undoBtn.disabled = !previousState || !undoAvailable;
   standardModeBtn.disabled = true;
   dailyModeBtn.disabled = true;
-  window.GameRoundSession.finish();
+  window.GameRoundSession.finish(gameWon);
 }
 
 function markDailyComplete(won) {
@@ -425,10 +426,20 @@ function isGameOver() {
 }
 
 function undo() {
-  if (roundFinished || gameOver || gameWon || animating) return;
+  if (animating) return;
   if (!previousState) return;
   if (!undoAvailable) return;
 
+  if (roundFinished) {
+    window.GameRoundSession.restart();
+    document.querySelector('.game-over-overlay')?.remove();
+    roundFinished = false;
+    newGameBtn.disabled = false;
+    standardModeBtn.disabled = false;
+    dailyModeBtn.disabled = false;
+  }
+  gameOver = false;
+  gameWon = false;
   undoAvailable = false;
   grid = previousState.map(row => [...row]);
   score = previousScore;
@@ -444,6 +455,15 @@ function undo() {
   render();
 }
 
+// Use the same responsive label for stationary and animated tiles.
+function setTileLabel(tile, value) {
+  const label = document.createElement('span');
+  label.className = 'tile-label';
+  label.textContent = String(value);
+  label.style.setProperty('--digits', String(String(value).length));
+  tile.appendChild(label);
+}
+
 function render(spawned = [], merged = []) {
   undoBtn.disabled = animating || !previousState || !undoAvailable || roundFinished;
   gameBoard.innerHTML = '';
@@ -457,7 +477,7 @@ function render(spawned = [], merged = []) {
       tile.setAttribute('aria-label', value === 0 ? 'Leer' : String(value));
 
       if (value !== 0) {
-        tile.textContent = value;
+        setTileLabel(tile, value);
         tile.className += ` tile-${value}`;
         if (spawned.some(cell => cell.row === i && cell.col === j)) tile.classList.add('new');
         if (merged.some(cell => cell.row === i && cell.col === j)) tile.classList.add('merge');

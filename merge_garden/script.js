@@ -202,7 +202,7 @@ function placeCurrentTile(row, col) {
     roundFinished = true;
     resetBtn.disabled = true;
     goalStatusEl.textContent = "Das Spielfeld ist voll. Deine Runde ist beendet.";
-    window.GameRoundSession.finish();
+    window.GameRoundSession.finish(goalAchieved);
   }
 }
 

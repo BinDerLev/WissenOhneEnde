@@ -113,7 +113,7 @@ function createLearningContext(storageValues = {}) {
     localStorage,
     Date,
     Intl,
-    Math,
+    Math: Object.create(Math),
     setTimeout(callback) { callback(); },
     navigator: {
       clipboard: {
@@ -426,7 +426,7 @@ test("the GameHub renders every catalog entry with an existing game and image", 
   assert.equal(new Set(catalog.map((game) => game.href)).size, catalog.length);
   const towerDefense = catalog.find((game) => game.href === "tower_defense/index.html");
   assert.ok(towerDefense, "Tower Defense should be registered");
-  assert.equal(towerDefense.image, "tower_defense/logo.svg");
+  assert.equal(towerDefense.image, "tower_defense/logo.png");
   assert.equal(towerDefense.title, "Tower Defense");
   for (const game of catalog) {
     assert.ok(fs.existsSync(path.join(root, game.href)), `missing game page: ${game.href}`);
@@ -454,7 +454,7 @@ test("every GameHub game loads and invokes the shared round-return helper", () =
 
     const gameScripts = fs.readdirSync(gameDirectory).filter((file) => file.endsWith(".js"));
     const callsRoundReturn = gameScripts.some((file) =>
-      fs.readFileSync(path.join(gameDirectory, file), "utf8").includes("GameRoundSession.finish()")
+      fs.readFileSync(path.join(gameDirectory, file), "utf8").includes("GameRoundSession.finish(")
     );
     assert.ok(callsRoundReturn, `${game.title} has no round-end return hook`);
   }
@@ -550,8 +550,8 @@ function assertNumericQuestionMatchesTask(skill, question) {
       calculate: ([, dividend, divisor]) => Number(dividend) / Number(divisor)
     },
     coins: {
-      expression: /(\d+) Münzen zu 10 Cent und (\d+) Münzen zu 20 Cent/,
-      calculate: ([, tens, twenties]) => Number(tens) * 10 + Number(twenties) * 20
+      expression: /(\d+) Münzen zu 10 Cent, (\d+) Münzen zu 20 Cent und (\d+) Münzen zu 5 Cent/,
+      calculate: ([, tens, twenties, fives]) => Number(tens) * 10 + Number(twenties) * 20 + Number(fives) * 5
     },
     time: {
       expression: /beginnt um (\d+):00 Uhr und endet um (\d+):00 Uhr/,
@@ -574,8 +574,8 @@ function assertNumericQuestionMatchesTask(skill, question) {
       calculate: ([, , second, third]) => Number(third) + (Number(third) - Number(second))
     },
     shapes: {
-      expression: /Wie viele (?:Ecken|Seiten) hat ein (Dreieck|Viereck|Fünfeck|Sechseck)\?/,
-      calculate: (match) => ({ Dreieck: 3, Viereck: 4, Fünfeck: 5, Sechseck: 6 })[match[1]]
+      expression: /(?:Wie viele (?:Ecken|Seiten) hat ein .*\?|Zwei Formen liegen getrennt nebeneinander: .*\?)/,
+      calculate: ([text]) => [...text.matchAll(/\b(Dreieck|Viereck|Quadrat|Rechteck|Fünfeck|Sechseck)\b/g)].reduce((sum, match) => sum + ({ Dreieck: 3, Viereck: 4, Quadrat: 4, Rechteck: 4, Fünfeck: 5, Sechseck: 6 })[match[1]], 0)
     },
     multiply: {
       expression: /Wie viel ist (\d+) × (\d+)\?/,
@@ -600,8 +600,8 @@ function assertNumericQuestionMatchesTask(skill, question) {
         : Number(length) * Number(width)
     },
     units: {
-      expression: /Wie viele Zentimeter sind (\d+(?:,\d+)?) Meter\?/,
-      calculate: ([, meters]) => germanNumber(meters) * 100
+      expression: /Wie viele (Zentimeter|Meter) sind (\d+) (Meter|Zentimeter)\?/,
+      calculate: ([, target, amount]) => target === "Zentimeter" ? Number(amount) * 100 : Number(amount) / 100
     },
     percent: {
       expression: /Wie viel sind (\d+) % von (\d+)\?/,
@@ -780,7 +780,7 @@ test("generated questions have valid shapes and math answers match every curricu
           } else if (topic.skill === "de-wordclass" && !topic.mode) {
             assert.ok(["Nomen", "Verb", "Adjektiv"].includes(question.answer), `${label} has an invalid word class`);
           } else if (topic.skill === "de-grammar" && !topic.mode) {
-            const match = question.text.match(/Setze „(\w+)“ für „(ich|du|er|wir|ihr|sie)“ ins (Präsens|Präteritum):/);
+            const match = question.text.match(/Setze „([^“]+)“ für „(ich|du|er|wir|ihr|sie)“ ins (Präsens|Präteritum):/);
             assert.ok(match, `${label} has an invalid conjugation prompt`);
             const [, verb, pronoun, tense] = match;
             const endings = tense === "Präsens"
@@ -802,14 +802,23 @@ test("generated questions have valid shapes and math answers match every curricu
                 : pronoun === "ich"
                   ? `${verb.replace(/e([lr])n$/, "$1")}e`
                   : `${stem}${endings[pronoun]}`;
-              assert.equal(question.answer, expected, `${label} answer disagrees with the conjugation prompt`);
+              if (pronoun === "ich") {
+                assert.deepEqual(Array.from(question.answer).sort(), [...new Set([expected, `${stem}e`])].sort(), `${label} omits a valid ich form`);
+              } else {
+                assert.equal(question.answer, expected, `${label} answer disagrees with the conjugation prompt`);
+              }
             } else {
               assert.equal(question.answer, `${stem}${endings[pronoun]}`, `${label} answer disagrees with the conjugation prompt`);
             }
           } else if (topic.skill === "de-wordorder") {
-            const words = question.text.split(": ")[1].split(" / ").map((word) => word.toLowerCase()).sort();
-            const answerWords = question.answer.toLowerCase().replace(/[,.!?]/g, "").split(/\s+/).sort();
-            assert.deepEqual(answerWords, words, `${label} answer does not use the words in the task`);
+            const prompt = question.text.match(/^Ordne die Wörter zu einem Satz: (.+)\. Beginne mit „(.+)“\.$/);
+            assert.ok(prompt, `${label} must constrain the sentence opening`);
+            const words = prompt[1].split(" / ").map((word) => word.toLowerCase()).sort();
+            for (const answer of Array.isArray(question.answer) ? question.answer : [question.answer]) {
+              const answerWords = answer.toLowerCase().replace(/[,.!?]/g, "").split(/\s+/).sort();
+              assert.deepEqual(answerWords, words, `${label} answer does not use the words in the task`);
+              assert.ok(answer.startsWith(prompt[2]), `${label} answer violates its stated opening`);
+            }
           } else if (topic.skill === "de-reading") {
             if (!question.options) {
               assert.ok(question.text.includes(question.answer), `${label} answer is not supported by its reading task`);
@@ -818,7 +827,7 @@ test("generated questions have valid shapes and math answers match every curricu
             const operands = question.text.match(/'([^']+)' und '([^']+)'/);
             assert.ok(operands, `${label} does not identify its compound-word inputs`);
             // Komposita: Fugenregel spiegeln (Hund → Hunde-, Schule → Schul-)
-            const fuges = { Hund: "Hunde", Schule: "Schul", Gedanke: "Gedanken", Freiheit: "Freiheits" };
+            const fuges = { Hund: "Hunde", Schule: "Schul", Gedanke: "Gedanken", Freiheit: "Freiheits", Buch: "Buch", Zahn: "Zahn", Obst: "Obst" };
             const expected = `${fuges[operands[1]] || operands[1]}${operands[2]}`.toLowerCase();
             assert.equal(question.answer, expected.charAt(0).toUpperCase() + expected.slice(1), `${label} answer disagrees with its inputs`);
           }
@@ -841,6 +850,8 @@ test("lesson identities ignore sentence shuffles, option order and commutative o
   const { context } = createLearningContext();
   assert.equal(context.questionIdentity({ text: "Wie viel ist 3 + 7?" }), context.questionIdentity({ text: "Wie viel ist 7 + 3?" }));
   assert.equal(context.questionIdentity({ text: "Wie viel ist 4 × 8?" }), context.questionIdentity({ text: "Wie viel ist 8 × 4?" }));
+  assert.equal(context.questionIdentity({ text: "Berechne 1/4 + 2/4. Gib einen Bruch ein." }), context.questionIdentity({ text: "Berechne 2/4 + 1/4. Gib einen Bruch ein." }));
+  assert.equal(context.questionIdentity({ text: "Berechne 1,2 × 3,4." }), context.questionIdentity({ text: "Berechne 3,4 × 1,2." }));
   useDeterministicRandom(context, 0x45a7);
   vm.runInContext('progress.grade = 4; progress.subject = "german";', context);
   for (const skill of ["de-wordorder", "de-reading"]) {
@@ -851,7 +862,7 @@ test("lesson identities ignore sentence shuffles, option order and commutative o
       identities.add(context.questionIdentity(question));
       texts.add(question.text);
     }
-    assert.equal(identities.size, skill === "de-wordorder" ? 8 : 9);
+    assert.ok(identities.size >= 24, `${skill} has fewer than three lessons of content`);
     if (skill === "de-wordorder") assert.ok(texts.size > identities.size, "different word shuffles must share an identity");
   }
 });
@@ -947,6 +958,143 @@ test("grade six spelling accepts both standard variants and comma tasks contain 
   const punctuation = context.makeUniqueQuestions({ skill: "de-punctuation" }, 8);
   assert.equal(punctuation.length, 8);
   assert.ok(punctuation.every((question) => question.answer.includes(",")));
+});
+
+test("three consecutive German lessons use 24 distinct contents for every topic", () => {
+  const { context } = createLearningContext();
+  useDeterministicRandom(context, 0x241113);
+  const curriculum = vm.runInContext("germanCurriculum", context);
+  for (const [grade, topics] of Object.entries(curriculum)) {
+    vm.runInContext(`progress.grade = ${grade}; progress.subject = "german";`, context);
+    for (let index = 0; index < topics.length; index += 1) {
+      const identities = new Set();
+      for (let round = 0; round < 3; round += 1) {
+        context.startLesson(index);
+        const questions = vm.runInContext("activeLesson.questions", context);
+        assert.equal(questions.length, 8);
+        for (const question of questions) {
+          const identity = context.questionIdentity(question);
+          assert.ok(!identities.has(identity), `grade ${grade}: ${topics[index].title} repeats in round ${round + 1}: ${question.text}`);
+          identities.add(identity);
+        }
+      }
+      assert.equal(identities.size, 24);
+    }
+  }
+});
+
+test("recent contents survive reloads and are shared by related lesson topics", () => {
+  const first = createLearningContext();
+  useDeterministicRandom(first.context, 121);
+  vm.runInContext('progress.grade = 2; progress.subject = "german"; startLesson(0);', first.context);
+  const firstIds = new Set(vm.runInContext("activeLesson.questions", first.context).map(first.context.questionIdentity));
+  const storageKey = vm.runInContext("questionHistoryStorageKey", first.context);
+  const restored = createLearningContext({
+    "mathekompass-progress": JSON.stringify({ grade: 2, subject: "german" }),
+    [storageKey]: first.localStorage.getItem(storageKey)
+  });
+  useDeterministicRandom(restored.context, 121);
+  restored.context.startLesson(5);
+  const second = vm.runInContext("activeLesson.questions", restored.context);
+  assert.equal(second.length, 8);
+  assert.ok(second.every((question) => !firstIds.has(restored.context.questionIdentity(question))));
+});
+
+test("finite number facts rotate with the minimum unavoidable repeats", () => {
+  const { context } = createLearningContext();
+  useDeterministicRandom(context, 110);
+  vm.runInContext('progress.grade = 1; progress.subject = "math"; startLesson(8);', context);
+  const first = vm.runInContext("activeLesson.questions", context).map(context.questionIdentity);
+  context.startLesson(8);
+  const second = vm.runInContext("activeLesson.questions", context).map(context.questionIdentity);
+  assert.equal(new Set([...first, ...second]).size, 11);
+  assert.equal(second.filter((identity) => first.includes(identity)).length, 5);
+  assert.ok(first.slice(-3).every((identity) => !second.includes(identity)), "repeat oldest facts first");
+});
+
+test("question history is bounded and malformed saved data does not break learning", () => {
+  const storageKey = "lernlabor-question-history-v1";
+  for (const value of ["not JSON", "null", "[]"]) {
+    const { context } = createLearningContext({ [storageKey]: value });
+    assert.equal(Object.keys(vm.runInContext("questionHistory", context)).length, 0);
+  }
+  const { context } = createLearningContext({ [storageKey]: JSON.stringify({
+    "math:1": [...Array.from({ length: 400 }, (_, index) => `old-${index}`), null, 5, "x".repeat(1025)],
+    "german:99": ["invalid grade"], "unknown:1": ["invalid subject"]
+  }) });
+  assert.equal(vm.runInContext('questionHistory["math:1"].length', context), 256);
+  assert.equal(Object.keys(vm.runInContext("questionHistory", context)).length, 1);
+  useDeterministicRandom(context, 404);
+  vm.runInContext('progress.grade = 1; progress.subject = "math"; startLesson(0);', context);
+  assert.equal(vm.runInContext('questionHistory["math:1"].length', context), 256);
+});
+
+test("expanded math pools provide multiple rounds without raising early-grade number ranges", () => {
+  const { context } = createLearningContext();
+  useDeterministicRandom(context, 0x7171);
+  const topics = vm.runInContext("curriculum", context);
+  for (const [grade, index, minimum] of [[1, 1, 32], [1, 2, 32], [2, 6, 32], [2, 9, 32], [4, 4, 32], [5, 2, 32]]) {
+    vm.runInContext(`progress.grade = ${grade}; progress.subject = "math";`, context);
+    const identities = new Set();
+    for (let sample = 0; sample < 2000; sample += 1) {
+      const question = context.makeQuestion(topics[grade][index]);
+      assertNumericQuestionMatchesTask(topics[grade][index].mode || topics[grade][index].skill, question);
+      identities.add(context.questionIdentity(question));
+      if (grade === 1) assert.ok(question.answer >= 0 && question.answer <= 20);
+      if (topics[grade][index].mode === "coins") assert.ok(question.answer <= 100);
+    }
+    assert.ok(identities.size >= minimum, `grade ${grade}: ${topics[grade][index].title} only has ${identities.size} observed contents`);
+  }
+});
+
+test("reviewed conjugation and sentence-order variants are accepted", () => {
+  const { context } = createLearningContext();
+  vm.runInContext('progress.grade = 6; progress.subject = "german";', context);
+  const verbs = vm.runInContext("germanRegularVerbs", context);
+  for (const [verb, expected] of [["sammeln", ["sammele", "sammle"]], ["wandern", ["wandere", "wandre"]]]) {
+    const draws = [(verbs.indexOf(verb) + 0.5) / verbs.length, 0, 0];
+    context.Math.random = () => draws.shift() ?? 0;
+    const question = context.makeGermanQuestion({ skill: "de-grammar" });
+    assert.deepEqual(Array.from(question.answer), expected);
+    for (const answer of expected) {
+      context.reviewedQuestion = question;
+      context.reviewedAnswer = answer;
+      vm.runInContext('activeLesson = { questions: [reviewedQuestion], position: 0, correct: 0, firstAttempts: [null], submissions: [], resolved: false }; checkAnswer(null, reviewedAnswer);', context);
+      assert.equal(vm.runInContext("activeLesson.resolved", context), true);
+    }
+  }
+  vm.runInContext('progress.grade = 2; Math.random = () => 3.5 / 32;', context);
+  const question = context.makeGermanQuestion({ skill: "de-wordorder" });
+  assert.ok(question.text.endsWith('Beginne mit „Wir“.'));
+  assert.ok(question.answer.includes("Wir spielen nach der Schule im Garten."));
+  assert.ok(question.answer.includes("Wir spielen im Garten nach der Schule."));
+});
+
+test("reviewed static content banks contain enough distinct and usable items", () => {
+  const { context } = createLearningContext();
+  const banks = vm.runInContext("[...Object.values(germanSpellingPairsByGrade), germanWords, germanSentences, germanVocabulary, germanSyllables, germanVerbSentences, germanWordFamilies, germanCompoundPairs, germanIntermediateTexts, germanAdvancedTexts, germanMainIdeaTexts, germanPunctuationQuestions, ...Object.values(germanGradeSixCards)]", context);
+  for (const bank of banks) {
+    assert.ok(bank.length >= 24);
+    assert.equal(new Set(bank.map((item) => JSON.stringify(item))).size, bank.length);
+  }
+  vm.runInContext('progress.grade = 6; progress.subject = "german";', context);
+  useDeterministicRandom(context, 302);
+  const punctuation = context.makeUniqueQuestions({ skill: "de-punctuation" }, 8);
+  for (const question of punctuation) {
+    assert.ok(question.text.includes("Ende mit einem Punkt."));
+    assert.ok(question.answer.endsWith("."));
+  }
+});
+
+test("a history storage failure preserves the current lesson and in-memory rotation", () => {
+  const { context } = createLearningContext();
+  useDeterministicRandom(context, 303);
+  vm.runInContext('progress.grade = 4; progress.subject = "german"; localStorage.setItem = () => { throw new Error("Storage unavailable"); }; startLesson(1);', context);
+  const first = new Set(vm.runInContext("activeLesson.questions", context).map(context.questionIdentity));
+  context.startLesson(1);
+  const second = vm.runInContext("activeLesson.questions", context);
+  assert.equal(second.length, 8);
+  assert.ok(second.every((question) => !first.has(context.questionIdentity(question))));
 });
 
 test("the exercise error-report button copies question, answer and context to the clipboard", () => {

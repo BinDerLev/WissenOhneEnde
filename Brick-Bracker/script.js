@@ -161,7 +161,7 @@ function endGame(won) {
         "Nochmal spielen"
     );
     startButton.focus();
-    window.GameRoundSession.finish();
+    window.GameRoundSession.finish(won);
 }
 
 function clearPressedKeys() {

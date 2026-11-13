@@ -293,7 +293,7 @@
         elements.announcement.textContent = won ? "Du hast gewonnen!" : "Das Spiel ist vorbei.";
         elements.waveButton.disabled = true;
         elements.waveButton.textContent = won ? "Sieg!" : "Verloren";
-        window.GameRoundSession.finish();
+        window.GameRoundSession.finish(won);
     }
 
     function draw() {

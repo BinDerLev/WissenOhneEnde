@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Einfaches Schach</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <link rel="icon" type="image/png" href="logo.png">
   <link rel="stylesheet" href="../gamehub-nav.css">
 </head>
 <body>
@@ -69,11 +69,6 @@
 	      </ul>
 	    </div>
 
-					<div class="rules-section">
-					  <h3>🔎 Suche</h3>
-					  <p>Mit der Suchfunktion kannst du schnell Felder (z. B. <code>e4</code>) oder Figuren (z. B. <em>Bauer</em>, <em>Springer</em>) finden und hervorheben.</p>
-					</div>
-
 	    <div class="rules-section">
 	      <h3>💡 Tipps</h3>
 	      <ul>
@@ -88,12 +83,13 @@
 	</div>
 
 	<div class="player-info">
-	  <div class="player-human"><strong>Du:</strong> <span style="color:#f0e6d2; background:#2a2a2a; padding:2px 8px; border-radius:4px;">● Schwarz</span></div>
-	  <div class="player-ai"><strong>KI:</strong> <span style="color:#fff; background:#3d7028; padding:2px 8px; border-radius:4px;">● Weiß</span></div>
+	  <div class="player-human"><strong>Du:</strong> <span class="player-color player-color-black">● Schwarz</span></div>
+	  <div class="player-ai"><strong>KI:</strong> <span class="player-color player-color-white">● Weiß</span></div>
 	</div>
 	<p class="description">Wähle eine Figur und dann ein markiertes Feld. Mit den Pfeiltasten bewegst du den Fokus; Enter wählt ein Feld. Die KI spielt mit Weiß.</p>
 
 	<div id="board" class="board" role="grid" aria-label="Schachbrett" aria-rowcount="8" aria-colcount="8"></div>
+	<p id="last-move" class="last-move" aria-live="polite" aria-atomic="true"></p>
 
 	<div class="controls">
 	  <div id="status" class="status" aria-live="polite">Lade...</div>
@@ -104,9 +100,6 @@
 	    <option value="3">Level 3 (Schwer)</option>
 	  </select>
  	  <button id="restart" class="btn">Neu starten</button>
-	<input id="search" type="text" aria-label="Schachbrett durchsuchen" placeholder="Suche (z.B. e4 oder Springer)" style="padding:8px;border-radius:6px;border:1px solid #ccc;">
- 	  <button id="search-btn" class="btn">Suchen</button>
- 	  <button id="clear-search" class="btn" style="background:#888">Suche löschen</button>
 	</div>
 
 	<footer class="footer">Schachspiel mit KI</footer>

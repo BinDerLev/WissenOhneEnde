@@ -192,8 +192,9 @@ h1 {
     justify-content: center;
     background-color: rgba(100, 50, 150, 0.2);
     border-radius: 8px;
-    font-size: 2em;
+    container-type: inline-size;
     font-weight: bold;
+    line-height: 1;
     color: white;
     border: 2px solid rgba(200, 100, 255, 0.2);
     cursor: default;
@@ -228,13 +229,13 @@ h1 {
 .tile-16 { background: linear-gradient(135deg, #ffbb00 0%, #ff9900 100%); box-shadow: 0 0 15px rgba(255, 187, 0, 0.5); }
 .tile-32 { background: linear-gradient(135deg, #ffdd00 0%, #ffbb00 100%); box-shadow: 0 0 15px rgba(255, 221, 0, 0.5); color: #333; }
 .tile-64 { background: linear-gradient(135deg, #00dd44 0%, #00bb33 100%); box-shadow: 0 0 15px rgba(0, 221, 68, 0.5); }
-.tile-128 { background: linear-gradient(135deg, #00ff88 0%, #00dd66 100%); box-shadow: 0 0 15px rgba(0, 255, 136, 0.5); color: #333; font-size: 1.5em; }
-.tile-256 { background: linear-gradient(135deg, #00ffaa 0%, #00dd99 100%); box-shadow: 0 0 15px rgba(0, 255, 170, 0.5); color: #333; font-size: 1.5em; }
+.tile-128 { background: linear-gradient(135deg, #00ff88 0%, #00dd66 100%); box-shadow: 0 0 15px rgba(0, 255, 136, 0.5); color: #333; }
+.tile-256 { background: linear-gradient(135deg, #00ffaa 0%, #00dd99 100%); box-shadow: 0 0 15px rgba(0, 255, 170, 0.5); color: #333; }
 .tile-512 { background: linear-gradient(135deg, #00ddff 0%, #0099dd 100%); box-shadow: 0 0 15px rgba(0, 221, 255, 0.5); }
-.tile-1024 { background: linear-gradient(135deg, #00aaff 0%, #0077ff 100%); box-shadow: 0 0 15px rgba(0, 170, 255, 0.5); font-size: 1.3em; }
-.tile-2048 { background: linear-gradient(135deg, #9933ff 0%, #6600ff 100%); box-shadow: 0 0 20px rgba(153, 51, 255, 0.7); font-size: 1.3em; }
-.tile-4096 { background: linear-gradient(135deg, #cc66ff 0%, #9933ff 100%); box-shadow: 0 0 20px rgba(204, 102, 255, 0.7); font-size: 1.3em; }
-.tile-8192 { background: linear-gradient(135deg, #ff66cc 0%, #ff33aa 100%); box-shadow: 0 0 20px rgba(255, 102, 204, 0.7); font-size: 1.3em; }
+.tile-1024 { background: linear-gradient(135deg, #00aaff 0%, #0077ff 100%); box-shadow: 0 0 15px rgba(0, 170, 255, 0.5); }
+.tile-2048 { background: linear-gradient(135deg, #9933ff 0%, #6600ff 100%); box-shadow: 0 0 20px rgba(153, 51, 255, 0.7); }
+.tile-4096 { background: linear-gradient(135deg, #cc66ff 0%, #9933ff 100%); box-shadow: 0 0 20px rgba(204, 102, 255, 0.7); }
+.tile-8192 { background: linear-gradient(135deg, #ff66cc 0%, #ff33aa 100%); box-shadow: 0 0 20px rgba(255, 102, 204, 0.7); }
 
 .controls {
     display: flex;
@@ -352,7 +353,6 @@ body[data-round-finished="true"] .game-round-return-notice {
         gap: clamp(5px, 2vw, 8px);
         padding: clamp(8px, 3vw, 12px);
     }
-    .game-tile { font-size: clamp(1.15em, 6vw, 1.5em); }
     .header { flex-direction: column; align-items: center; }
     .score-section { width: 100%; justify-content: center; }
     .status-panel { grid-template-columns: 1fr; }
@@ -374,4 +374,20 @@ body[data-round-finished="true"] .game-round-return-notice {
 
 @media (prefers-reduced-motion: reduce) {
     .game-tile.new, .game-tile.merge { animation: none; }
+}
+
+/* Reserve space around every digit, including during the merge pulse. */
+.tile-label {
+    display: block;
+    flex: none;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    font-size: min(32px, 50cqw, calc(120cqw / var(--digits, 1)));
+    line-height: 1;
+}
+
+/* Rückgängig bleibt auch nach dem letzten Zug erreichbar. */
+body[data-round-finished="true"] .controls {
+    position: relative;
+    z-index: 10002;
 }

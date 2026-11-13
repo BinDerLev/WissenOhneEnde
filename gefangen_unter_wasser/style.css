@@ -76,6 +76,7 @@ header .subtitle {
     /* Kleine Größe */
     width: 20px;
     height: 20px;
+    border-radius: 18%;
     /* Abstand nach unten */
     margin-bottom: 15px;
     /* Grüner Drop-Shadow für Glow-Effekt */

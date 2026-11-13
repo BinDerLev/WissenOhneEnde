@@ -517,7 +517,7 @@ function updateDisplay() {
 
 function showMessage(title, message) {
     roundFinished = true;
-    window.GameRoundSession.finish();
+    window.GameRoundSession.finish(title === '🎉 Du hast gewonnen!');
     const overlay = document.createElement('div');
     overlay.className = 'message-overlay';
 

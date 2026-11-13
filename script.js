@@ -18,7 +18,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 const gameCatalog = [
     {
         href: 'gefangen_unter_wasser/index.html',
-        image: 'gefangen_unter_wasser/logo_creepy.svg',
+        image: 'gefangen_unter_wasser/logo.png',
         imageAlt: 'Gefangen Unter Wasser',
         title: 'Gefangen Unter Wasser',
         type: 'Abenteuer • Puzzle',
@@ -30,7 +30,7 @@ const gameCatalog = [
     },
     {
         href: 'chess/index.html',
-        image: 'chess/logo.svg',
+        image: 'chess/logo.png',
         imageAlt: 'Schach',
         title: 'Schach',
         type: 'Strategie',
@@ -42,7 +42,7 @@ const gameCatalog = [
     },
     {
         href: 'snake_game/index.html',
-        image: 'snake_game/logo.svg',
+        image: 'snake_game/logo.png',
         imageAlt: 'Snake Game',
         title: 'Snake Game',
         type: 'Action • Klassiker',
@@ -54,7 +54,7 @@ const gameCatalog = [
     },
     {
         href: 'Brick-Bracker/index.html',
-        image: 'breakout_game/logo.svg',
+        image: 'breakout_game/logo.png',
         imageAlt: 'Breakout',
         title: 'Breakout - Brick Breaker',
         type: 'Action',
@@ -66,7 +66,7 @@ const gameCatalog = [
     },
     {
         href: '2048_game/index.html',
-        image: '2048_game/logo.svg',
+        image: '2048_game/logo.png',
         imageAlt: '2048',
         title: '2048',
         type: 'Puzzle • Strategie',
@@ -78,7 +78,7 @@ const gameCatalog = [
     },
     {
         href: 'memory/index.html',
-        image: 'memory/logo.svg',
+        image: 'memory/logo.png',
         imageAlt: 'Memory',
         title: 'Memory',
         type: 'Puzzle • Konzentration',
@@ -90,7 +90,7 @@ const gameCatalog = [
     },
     {
         href: 'asteroid_game/index.html',
-        image: 'asteroid_game/logo.svg',
+        image: 'asteroid_game/logo.png',
         imageAlt: 'Asteroids',
         title: 'Asteroids',
         type: 'Action • Arcade',
@@ -102,7 +102,7 @@ const gameCatalog = [
     },
     {
         href: 'neon_runner/index.html',
-        image: 'neon_runner/logo.svg',
+        image: 'neon_runner/logo.png',
         imageAlt: 'Neon Runner',
         title: 'Neon Runner',
         type: 'Action • Arcade',
@@ -114,7 +114,7 @@ const gameCatalog = [
     },
     {
         href: 'sky_stack/index.html',
-        image: 'sky_stack/logo.svg',
+        image: 'sky_stack/logo.png',
         imageAlt: 'Sky Stack',
         title: 'Sky Stack',
         type: 'Action • Arcade',
@@ -126,7 +126,7 @@ const gameCatalog = [
     },
     {
         href: 'tictactoe_connect4/index.html',
-        image: 'tictactoe_connect4/logo.svg',
+        image: 'tictactoe_connect4/logo.png',
         imageAlt: 'Tic-Tac-Toe & Vier Gewinnt',
         title: 'Tic-Tac-Toe & Vier Gewinnt',
         type: 'Strategie',
@@ -138,7 +138,7 @@ const gameCatalog = [
     },
     {
         href: 'tower_defense/index.html',
-        image: 'tower_defense/logo.svg',
+        image: 'tower_defense/logo.png',
         imageAlt: 'Tower Defense',
         title: 'Tower Defense',
         type: 'Strategie • Action',

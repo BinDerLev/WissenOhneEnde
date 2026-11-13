@@ -155,7 +155,8 @@ configureTopic(curriculum[2], 6, { mode: "coins" });
 configureTopic(curriculum[1], 7, { title: "Vielecke untersuchen", description: "Ecken und Seiten von Vielecken zählen.", explanation: "Zähle die Ecken und Seiten. Ein Dreieck hat drei, ein Viereck vier." });
 configureTopic(curriculum[4], 1, { title: "Geldbeträge addieren", moneyContext: true, description: "Einfache Geldbeträge in Euro addieren.", explanation: "Stelle die Kommas untereinander. Zehn Cent sind 0,10 Euro." });
 configureTopic(curriculum[4], 6, { title: "Geldbeträge subtrahieren", moneyContext: true, operation: "subtract", description: "Differenzen zwischen Geldbeträgen berechnen.", explanation: "Stelle die Kommas untereinander und ziehe den kleineren Betrag vom größeren ab." });
-configureTopic(curriculum[4], 7, { title: "Meter in Zentimeter umrechnen", description: "Ganze Meter in Zentimeter umwandeln.", explanation: "Ein Meter sind 100 Zentimeter. Multipliziere die Meterzahl mit 100." });
+configureTopic(curriculum[4], 7, { title: "Meter und Zentimeter umrechnen", description: "Ganze Meter in Zentimeter und zurück umwandeln.", explanation: "Ein Meter sind 100 Zentimeter. Von Metern zu Zentimetern multiplizierst du mit 100; zurück teilst du durch 100." });
+configureTopic(curriculum[2], 9, { title: "Längen umrechnen", description: "Zwischen ganzen Metern und Zentimetern umrechnen.", explanation: "Ein Meter sind 100 Zentimeter. Von Metern zu Zentimetern multiplizierst du mit 100; zurück teilst du durch 100." });
 configureTopic(curriculum[2], 7, { title: "Fehlende Zahlen", mode: "missing", description: "Die fehlende Zahl einer Plusaufgabe finden.", explanation: "Überlege, wie viel bis zum Ergebnis fehlt. Die Umkehraufgabe hilft." });
 configureTopic(curriculum[3], 3, { operation: "subtract" });
 configureTopic(curriculum[3], 4, { measure: "perimeter" });
@@ -314,6 +315,43 @@ const progress = {
 syncPlatformUnlock();
 
 let activeLesson = null;
+
+const questionHistoryStorageKey = "lernlabor-question-history-v1";
+const questionHistoryLimit = 256;
+const questionHistory = loadQuestionHistory();
+
+function loadQuestionHistory() {
+  const history = Object.create(null);
+  try {
+    const savedHistory = JSON.parse(localStorage.getItem(questionHistoryStorageKey) || "{}");
+    if (savedHistory && typeof savedHistory === "object" && !Array.isArray(savedHistory)) {
+      for (const [key, values] of Object.entries(savedHistory)) {
+        if (!/^(math|german):[1-6]$/.test(key) || !Array.isArray(values)) continue;
+        history[key] = [...new Set(values.filter((value) => typeof value === "string" && value.length <= 1024))].slice(-questionHistoryLimit);
+      }
+    }
+  } catch (error) {
+    console.warn("Aufgabenhistorie konnte nicht geladen werden.", error);
+  }
+  return history;
+}
+
+function questionHistoryKey() {
+  // Gemeinsame Historie für verwandte Themen derselben Klasse und desselben Fachs.
+  return `${progress.subject}:${progress.grade}`;
+}
+
+function rememberQuestions(questions) {
+  const key = questionHistoryKey();
+  const shown = questions.map(questionIdentity);
+  const newIdentities = new Set(shown);
+  questionHistory[key] = [...(questionHistory[key] || []).filter((identity) => !newIdentities.has(identity)), ...shown].slice(-questionHistoryLimit);
+  try {
+    localStorage.setItem(questionHistoryStorageKey, JSON.stringify(questionHistory));
+  } catch (error) {
+    reportStorageFailure("Die Aufgabenhistorie konnte nicht gespeichert werden. Nach einem Neuladen können sich Aufgaben früher wiederholen.");
+  }
+}
 
 function persistProgress(coinBalance) {
   let progressSaved = true;
@@ -544,11 +582,11 @@ function makeFocusedMathQuestion(topic) {
     }
     case "volume": {
       const height = randomInt(2, 12);
-      return { text: `Ein Quader ist ${a} cm lang, ${b} cm breit und ${height} cm hoch. Wie groß ist sein Volumen in cm³?`, answer: a * b * height, hint: topic.explanation };
+      return { key: `volume:${[a, b, height].sort((left, right) => left - right).join(":")}`, text: `Ein Quader ist ${a} cm lang, ${b} cm breit und ${height} cm hoch. Wie groß ist sein Volumen in cm³?`, answer: a * b * height, hint: topic.explanation };
     }
     case "mean": {
       const c = randomInt(1, 30);
-      return { text: `Bestimme das arithmetische Mittel von ${a}, ${b} und ${c}. Gib bei Bedarf einen Bruch ein.`, answer: (a + b + c) / 3, allowFraction: true, numericTolerance: 1e-9, hint: topic.explanation };
+      return { key: `mean:${[a, b, c].sort((left, right) => left - right).join(":")}`, text: `Bestimme das arithmetische Mittel von ${a}, ${b} und ${c}. Gib bei Bedarf einen Bruch ein.`, answer: (a + b + c) / 3, allowFraction: true, numericTolerance: 1e-9, hint: topic.explanation };
     }
     case "term": {
       const c = randomInt(2, 12);
@@ -563,8 +601,10 @@ function makeFocusedMathQuestion(topic) {
       const n = randomInt(0, 10);
       return { text: `Welche Zahl fehlt? ${n} + ___ = 10`, answer: 10 - n, hint: "Ergänze bis zehn." };
     }
-    case "number-compare":
-      return { text: `Welche Zahl ist größer: ${a} oder ${a + b}?`, answer: a + b, hint: "Die größere Zahl liegt auf dem Zahlenstrahl weiter rechts." };
+    case "number-compare": {
+      const pair = shuffled([a, a + b]);
+      return { key: `number-compare:${a}:${a + b}`, text: `Welche Zahl ist größer: ${pair[0]} oder ${pair[1]}?`, answer: a + b, hint: "Die größere Zahl liegt auf dem Zahlenstrahl weiter rechts." };
+    }
     case "missing":
       return { text: `Welche Zahl fehlt? ${a} + ___ = ${a + b}`, answer: b, hint: "Ziehe die bekannte Zahl vom Ergebnis ab." };
     case "division": {
@@ -574,8 +614,9 @@ function makeFocusedMathQuestion(topic) {
     }
     case "coins": {
       const tens = randomInt(1, 4);
-      const twenties = randomInt(1, 3);
-      return { text: `Du hast ${tens} Münzen zu 10 Cent und ${twenties} Münzen zu 20 Cent. Wie viele Cent sind das zusammen?`, answer: tens * 10 + twenties * 20, hint: "Zähle zuerst die Zehn-Cent-Münzen, dann die Zwanzig-Cent-Münzen. Addiere die Beträge." };
+      const twenties = randomInt(1, 2);
+      const fives = randomInt(1, 4);
+      return { text: `Du hast ${tens} Münzen zu 10 Cent, ${twenties} Münzen zu 20 Cent und ${fives} Münzen zu 5 Cent. Wie viele Cent sind das zusammen?`, answer: tens * 10 + twenties * 20 + fives * 5, hint: "Berechne erst den Wert jeder Münzsorte. Addiere dann die drei Beträge." };
     }
     case "time": {
       const start = randomInt(6, 16);
@@ -585,7 +626,8 @@ function makeFocusedMathQuestion(topic) {
     case "fraction-compare": {
       const denominator = randomInt(3, 12);
       const numerator = randomInt(1, denominator - 1);
-      return { text: `Welcher Zähler gehört zum größeren Bruch: ${numerator}/${denominator} oder ${numerator + 1}/${denominator}? Gib nur den Zähler ein.`, answer: numerator + 1, hint: "Bei gleichem Nenner ist der Bruch mit dem größeren Zähler größer." };
+      const pair = shuffled([numerator, numerator + 1]);
+      return { key: `fraction-compare:${numerator}:${denominator}`, text: `Welcher Zähler gehört zum größeren Bruch: ${pair[0]}/${denominator} oder ${pair[1]}/${denominator}? Gib nur den Zähler ein.`, answer: numerator + 1, hint: "Bei gleichem Nenner ist der Bruch mit dem größeren Zähler größer." };
     }
     case "data": {
       const difference = Math.random() < 0.5;
@@ -611,15 +653,25 @@ function makeQuestion(topic) {
       const operator = subtract ? "−" : "+";
       return { text: `Wie viel ist ${a} ${operator} ${b}?`, answer, hint: "Rechne stellenweise und prüfe durch Überschlagen.", solution: `${a} ${operator} ${b} = ${answer}` };
     }
-    case "compare":
-      a = randomInt(2, progress.grade === 1 ? 5 : 15);
-      b = a + randomInt(1, 5);
-      return { text: `Welche Zahl kommt als Nächstes? ${a}, ${a + (b - a)}, ${b + (b - a)}, …`, answer: b + 2 * (b - a), hint: "Finde heraus, wie viel jedes Mal dazukommt.", solution: `Es kommen jeweils ${b - a} dazu. Die nächste Zahl ist ${b + 2 * (b - a)}.` };
+    case "compare": {
+      const limit = progress.grade === 1 ? 20 : 100;
+      const step = randomInt(1, progress.grade === 1 ? 5 : 10);
+      const descending = Math.random() < 0.5;
+      const start = descending ? randomInt(step * 3, limit) : randomInt(0, limit - step * 3);
+      const delta = descending ? -step : step;
+      const answer = start + 3 * delta;
+      return { text: `Welche Zahl kommt als Nächstes? ${start}, ${start + delta}, ${start + 2 * delta}, …`, answer, hint: "Prüfe, ob die Zahlen größer oder kleiner werden. Finde dann die Schrittweite.", solution: `Es ${descending ? "gehen" : "kommen"} jeweils ${step} ${descending ? "weg" : "dazu"}. Die nächste Zahl ist ${answer}.` };
+    }
     case "shapes": {
-      const sides = randomInt(3, 6);
-      const shape = ["", "", "", "Dreieck", "Viereck", "Fünfeck", "Sechseck"][sides];
+      const shapes = [{ name: "Dreieck", sides: 3 }, { name: "Viereck", sides: 4 }, { name: "Quadrat", sides: 4 }, { name: "Rechteck", sides: 4 }, { name: "Fünfeck", sides: 5 }, { name: "Sechseck", sides: 6 }];
+      const left = pickRandom(shapes);
+      const right = pickRandom(shapes);
       const feature = Math.random() < 0.5 ? "Ecken" : "Seiten";
-      return { text: `Wie viele ${feature} hat ein ${shape}?`, answer: sides, hint: "Bei Vielecken ist die Anzahl der Ecken genauso groß wie die Anzahl der Seiten.", solution: `Ein ${shape} hat ${sides} ${feature}.` };
+      if (Math.random() < 0.5) {
+        const pair = [left, right].sort((x, y) => x.name.localeCompare(y.name, "de"));
+        return { key: `shapes:pair:${feature}:${pair.map((shape) => shape.name).join(":")}`, text: `Zwei Formen liegen getrennt nebeneinander: ein ${left.name} und ein ${right.name}. Wie viele ${feature} haben beide zusammen?`, answer: left.sides + right.sides, hint: "Zähle die Ecken oder Seiten jeder Form einzeln und addiere die beiden Anzahlen." };
+      }
+      return { text: `Wie viele ${feature} hat ein ${left.name}?`, answer: left.sides, hint: "Bei Vielecken ist die Anzahl der Ecken genauso groß wie die Anzahl der Seiten.", solution: `Ein ${left.name} hat ${left.sides} ${feature}.` };
     }
     case "multiply":
       a = randomInt(topic.written ? 12 : 2, topic.written ? 999 : 10);
@@ -655,8 +707,11 @@ function makeQuestion(topic) {
       }
       return { text: `Ein Rechteck ist ${a} cm lang und ${b} cm breit. Wie groß ist seine Fläche in cm²?`, answer: a * b, hint: "Fläche = Länge × Breite.", solution: `${a} × ${b} = ${a * b} cm²` };
     case "units": {
-      a = randomInt(2, 9) * 100;
-      return { text: `Wie viele Zentimeter sind ${a / 100} Meter?`, answer: a, hint: "Ein Meter besteht aus 100 Zentimetern.", solution: `${a / 100} × 100 = ${a} cm` };
+      const meters = randomInt(1, progress.grade <= 2 ? 20 : 100);
+      if (Math.random() < 0.5) {
+        return { text: `Wie viele Meter sind ${meters * 100} Zentimeter?`, answer: meters, hint: "100 Zentimeter sind ein Meter. Teile die Zentimeterzahl durch 100.", solution: `${meters * 100} : 100 = ${meters} m` };
+      }
+      return { text: `Wie viele Zentimeter sind ${meters} Meter?`, answer: meters * 100, hint: "Ein Meter besteht aus 100 Zentimetern.", solution: `${meters} × 100 = ${meters * 100} cm` };
     }
     case "percent": {
       const percent = [10, 20, 25, 50][randomInt(0, 3)];
@@ -736,8 +791,8 @@ const germanSpellingPairsByGrade = {
     ["Kinnt", "Kind"], ["Broot", "Brot"]
   ],
   3: [
-    ["Bletter", "Blätter"], ["Hende", "Hände"], ["Kelte", "Kälte"], ["Welder", "Wälder"],
-    ["Bine", "Biene"], ["Wisse", "Wiese"], ["Brif", "Brief"], ["Schtuhl", "Stuhl"]
+    ["Bletter", "Blätter"], ["Hende", "Hände"], ["Källte", "Kälte"], ["Welder", "Wälder"],
+    ["Biehne", "Biene"], ["Wisse", "Wiese"], ["Brif", "Brief"], ["Schtuhl", "Stuhl"]
   ],
   4: [
     ["Heuser", "Häuser"], ["Beume", "Bäume"], ["Treume", "Träume"], ["Meuse", "Mäuse"],
@@ -812,7 +867,7 @@ const germanIntermediateTexts = [
 ];
 
 const germanAdvancedTexts = [
-  { text: "Der alte Leuchtturm stand an der Küste und leuchtete jede Nacht. Schiffe fanden so sicher den Weg. Doch eines Tages wurde das Licht schwächer und die Leute mussten eine Lösung finden.", question: "Was ist das Hauptproblem im Text?", options: ["Der Leuchtturm wurde modernisiert", "Das Licht ist ausgefallen", "Es gibt keine Schiffe", "Die Küste wird verkauft"], answer: "Das Licht ist ausgefallen" },
+  { text: "Der alte Leuchtturm stand an der Küste und leuchtete jede Nacht. Schiffe fanden so sicher den Weg. Doch eines Tages wurde das Licht schwächer und die Leute mussten eine Lösung finden.", question: "Was ist das Hauptproblem im Text?", options: ["Der Leuchtturm wurde modernisiert", "Das Licht wird schwächer", "Es gibt keine Schiffe", "Die Küste wird verkauft"], answer: "Das Licht wird schwächer" },
   { text: "In der Stadt herrschte Hektik: Menschen eilten zu ihren Terminen, Busse fuhren im Takt, und nur der Park blieb ruhig. Der Erzähler beobachtet das Treiben und fühlt sich fremd.", question: "Welches Gefühl beschreibt der Erzähler?", options: ["Freude", "Fremdheit", "Wut", "Langeweile"], answer: "Fremdheit" }
 ];
 
@@ -829,7 +884,7 @@ const germanVocabulary = [
   { word: "kostbar", answer: "wertvoll", options: ["wertvoll", "nutzlos", "gewöhnlich"] },
   { word: "erlauben", answer: "gestatten", options: ["verbieten", "gestatten", "vergessen"] },
   { word: "sorgfältig", answer: "gründlich", options: ["gründlich", "flüchtig", "zufällig"] },
-  { word: "behaupten", answer: "äußern", options: ["verbergen", "äußern", "bezweifeln"] },
+  { word: "überlegen", answer: "nachdenken", options: ["nachdenken", "vergessen", "rennen"] },
   { word: "unverzüglich", answer: "sofort", options: ["später", "sofort", "selten"] }
 ];
 
@@ -882,7 +937,7 @@ const germanWordFamilies = [
   ["backen", "Bäcker", "Bagger"], ["laufen", "Läufer", "Lampe"],
   ["wohnen", "Wohnung", "Wolke"], ["lesen", "Leser", "Leiter"],
   ["malen", "Maler", "Mantel"], ["freundlich", "Freund", "Freitag"],
-  ["singen", "Sänger", "Sonne"], ["bauen", "Bauwerk", "Baum"]
+  ["singen", "Sänger", "Sonne"], ["bauen", "Bauwerk", "Bauch"]
 ];
 const germanCompoundPairs = [
   ["Haus", "Tür"], ["Garten", "Tor"], ["Regen", "Jacke"], ["Hand", "Schuh"],
@@ -950,6 +1005,840 @@ const germanGradeSixCards = {
   ]
 };
 
+// Erweiterte, redaktionell geprüfte Übungspools: mindestens drei Durchläufe pro Inhaltspool.
+
+germanSpellingPairsByGrade[1].push(...[
+  ["Naseh", "Nase"],
+  ["Hahse", "Hase"],
+  ["Fihsch", "Fisch"],
+  ["Tish", "Tisch"],
+  ["Buchh", "Buch"],
+  ["Milh", "Milch"],
+  ["Gabell", "Gabel"],
+  ["Tascheh", "Tasche"],
+  ["Müze", "Mütze"],
+  ["Wollke", "Wolke"],
+  ["Löhwe", "Löwe"],
+  ["Apfell", "Apfel"],
+  ["Ehsel", "Esel"],
+  ["Innsel", "Insel"],
+  ["Entte", "Ente"],
+  ["Hohse", "Hose"]
+]);
+germanSpellingPairsByGrade[2].push(...[
+  ["Rater", "Räder"],
+  ["Beten", "Betten"],
+  ["Teler", "Teller"],
+  ["Löfel", "Löffel"],
+  ["Somer", "Sommer"],
+  ["Winta", "Winter"],
+  ["Kisen", "Kissen"],
+  ["Trepe", "Treppe"],
+  ["Bierne", "Birne"],
+  ["Gahrten", "Garten"],
+  ["Nuddel", "Nudel"],
+  ["Häft", "Heft"],
+  ["Rükken", "Rücken"],
+  ["Brile", "Brille"],
+  ["Schnekke", "Schnecke"],
+  ["Tromell", "Trommel"]
+]);
+germanSpellingPairsByGrade[3].push(...[
+  ["Tire", "Tiere"],
+  ["Kniee", "Knie"],
+  ["viell", "viel"],
+  ["Spigel", "Spiegel"],
+  ["Liedder", "Lieder"],
+  ["Graser", "Gräser"],
+  ["Aste", "Äste"],
+  ["Zahne", "Zähne"],
+  ["Körbbe", "Körbe"],
+  ["Mäner", "Männer"],
+  ["Stengel", "Stängel"],
+  ["Schpielen", "spielen"],
+  ["Schtein", "Stein"],
+  ["Schturm", "Sturm"],
+  ["Schtraße", "Straße"],
+  ["Walt", "Wald"]
+]);
+germanSpellingPairsByGrade[4].push(...[
+  ["Reuber", "Räuber"],
+  ["Schäune", "Scheune"],
+  ["Feur", "Feuer"],
+  ["Fräunde", "Freunde"],
+  ["Täuer", "teuer"],
+  ["neuhn", "neun"],
+  ["Bläustift", "Bleistift"],
+  ["Aimer", "Eimer"],
+  ["Kreutz", "Kreuz"],
+  ["Träppe", "Treppe"],
+  ["schneler", "schneller"],
+  ["Himel", "Himmel"],
+  ["Doner", "Donner"],
+  ["Schif", "Schiff"],
+  ["Höle", "Höhle"],
+  ["Stiell", "Stiel"]
+]);
+germanSpellingPairsByGrade[5].push(...[
+  ["grüntlich", "gründlich"],
+  ["aufmerksamm", "aufmerksam"],
+  ["Kentnis", "Kenntnis"],
+  ["äuserlich", "äußerlich"],
+  ["Fehrnsehen", "Fernsehen"],
+  ["verdächtik", "verdächtig"],
+  ["Dunkelhait", "Dunkelheit"],
+  ["Wanderunk", "Wanderung"],
+  ["überasschen", "überraschen"],
+  ["Wirklichkait", "Wirklichkeit"],
+  ["merkwürdich", "merkwürdig"],
+  ["geheimnissvoll", "geheimnisvoll"],
+  ["Hinderniss", "Hindernis"],
+  ["vergesen", "vergessen"],
+  ["aufpasen", "aufpassen"],
+  ["Gedult", "Geduld"]
+]);
+germanSpellingPairsByGrade[6].push(...[
+  ["Ereigniss", "Ereignis"],
+  ["Verhältniss", "Verhältnis"],
+  ["Gedächtniss", "Gedächtnis"],
+  ["Kenntnise", "Kenntnisse"],
+  ["Erläuterunk", "Erläuterung"],
+  ["Begrüntung", "Begründung"],
+  ["Vorausetzung", "Voraussetzung"],
+  ["unabhängik", "unabhängig"],
+  ["verständnissvoll", "verständnisvoll"],
+  ["Zusamenhang", "Zusammenhang"],
+  ["Wiederspruch", "Widerspruch"],
+  ["verantwordlich", "verantwortlich"],
+  ["empfelenswert", "empfehlenswert"],
+  ["verschiden", "verschieden"],
+  ["unterschidlich", "unterschiedlich"],
+  ["entwikeln", "entwickeln"]
+]);
+germanWords.push(...[
+  {"word": "Ball", "type": "Nomen"},
+  {"word": "Haus", "type": "Nomen"},
+  {"word": "Katze", "type": "Nomen"},
+  {"word": "Baum", "type": "Nomen"},
+  {"word": "Garten", "type": "Nomen"},
+  {"word": "essen", "type": "Verb"},
+  {"word": "malen", "type": "Verb"},
+  {"word": "tanzen", "type": "Verb"},
+  {"word": "lachen", "type": "Verb"},
+  {"word": "trinken", "type": "Verb"},
+  {"word": "klein", "type": "Adjektiv"},
+  {"word": "bunt", "type": "Adjektiv"},
+  {"word": "warm", "type": "Adjektiv"},
+  {"word": "rund", "type": "Adjektiv"},
+  {"word": "kalt", "type": "Adjektiv"},
+  {"word": "Stuhl", "type": "Nomen"},
+  {"word": "kochen", "type": "Verb"},
+  {"word": "weich", "type": "Adjektiv"},
+  {"word": "Tasche", "type": "Nomen"},
+  {"word": "schwimmen", "type": "Verb"},
+  {"word": "sauber", "type": "Adjektiv"},
+  {"word": "Vogel", "type": "Nomen"},
+  {"word": "schlafen", "type": "Verb"},
+  {"word": "hell", "type": "Adjektiv"}
+]);
+germanVocabulary.push(...[
+  {"word": "kalt", "answer": "kühl", "options": ["kühl", "heiß", "laut"]},
+  {"word": "klein", "answer": "winzig", "options": ["winzig", "riesig", "schwer"]},
+  {"word": "schön", "answer": "hübsch", "options": ["hübsch", "schmutzig", "müde"]},
+  {"word": "stark", "answer": "kräftig", "options": ["kräftig", "schwach", "kühl"]},
+  {"word": "finster", "answer": "dunkel", "options": ["dunkel", "hell", "weich"]},
+  {"word": "erzählen", "answer": "berichten", "options": ["berichten", "schweigen", "laufen"]},
+  {"word": "schauen", "answer": "blicken", "options": ["blicken", "schlafen", "essen"]},
+  {"word": "rufen", "answer": "laut sprechen", "options": ["laut sprechen", "leise schlafen", "schnell laufen"]},
+  {"word": "zornig", "answer": "wütend", "options": ["wütend", "zufrieden", "entspannt"]},
+  {"word": "spazieren", "answer": "bummeln", "options": ["bummeln", "rennen", "schwimmen"]},
+  {"word": "beenden", "answer": "abschließen", "options": ["abschließen", "beginnen", "verlieren"]},
+  {"word": "leuchten", "answer": "strahlen", "options": ["strahlen", "regnen", "schweigen"]},
+  {"word": "satt", "answer": "nicht mehr hungrig", "options": ["nicht mehr hungrig", "sehr durstig", "sehr müde"]},
+  {"word": "erschöpft", "answer": "sehr müde", "options": ["sehr müde", "sehr fröhlich", "sehr laut"]},
+  {"word": "behutsam", "answer": "vorsichtig", "options": ["vorsichtig", "hastig", "grob"]},
+  {"word": "antworten", "answer": "erwidern", "options": ["erwidern", "fragen", "suchen"]},
+  {"word": "bauen", "answer": "errichten", "options": ["errichten", "zerstören", "verstecken"]},
+  {"word": "reden", "answer": "sprechen", "options": ["sprechen", "hören", "schreiben"]},
+  {"word": "springen", "answer": "hüpfen", "options": ["hüpfen", "sitzen", "schlafen"]},
+  {"word": "sauber", "answer": "rein", "options": ["rein", "schmutzig", "müde"]},
+  {"word": "freundlich", "answer": "nett", "options": ["nett", "unhöflich", "kalt"]},
+  {"word": "nass", "answer": "feucht", "options": ["feucht", "trocken", "heiß"]},
+  {"word": "hilfsbereit", "answer": "unterstützend", "options": ["unterstützend", "abweisend", "schläfrig"]},
+  {"word": "suchen", "answer": "nach etwas Ausschau halten", "options": ["nach etwas Ausschau halten", "etwas absichtlich verstecken", "etwas vergessen"]}
+]);
+germanSyllables.push(...[
+  ["Auto", 2],
+  ["Ampel", 2],
+  ["Apfel", 2],
+  ["Fenster", 2],
+  ["Giraffe", 3],
+  ["Krokodil", 3],
+  ["Melone", 3],
+  ["Tasse", 2],
+  ["Brot", 1],
+  ["Fisch", 1],
+  ["Hund", 1],
+  ["Maus", 1],
+  ["Kuchen", 2],
+  ["Salat", 2],
+  ["Pirat", 2],
+  ["Kamera", 3],
+  ["Papagei", 3],
+  ["Lokomotive", 5],
+  ["Musik", 2],
+  ["Rucksack", 2],
+  ["Eis", 1],
+  ["Boot", 1],
+  ["Dose", 2],
+  ["Limo", 2]
+]);
+germanVerbSentences.push(...[
+  ["Der Frosch hüpft ins Wasser.", "hüpft"],
+  ["Mira schneidet Papier.", "schneidet"],
+  ["Die Kinder rennen zur Schule.", "rennen"],
+  ["Paul trinkt ein Glas Wasser.", "trinkt"],
+  ["Das Baby weint.", "weint"],
+  ["Der Wind rauscht.", "rauscht"],
+  ["Die Biene summt.", "summt"],
+  ["Opa repariert sein Fahrrad.", "repariert"],
+  ["Die Ärztin untersucht den Arm.", "untersucht"],
+  ["Der Bäcker knetet den Teig.", "knetet"],
+  ["Das Pferd frisst Gras.", "frisst"],
+  ["Die Ente taucht.", "taucht"],
+  ["Wir suchen den Schlüssel.", "suchen"],
+  ["Nora schreibt einen Brief.", "schreibt"],
+  ["Der Igel versteckt sich.", "versteckt"],
+  ["Mein Bruder zeichnet ein Schiff.", "zeichnet"],
+  ["Die Sonne scheint.", "scheint"],
+  ["Das Eis schmilzt.", "schmilzt"],
+  ["Im Garten blüht eine Rose.", "blüht"],
+  ["Auf dem See schwimmt ein Boot.", "schwimmt"],
+  ["Das Mädchen öffnet die Tür.", "öffnet"],
+  ["Die Schnecke kriecht über den Weg.", "kriecht"],
+  ["Im Ofen backt das Brot.", "backt"],
+  ["Der Zug fährt in den Bahnhof.", "fährt"]
+]);
+germanWordFamilies.push(...[
+  ["lernen", "Lernheft", "Laterne"],
+  ["kaufen", "Verkäufer", "Koffer"],
+  ["lachen", "Gelächter", "Lampe"],
+  ["tanzen", "Tänzer", "Tante"],
+  ["trinken", "Getränk", "Treppe"],
+  ["suchen", "Suchbild", "Suppe"],
+  ["schreiben", "Schrift", "Schrank"],
+  ["reisen", "Reisende", "Reifen"],
+  ["sprechen", "Sprache", "Sprosse"],
+  ["fragen", "Frage", "Frosch"],
+  ["arbeiten", "Arbeiter", "Abend"],
+  ["zeichnen", "Zeichnung", "Ziege"],
+  ["kochen", "Koch", "Kohle"],
+  ["hören", "Gehör", "Höhle"],
+  ["klingen", "Klang", "Kleider"],
+  ["zählen", "Zahl", "Zaun"],
+  ["schwimmen", "Schwimmer", "Schrank"],
+  ["fliegen", "Flug", "Flasche"],
+  ["schlafen", "Schlaf", "Schlauch"],
+  ["rufen", "Ruf", "Ruder"],
+  ["helfen", "Hilfe", "Hemd"],
+  ["denken", "Gedanke", "Deckel"],
+  ["warm", "Wärme", "Wand"],
+  ["kalt", "Kälte", "Kamm"]
+]);
+germanCompoundPairs.push(...[
+  ["Buch", "Seite"],
+  ["Tisch", "Bein"],
+  ["Tür", "Griff"],
+  ["Haus", "Wand"],
+  ["Schnee", "Mann"],
+  ["Regen", "Wolke"],
+  ["Milch", "Glas"],
+  ["Wasser", "Flasche"],
+  ["Wind", "Mühle"],
+  ["Brot", "Dose"],
+  ["Stadt", "Park"],
+  ["Obst", "Korb"],
+  ["Garten", "Haus"],
+  ["Spiel", "Platz"],
+  ["Winter", "Jacke"],
+  ["Sommer", "Kleid"],
+  ["Schule", "Hof"],
+  ["Hund", "Leine"],
+  ["Zahn", "Arzt"],
+  ["Fuß", "Boden"],
+  ["Hand", "Ball"],
+  ["Buch", "Laden"],
+  ["Fisch", "Teich"],
+  ["Regen", "Schirm"]
+]);
+germanIntermediateTexts.push(...[
+  {"text": "Am Montag ist das Schwimmbad geschlossen. Am Dienstag öffnet es wieder um neun Uhr.", "question": "Wann öffnet das Schwimmbad wieder?", "options": ["Am Dienstag um neun Uhr", "Am Montag um neun Uhr", "Am Sonntag um zehn Uhr"], "answer": "Am Dienstag um neun Uhr"},
+  {"text": "Mila findet einen verletzten Igel. Sie holt eine erwachsene Person, statt das Tier allein anzufassen.", "question": "Wen holt Mila?", "options": ["Eine erwachsene Person", "Einen Bäcker", "Eine Reisegruppe"], "answer": "Eine erwachsene Person"},
+  {"text": "Vor der Sportstunde stellt Tom seine Trinkflasche neben die Bank. Nach dem Spielen trinkt er daraus.", "question": "Wo steht die Trinkflasche?", "options": ["Neben der Bank", "Auf dem Dach", "Unter dem Bett"], "answer": "Neben der Bank"},
+  {"text": "Ein heftiger Wind zerreißt den Drachen. Opa hilft Lia, das Papier mit Klebeband zu flicken.", "question": "Warum muss der Drachen geflickt werden?", "options": ["Der Wind hat ihn zerrissen.", "Er ist nass geworden.", "Er ist zu schwer."], "answer": "Der Wind hat ihn zerrissen."},
+  {"text": "Die Klasse sammelt Kastanien für das Basteln. Jedes Kind legt seine Fundstücke in einen großen Korb.", "question": "Wofür sammelt die Klasse Kastanien?", "options": ["Zum Basteln", "Zum Schwimmen", "Zum Backen von Brot"], "answer": "Zum Basteln"},
+  {"text": "Samira räumt zuerst die Stifte weg. Danach wischt sie den Tisch ab. Zum Schluss legt sie das Heft hin.", "question": "Was macht Samira zuletzt?", "options": ["Sie legt das Heft hin.", "Sie räumt die Stifte weg.", "Sie wischt den Boden."], "answer": "Sie legt das Heft hin."},
+  {"text": "Der Bus fällt heute aus. Deshalb gehen Nils und sein Vater zu Fuß zum Bahnhof.", "question": "Warum gehen Nils und sein Vater zu Fuß?", "options": ["Der Bus fällt aus.", "Ihr Auto ist blau.", "Der Bahnhof ist geschlossen."], "answer": "Der Bus fällt aus."},
+  {"text": "Eine Schnecke sitzt auf dem Gartenweg. Lea trägt sie vorsichtig an den Rand, damit niemand auf sie tritt.", "question": "Warum trägt Lea die Schnecke an den Rand?", "options": ["Damit niemand auf sie tritt", "Damit sie schneller läuft", "Damit sie fliegen lernt"], "answer": "Damit niemand auf sie tritt"},
+  {"text": "Im Klassenraum ist die Luft stickig. Die Lehrerin öffnet für einige Minuten alle Fenster.", "question": "Was tut die Lehrerin?", "options": ["Sie öffnet die Fenster.", "Sie schaltet den Ofen ein.", "Sie schließt die Tür ab."], "answer": "Sie öffnet die Fenster."},
+  {"text": "Farid leiht in der Bücherei ein Buch über den Weltraum aus. Er möchte mehr über Planeten erfahren.", "question": "Worüber möchte Farid mehr erfahren?", "options": ["Über Planeten", "Über Brot", "Über Fußballschuhe"], "answer": "Über Planeten"},
+  {"text": "Das junge Eichhörnchen vergräbt eine Nuss unter einem Baum. Im Winter kann es dort Futter suchen.", "question": "Was vergräbt das Eichhörnchen?", "options": ["Eine Nuss", "Einen Stein", "Eine Feder"], "answer": "Eine Nuss"},
+  {"text": "Beim Ausflug beginnt es zu regnen. Die Gruppe stellt sich unter das Dach einer Haltestelle.", "question": "Wo sucht die Gruppe Schutz?", "options": ["Unter dem Dach einer Haltestelle", "Mitten auf dem Feld", "Auf einem Baum"], "answer": "Unter dem Dach einer Haltestelle"},
+  {"text": "Der Kuchen muss noch zehn Minuten im Ofen bleiben. Erst danach nimmt Papa ihn heraus.", "question": "Wann nimmt Papa den Kuchen heraus?", "options": ["Nach weiteren zehn Minuten", "Sofort", "Erst am nächsten Tag"], "answer": "Nach weiteren zehn Minuten"},
+  {"text": "Elias hat sein Sportzeug vergessen. Seine Schwester bringt die Tasche vor der zweiten Stunde zur Schule.", "question": "Was hat Elias vergessen?", "options": ["Sein Sportzeug", "Seinen Haustürschlüssel", "Sein Fahrrad"], "answer": "Sein Sportzeug"},
+  {"text": "Die Blätter der Zimmerpflanze hängen herunter. Die Erde ist trocken. Anja gießt die Pflanze.", "question": "Woran erkennt Anja, dass die Pflanze Wasser braucht?", "options": ["An der trockenen Erde und den hängenden Blättern", "An einer zerbrochenen Tasse", "Am roten Blumentopf"], "answer": "An der trockenen Erde und den hängenden Blättern"},
+  {"text": "Luca möchte ein Vogelhaus bauen. Bevor er Holz zusägt, zeichnet er einen Plan mit den Maßen.", "question": "Was macht Luca vor dem Sägen?", "options": ["Er zeichnet einen Plan.", "Er streicht das fertige Haus.", "Er füllt Vogelfutter ein."], "answer": "Er zeichnet einen Plan."},
+  {"text": "Im Museum dürfen die Kinder die alte Ritterrüstung ansehen. Anfassen ist zum Schutz des Stücks verboten.", "question": "Was dürfen die Kinder tun?", "options": ["Die Rüstung ansehen", "Die Rüstung anziehen", "Die Rüstung mitnehmen"], "answer": "Die Rüstung ansehen"},
+  {"text": "Für das Picknick packt Jana Äpfel, Brot und Wasser ein. Den Müll nimmt die Familie später wieder mit.", "question": "Was macht die Familie mit dem Müll?", "options": ["Sie nimmt ihn wieder mit.", "Sie lässt ihn auf der Wiese.", "Sie wirft ihn in den Bach."], "answer": "Sie nimmt ihn wieder mit."},
+  {"text": "Am Abend hört Tim ein Rascheln im Garten. Unter dem Laub entdeckt er einen Igel.", "question": "Was entdeckt Tim unter dem Laub?", "options": ["Einen Igel", "Einen Papagei", "Eine Katze"], "answer": "Einen Igel"},
+  {"text": "Die Klasse fährt mit dem Zug nach Köln. Jedes Kind hat eine Fahrkarte im Rucksack.", "question": "Womit fährt die Klasse nach Köln?", "options": ["Mit dem Zug", "Mit einem Flugzeug", "Mit einem Schiff"], "answer": "Mit dem Zug"},
+  {"text": "Ein Kind hat auf dem Spielplatz eine Mütze verloren. Ada bringt sie zum Fundbüro.", "question": "Wohin bringt Ada die Mütze?", "options": ["Zum Fundbüro", "In die Mülltonne", "Zu einer Bäckerei"], "answer": "Zum Fundbüro"},
+  {"text": "Die neuen Schuhe drücken an der Ferse. Deshalb zieht Ole für die Wanderung seine alten Schuhe an.", "question": "Welche Schuhe trägt Ole bei der Wanderung?", "options": ["Seine alten Schuhe", "Die drückenden neuen Schuhe", "Gar keine Schuhe"], "answer": "Seine alten Schuhe"},
+  {"text": "Die Schule sammelt Bücher für einen Tauschmarkt. Wer ein Buch abgibt, darf sich ein anderes aussuchen.", "question": "Was darf man nach dem Abgeben eines Buches tun?", "options": ["Ein anderes Buch aussuchen", "Alle Bücher behalten", "Die Schule verlassen"], "answer": "Ein anderes Buch aussuchen"},
+  {"text": "Auf der Baustelle steht ein großes Schild. Es warnt davor, das abgesperrte Gelände zu betreten.", "question": "Wovor warnt das Schild?", "options": ["Vor dem Betreten des abgesperrten Geländes", "Vor dem Lesen eines Buches", "Vor dem Warten auf den Bus"], "answer": "Vor dem Betreten des abgesperrten Geländes"}
+]);
+germanMainIdeaTexts.push(...[
+  ["Die Klasse möchte ein Fest feiern. Einige Kinder kümmern sich um Spiele, andere um Essen und Einladungen. Gemeinsam wird alles rechtzeitig fertig.", "Die Klasse bereitet ihr Fest gemeinsam vor.", "Die Klasse sagt ihr Fest wegen fehlender Hilfe ab."],
+  ["Im Bach schwimmt Müll. Die Kinder informieren den örtlichen Umweltverein. Zusammen räumen sie das Ufer auf.", "Kinder und Verein helfen, den Bach sauberer zu machen.", "Die Kinder bauen eine Brücke über den Bach."],
+  ["Emil verliert beim Spiel. Erst ärgert er sich. Dann gratuliert er der Siegerin und bittet um eine neue Runde.", "Emil lernt, fair mit einer Niederlage umzugehen.", "Emil möchte nie wieder mit anderen spielen."],
+  ["Eine Baustelle sperrt den Schulweg. Die Schule zeichnet einen Ersatzweg auf. Am Morgen begleiten Erwachsene die Kinder.", "Die Schule organisiert einen sicheren Ersatzweg.", "Die Schule schließt wegen der Baustelle für immer."],
+  ["Nora versteht eine Matheaufgabe nicht. Sie erklärt ihrem Freund, wo sie nicht weiterkommt. Gemeinsam finden sie den Fehler.", "Durch Nachfragen und Erklären löst Nora ihr Problem.", "Nora überspringt alle Matheaufgaben."],
+  ["Die Stadt pflanzt neue Bäume. Im Sommer spenden sie Schatten. Viele Menschen ruhen sich dort bei Hitze aus.", "Die neuen Bäume bieten im Sommer Schatten.", "Die Bäume sorgen dafür, dass es nie mehr regnet."],
+  ["Ben möchte Geld für ein Fahrrad sparen. Er notiert seine Einnahmen und Ausgaben. So erkennt er, wie viel er zurücklegen kann.", "Ben plant seine Ausgaben, um für ein Fahrrad zu sparen.", "Ben kauft jeden Tag ein neues Fahrrad."],
+  ["Mira hat Angst vor dem Referat. Sie übt es zu Hause vor ihrer Familie. Am nächsten Tag spricht sie sicherer vor der Klasse.", "Vorbereitung hilft Mira beim Vortragen.", "Mira hält das Referat ohne Vorbereitung."],
+  ["Ein Buch ist in der Bücherei beschädigt. Die Bibliothekarin klebt die losen Seiten fest. Danach kann es wieder ausgeliehen werden.", "Ein beschädigtes Buch wird repariert.", "Die Bücherei verschenkt alle Bücher."],
+  ["Die Mannschaft verliert oft den Ball. Im Training übt sie kurze Pässe. Im nächsten Spiel gelingt das Zusammenspiel besser.", "Gezieltes Training verbessert das Zusammenspiel.", "Die Mannschaft trainiert jetzt nur noch Schwimmen."],
+  ["Im Dorf gibt es keinen Laden mehr. Einige Menschen organisieren einen mobilen Verkaufsstand. Er kommt zweimal pro Woche auf den Platz.", "Ein mobiler Stand hilft bei der Versorgung im Dorf.", "Die Bewohner müssen ihr Dorf verlassen."],
+  ["Lara entdeckt Schimmel auf einer Brotscheibe. Sie isst das Brot nicht und sagt zu Hause Bescheid. Die Familie prüft die übrigen Lebensmittel.", "Die Familie achtet auf verdorbene Lebensmittel.", "Die Familie benutzt das Brot für ein Kunstwerk."],
+  ["Die Klasse beobachtet das Wetter. Jeden Mittag misst sie die Temperatur und trägt sie in eine Tabelle ein. Nach einer Woche vergleicht sie die Werte.", "Die Klasse sammelt und vergleicht Wetterdaten.", "Die Klasse entscheidet täglich über das Wetter."],
+  ["Ein Sturm knickt einen Ast ab. Die Feuerwehr sperrt den gefährlichen Weg. Erst nach dem Wegräumen wird er wieder geöffnet.", "Ein gefährlicher Weg wird vorübergehend gesichert.", "Die Feuerwehr pflanzt einen Wald."],
+  ["Im Zoo wird das Gehege umgebaut. Die Tiere ziehen vorübergehend in einen anderen Bereich. Danach haben sie mehr Platz.", "Der Umbau verbessert den Platz für die Tiere.", "Die Tiere werden für immer aus dem Zoo entfernt."],
+  ["Am Bahnhof kann ein Besucher den Gleisplan nicht lesen. Sana erklärt ihm den Weg. So erreicht er seinen Zug rechtzeitig.", "Sana hilft einem Besucher bei der Orientierung.", "Sana kauft einen neuen Zug."],
+  ["Die Kinder bauen ein Insektenhotel. Sie verwenden trockenes Holz und geeignete Röhren. Danach beobachten sie, welche Tiere einziehen.", "Die Kinder schaffen und beobachten Nistplätze für Insekten.", "Die Kinder stellen ein Hotel für Menschen auf."],
+  ["Jonas findet eine Geldbörse. Er bringt sie mit einem Erwachsenen zur Polizei. Die Besitzerin bekommt sie später zurück.", "Jonas sorgt dafür, dass eine Fundsache zurückgegeben wird.", "Jonas gibt das gefundene Geld für Süßigkeiten aus."],
+  ["Ein Familienmitglied hört schlecht. Die anderen sprechen deutlich und schauen es beim Reden an. So gelingt das Gespräch besser.", "Die Familie passt ihr Gespräch an die Bedürfnisse eines Mitglieds an.", "Die Familie redet künftig überhaupt nicht mehr."],
+  ["Eine Theatergruppe hat wenig Platz auf der Bühne. Sie verändert ihre Kulissen und probt die Wege neu. Bei der Aufführung klappt alles.", "Die Theatergruppe passt ihre Planung an den vorhandenen Platz an.", "Die Theatergruppe baut ein neues Theater."],
+  ["Die Nachbarn teilen sich Gartengeräte. Sie schreiben auf, wer etwas ausleiht. So braucht nicht jeder jedes Gerät zu kaufen.", "Die Nachbarn organisieren das gemeinsame Nutzen von Geräten.", "Die Nachbarn verschenken ihre Häuser."],
+  ["Der neue Schüler kennt noch niemanden. Zwei Kinder laden ihn in der Pause zum Spiel ein. Bald findet er Anschluss.", "Eine Einladung hilft einem neuen Schüler, Kontakte zu knüpfen.", "Der neue Schüler zieht sofort wieder weg."],
+  ["Eine Gruppe will wandern. Sie prüft vorher den Wetterbericht und packt passende Kleidung ein. Als es kühler wird, sind alle vorbereitet.", "Gute Planung hilft der Gruppe bei der Wanderung.", "Die Gruppe wandert ohne Ausrüstung durch Schnee."],
+  ["Die Schule spart Strom. Leere Räume bleiben unbeleuchtet und Geräte werden ganz ausgeschaltet. Nach einem Monat wird der Verbrauch verglichen.", "Die Schule versucht, ihren Stromverbrauch zu senken.", "Die Schule kauft jeden Monat neue Lampen."]
+]);
+germanSentences.splice(8, 0, ...[
+  {"words": ["Die", "Katze", "schläft", "auf", "dem", "Sofa"], "answer": "Die Katze schläft auf dem Sofa."},
+  {"words": ["Ben", "trägt", "einen", "Rucksack"], "answer": "Ben trägt einen Rucksack."},
+  {"words": ["Oma", "kocht", "eine", "Suppe"], "answer": "Oma kocht eine Suppe."},
+  {"words": ["Der", "Bus", "hält", "an", "der", "Schule"], "answer": "Der Bus hält an der Schule."},
+  {"words": ["Das", "Kind", "baut", "einen", "Turm"], "answer": "Das Kind baut einen Turm."},
+  {"words": ["Die", "Ente", "schwimmt", "im", "Teich"], "answer": "Die Ente schwimmt im Teich."},
+  {"words": ["Der", "Wind", "bewegt", "die", "Blätter"], "answer": "Der Wind bewegt die Blätter."},
+  {"words": ["Mila", "schneidet", "das", "Papier"], "answer": "Mila schneidet das Papier."},
+  {"words": ["Der", "Bäcker", "verkauft", "frisches", "Brot"], "answer": "Der Bäcker verkauft frisches Brot."},
+  {"words": ["Unsere", "Klasse", "sammelt", "Kastanien"], "answer": "Unsere Klasse sammelt Kastanien."},
+  {"words": ["Der", "Regen", "füllt", "die", "Tonne"], "answer": "Der Regen füllt die Tonne."},
+  {"words": ["Der", "Zug", "fährt", "durch", "den", "Tunnel"], "answer": "Der Zug fährt durch den Tunnel."},
+  {"words": ["Die", "Maus", "frisst", "ein", "Stück", "Käse"], "answer": "Die Maus frisst ein Stück Käse."},
+  {"words": ["Lukas", "sucht", "seinen", "Schlüssel"], "answer": "Lukas sucht seinen Schlüssel."},
+  {"words": ["Nora", "schreibt", "eine", "Karte"], "answer": "Nora schreibt eine Karte."},
+  {"words": ["Das", "Pferd", "steht", "auf", "der", "Wiese"], "answer": "Das Pferd steht auf der Wiese."},
+  {"words": ["Der", "Gärtner", "gießt", "die", "Blumen"], "answer": "Der Gärtner gießt die Blumen."},
+  {"words": ["Die", "Lampe", "leuchtet", "hell"], "answer": "Die Lampe leuchtet hell."},
+  {"words": ["Sara", "öffnet", "das", "Fenster"], "answer": "Sara öffnet das Fenster."},
+  {"words": ["Die", "Schnecke", "kriecht", "langsam"], "answer": "Die Schnecke kriecht langsam."},
+  {"words": ["Der", "Junge", "fängt", "den", "Ball"], "answer": "Der Junge fängt den Ball."},
+  {"words": ["Die", "Kinder", "singen", "ein", "Lied"], "answer": "Die Kinder singen ein Lied."},
+  {"words": ["Meine", "Schwester", "zeichnet", "ein", "Schiff"], "answer": "Meine Schwester zeichnet ein Schiff."},
+  {"words": ["Der", "Igel", "versteckt", "sich", "im", "Laub"], "answer": "Der Igel versteckt sich im Laub."}
+]);
+
+germanPunctuationQuestions.push(...[
+  {
+    "text": "die Katze liegt auf dem Sofa",
+    "answer": "Die Katze liegt auf dem Sofa.",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "Wann öffnet die Bücherei",
+    "answer": "Wann öffnet die Bücherei?",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "Kannst du den Ball fangen",
+    "answer": "Kannst du den Ball fangen?",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "die Kinder sammeln Blätter",
+    "answer": "Die Kinder sammeln Blätter.",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "Wo liegt dein Heft",
+    "answer": "Wo liegt dein Heft?",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "der Wind weht stark",
+    "answer": "Der Wind weht stark.",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "Wie heißt dein Hund",
+    "answer": "Wie heißt dein Hund?",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "morgen fährt unsere Klasse nach Köln",
+    "answer": "Morgen fährt unsere Klasse nach Köln.",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "Warum ist die Straße gesperrt",
+    "answer": "Warum ist die Straße gesperrt?",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "die Biene sammelt Nektar",
+    "answer": "Die Biene sammelt Nektar.",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "Hast du deine Tasche dabei",
+    "answer": "Hast du deine Tasche dabei?",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "im Garten blühen Rosen",
+    "answer": "Im Garten blühen Rosen.",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "Wem gehört dieser Schlüssel",
+    "answer": "Wem gehört dieser Schlüssel?",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "der Bus hält vor der Schule",
+    "answer": "Der Bus hält vor der Schule.",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "Was möchtest du trinken",
+    "answer": "Was möchtest du trinken?",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "heute backt Oma einen Kuchen",
+    "answer": "Heute backt Oma einen Kuchen.",
+    "hint": "Achte auf die Satzart und auf den Satzanfang."
+  },
+  {
+    "text": "Mia liest ein Buch während Ben ein Bild malt",
+    "answer": "Mia liest ein Buch, während Ben ein Bild malt.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  },
+  {
+    "text": "Ich weiß nicht ob der Bus schon gefahren ist",
+    "answer": "Ich weiß nicht, ob der Bus schon gefahren ist.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  },
+  {
+    "text": "Weil die Straße gesperrt ist gehen wir einen anderen Weg",
+    "answer": "Weil die Straße gesperrt ist, gehen wir einen anderen Weg.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  },
+  {
+    "text": "Sobald die Sonne aufgeht singen die Vögel",
+    "answer": "Sobald die Sonne aufgeht, singen die Vögel.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  },
+  {
+    "text": "Wir warten bis der Regen aufhört",
+    "answer": "Wir warten, bis der Regen aufhört.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  },
+  {
+    "text": "Der Hund bellt obwohl er niemanden sieht",
+    "answer": "Der Hund bellt, obwohl er niemanden sieht.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  },
+  {
+    "text": "Lina packt Brot Käse und Äpfel ein",
+    "answer": "Lina packt Brot, Käse und Äpfel ein.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  },
+  {
+    "text": "Im Garten wachsen Möhren Erbsen und Salat",
+    "answer": "Im Garten wachsen Möhren, Erbsen und Salat.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  },
+  {
+    "text": "Der Rucksack ist leicht praktisch und wasserdicht",
+    "answer": "Der Rucksack ist leicht, praktisch und wasserdicht.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  },
+  {
+    "text": "Ich hoffe dass wir uns bald wiedersehen",
+    "answer": "Ich hoffe, dass wir uns bald wiedersehen.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  },
+  {
+    "text": "Falls du Hilfe brauchst kannst du mich fragen",
+    "answer": "Falls du Hilfe brauchst, kannst du mich fragen.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  },
+  {
+    "text": "Ben übt täglich damit er das Stück sicher spielen kann",
+    "answer": "Ben übt täglich, damit er das Stück sicher spielen kann.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  },
+  {
+    "text": "Ob der Laden noch offen ist weiß ich nicht",
+    "answer": "Ob der Laden noch offen ist, weiß ich nicht.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  },
+  {
+    "text": "Wir holen Holz bevor wir das Vogelhaus bauen",
+    "answer": "Wir holen Holz, bevor wir das Vogelhaus bauen.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  },
+  {
+    "text": "Die Kinder lachen singen und tanzen",
+    "answer": "Die Kinder lachen, singen und tanzen.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  },
+  {
+    "text": "Nachdem alle gegessen hatten räumten sie gemeinsam auf",
+    "answer": "Nachdem alle gegessen hatten, räumten sie gemeinsam auf.",
+    "hint": "Trenne den Nebensatz oder die Teile der Aufzählung durch Kommas."
+  }
+]);
+germanGradeSixCards["wordclass-six"].push(...[
+  [
+    "Bestimme die Wortart von „ein“: Ein Vogel sitzt im Baum.",
+    "Artikel"
+  ],
+  [
+    "Bestimme die Wortart von „du“: Morgen kommst du zu uns.",
+    "Pronomen"
+  ],
+  [
+    "Bestimme die Wortart von „obwohl“: Wir gehen, obwohl es regnet.",
+    "Konjunktion"
+  ],
+  [
+    "Bestimme die Wortart von „gestern“: Gestern war schulfrei.",
+    "Adverb"
+  ],
+  [
+    "Bestimme die Wortart von „schreibt“: Ben schreibt einen Brief.",
+    "Verb"
+  ],
+  [
+    "Bestimme die Wortart von „Schlüssel“: Der Schlüssel liegt hier.",
+    "Nomen"
+  ],
+  [
+    "Bestimme die Wortart von „bunte“: Die bunte Tasche gefällt mir.",
+    "Adjektiv"
+  ],
+  [
+    "Bestimme die Wortart von „oder“: Wir lesen oder spielen.",
+    "Konjunktion"
+  ],
+  [
+    "Bestimme die Wortart von „ihr“: Am Abend kommt ihr.",
+    "Pronomen"
+  ],
+  [
+    "Bestimme die Wortart von „oben“: Oben wohnen meine Großeltern.",
+    "Adverb"
+  ],
+  [
+    "Bestimme die Wortart von „das“: Das Fenster ist offen.",
+    "Artikel"
+  ],
+  [
+    "Bestimme die Wortart von „niemand“: Heute fehlt niemand.",
+    "Pronomen"
+  ],
+  [
+    "Bestimme die Wortart von „denn“: Wir warten, denn der Bus kommt gleich.",
+    "Konjunktion"
+  ],
+  [
+    "Bestimme die Wortart von „bald“: Bald beginnt die Schule.",
+    "Adverb"
+  ],
+  [
+    "Bestimme die Wortart von „wachsen“: Die Pflanzen wachsen schnell.",
+    "Verb"
+  ],
+  [
+    "Bestimme die Wortart von „kalte“: Die kalte Suppe schmeckt nicht.",
+    "Adjektiv"
+  ]
+]);
+germanGradeSixCards["sentence-member"].push(...[
+  [
+    "Welches Satzglied ist „Unsere Klasse“? Unsere Klasse besucht ein Museum.",
+    "Subjekt"
+  ],
+  [
+    "Welches Satzglied ist „besucht“? Unsere Klasse besucht ein Museum.",
+    "Prädikat"
+  ],
+  [
+    "Welches Satzglied ist „ein Museum“? Unsere Klasse besucht ein Museum.",
+    "Akkusativobjekt"
+  ],
+  [
+    "Welches Satzglied ist „der Nachbarin“? Ben hilft der Nachbarin.",
+    "Dativobjekt"
+  ],
+  [
+    "Welches Satzglied ist „morgen“? Wir fahren morgen nach Köln.",
+    "Adverbiale Bestimmung der Zeit"
+  ],
+  [
+    "Welches Satzglied ist „vor der Schule“? Der Bus wartet vor der Schule.",
+    "Adverbiale Bestimmung des Ortes"
+  ],
+  [
+    "Welches Satzglied ist „Die Vögel“? Die Vögel singen im Baum.",
+    "Subjekt"
+  ],
+  [
+    "Welches Satzglied ist „ein Vogelhaus“? Opa baut ein Vogelhaus.",
+    "Akkusativobjekt"
+  ],
+  [
+    "Welches Satzglied ist „meinem Bruder“? Ich schenke meinem Bruder ein Buch.",
+    "Dativobjekt"
+  ],
+  [
+    "Welches Satzglied ist „schwimmt“? Die Ente schwimmt auf dem Teich.",
+    "Prädikat"
+  ],
+  [
+    "Welches Satzglied ist „am Dienstag“? Das Training beginnt am Dienstag.",
+    "Adverbiale Bestimmung der Zeit"
+  ],
+  [
+    "Welches Satzglied ist „unter dem Tisch“? Der Ball liegt unter dem Tisch.",
+    "Adverbiale Bestimmung des Ortes"
+  ],
+  [
+    "Welches Satzglied ist „einen Brief“? Samira schreibt einen Brief.",
+    "Akkusativobjekt"
+  ],
+  [
+    "Welches Satzglied ist „dem Patienten“? Die Ärztin hilft dem Patienten.",
+    "Dativobjekt"
+  ],
+  [
+    "Welches Satzglied ist „Das neue Fahrrad“? Das neue Fahrrad steht im Keller.",
+    "Subjekt"
+  ],
+  [
+    "Welches Satzglied ist „liest“? Mein Vater liest die Zeitung.",
+    "Prädikat"
+  ]
+]);
+germanGradeSixCards["reading-six"].push(...[
+  [
+    "Lies: Eine Ameise arbeitet im Sommer fleißig und legt Vorräte an. Eine Grille denkt nur ans Vergnügen. Im Winter fehlt ihr Nahrung. Welcher Gegensatz wird gezeigt?",
+    "Vorsorge und Sorglosigkeit",
+    "Mut und Körpergröße"
+  ],
+  [
+    "Lies: Das Wasser gefriert bei großer Kälte. Dabei wird aus flüssigem Wasser festes Eis. Welche Textabsicht liegt vor?",
+    "Einen Vorgang sachlich erklären",
+    "Eine Figur zum Kauf überreden"
+  ],
+  [
+    "Lies: Der Wind flüsterte durch die Zweige. Welches sprachliche Mittel liegt vor?",
+    "Personifikation",
+    "Vergleich mit „wie“"
+  ],
+  [
+    "Lies: Die Straße zog sich wie ein graues Band durch die Landschaft. Welches sprachliche Mittel liegt vor?",
+    "Vergleich",
+    "Wörtliche Rede"
+  ],
+  [
+    "Lies: Laut Fahrplan fährt der Bus um 8:15 Uhr ab. Welche Art von Aussage ist das?",
+    "Eine überprüfbare Information",
+    "Eine persönliche Vorliebe"
+  ],
+  [
+    "Lies: Meiner Meinung nach ist dieser Film zu lang. Was zeigt die Formulierung „meiner Meinung nach“?",
+    "Eine persönliche Bewertung",
+    "Ein wörtliches Zitat aus dem Fahrplan"
+  ],
+  [
+    "Lies: Erst schaltete sie den Strom ab. Dann wechselte eine Fachkraft die defekte Lampe. Weshalb ist die Reihenfolge wichtig?",
+    "Die Arbeit soll sicher erfolgen.",
+    "Die Lampe soll absichtlich kaputtgehen."
+  ],
+  [
+    "Lies: Im Text wird die Figur zuerst als mutig beschrieben. Später zögert sie vor einer unbekannten Aufgabe. Was lässt sich daraus schließen?",
+    "Eine mutige Person kann trotzdem unsicher sein.",
+    "Die Figur ist im gesamten Text immer gleichgültig."
+  ],
+  [
+    "Lies: Lisa wollte zum Fest. Doch dann sah sie den verletzten Vogel. Sie blieb bei ihm, bis Hilfe kam. Welche Entscheidung trifft Lisa?",
+    "Sie stellt die Hilfe für das Tier vor ihren Festbesuch.",
+    "Sie nimmt den Vogel als Schmuck mit zum Fest."
+  ],
+  [
+    "Lies: Für den Ausflug brauchen alle ein Getränk. Auch ein kleiner Imbiss wird empfohlen. Was ist ausdrücklich erforderlich?",
+    "Ein Getränk",
+    "Eine große Süßigkeitentüte"
+  ],
+  [
+    "Lies: Max sagte: „Ich habe den Schlüssel gefunden!“ Was steht zwischen den Anführungszeichen?",
+    "Die wörtlich wiedergegebene Äußerung von Max",
+    "Eine Erklärung des Verlags"
+  ],
+  [
+    "Lies: In einer Tabelle stehen die Öffnungszeiten der Bücherei. Wo findest du die Zeit für Donnerstag am schnellsten?",
+    "In der Zeile oder Spalte für Donnerstag",
+    "In einer beliebigen Werbeanzeige"
+  ],
+  [
+    "Lies: „Kaufe jetzt das beste Spiel aller Zeiten!“ Welche Absicht ist besonders deutlich?",
+    "Zum Kauf bewegen",
+    "Eine neutrale Messung beschreiben"
+  ],
+  [
+    "Lies: Nachdem der Hund lange gesucht hatte, legte er sich erschöpft hin. Was bedeutet „erschöpft“ hier?",
+    "Sehr müde",
+    "Besonders neugierig"
+  ],
+  [
+    "Lies: Eine Geschichte beginnt mitten in einer aufregenden Szene und erklärt die Vorgeschichte erst später. Was geschieht zuerst beim Lesen?",
+    "Man erfährt die spannende Szene vor ihrer Vorgeschichte.",
+    "Man liest zunächst sämtliche früheren Ereignisse."
+  ],
+  [
+    "Lies: Drei Strophen beschreiben Regen, Wind und Sonne. Die Wörter am Zeilenende reimen sich. Welche Textsorte liegt nahe?",
+    "Gedicht",
+    "Warenrechnung"
+  ]
+]);
+germanGradeSixCards["media-six"].push(...[
+  [
+    "Eine Nachricht verwendet eine auffällige Überschrift, aber liefert keinen Beleg. Wie prüfst du sie?",
+    "Den vollständigen Text lesen und unabhängige Belege suchen.",
+    "Nur nach der auffälligen Überschrift urteilen."
+  ],
+  [
+    "Ein Anbieter bezahlt eine bekannte Person dafür, ein Produkt zu zeigen. Was muss beim Einordnen beachtet werden?",
+    "Die Darstellung kann Werbung sein.",
+    "Bezahlung macht jede Aussage automatisch objektiv."
+  ],
+  [
+    "Ein Bild zeigt nur einen kleinen Ausschnitt eines Ereignisses. Was ist sinnvoll?",
+    "Den Zusammenhang und weitere Informationen prüfen.",
+    "Vom Ausschnitt auf den gesamten Ablauf schließen."
+  ],
+  [
+    "Du findest dieselbe Behauptung auf vielen Webseiten, die alle voneinander abschreiben. Was bedeutet das?",
+    "Viele Wiederholungen ersetzen keinen unabhängigen Beleg.",
+    "Die Anzahl der Kopien beweist die Behauptung."
+  ],
+  [
+    "In einem Referat zitierst du einen Satz wörtlich. Wie kennzeichnest du ihn?",
+    "Mit Anführungszeichen und Quellenangabe.",
+    "Als selbst erfundenen Satz ohne Kennzeichnung."
+  ],
+  [
+    "Ein Chatbeitrag beleidigt einen Mitschüler. Wie kannst du helfen?",
+    "Nicht weiterverbreiten und Unterstützung bei einer vertrauten Person suchen.",
+    "Die Beleidigung zur Unterhaltung weiterleiten."
+  ],
+  [
+    "Du möchtest ein sicheres Passwort wählen. Welche Eigenschaft hilft?",
+    "Es ist lang und wird nicht für andere Konten wiederverwendet.",
+    "Es besteht nur aus deinem öffentlich bekannten Vornamen."
+  ],
+  [
+    "Eine App verlangt Zugriff auf dein Mikrofon, obwohl du nur ein Bild ansehen willst. Was ist sinnvoll?",
+    "Prüfen, ob die Berechtigung für die Funktion erforderlich ist.",
+    "Immer jede Berechtigung ohne Prüfung erlauben."
+  ],
+  [
+    "Du nutzt eine Suchmaschine für ein Sachthema. Welche Suchanfrage ist meist hilfreicher?",
+    "Passende, genaue Schlüsselwörter zum Thema.",
+    "Beliebige Wörter ohne Bezug zum Thema."
+  ],
+  [
+    "Eine Information nennt ein Datum und einen Messwert. Was hilft bei der Prüfung?",
+    "Die ursprüngliche Veröffentlichung und ihre Methode suchen.",
+    "Allein auf die Schriftfarbe achten."
+  ],
+  [
+    "Du willst eine Information aus einem Lexikon in eigenen Worten erklären. Was ist wichtig?",
+    "Den Inhalt verstehen und sinngemäß mit Quellenangabe wiedergeben.",
+    "Ein paar Wörter tauschen und den Rest heimlich abschreiben."
+  ],
+  [
+    "Ein Kontakt bittet dich im Chat um dein Passwort. Wie reagierst du?",
+    "Das Passwort nicht weitergeben.",
+    "Das Passwort öffentlich in die Gruppe schreiben."
+  ],
+  [
+    "Eine Nachricht verspricht einen Gewinn, wenn du sie sofort weiterleitest. Was ist sinnvoll?",
+    "Die Nachricht kritisch prüfen und nicht unter Zeitdruck verbreiten.",
+    "Sie ungeprüft an alle Kontakte senden."
+  ],
+  [
+    "Du findest online einen Fehler in deinem eigenen Beitrag. Was ist fair?",
+    "Den Fehler berichtigen und die Korrektur verständlich machen.",
+    "Den Fehler trotz besseren Wissens weiter als Tatsache darstellen."
+  ],
+  [
+    "Zwei sachkundige Quellen widersprechen sich. Was ist ein guter nächster Schritt?",
+    "Argumente, Daten und Veröffentlichungszeitpunkte vergleichen.",
+    "Die Quelle mit dem schönsten Logo auswählen."
+  ],
+  [
+    "Du darfst ein Bild nur unter Nennung des Urhebers nutzen. Was musst du tun?",
+    "Die Nutzungsbedingungen beachten und den Urheber nennen.",
+    "Den Namen entfernen und das Bild als eigenes ausgeben."
+  ]
+]);
+
+const gardenSentence = germanSentences.find((item) => item.answer === "Wir spielen nach der Schule im Garten.");
+gardenSentence.alternatives = [gardenSentence.answer, "Wir spielen im Garten nach der Schule."];
+
+// Ab Klasse 5: längere Texte mit Schlussfolgerungen, Belegen und Textabsichten.
+germanAdvancedTexts.push(...[
+  {"text": "Die Schülerzeitung möchte über ein neues Busangebot berichten. Eine Schülerin kennt die Fahrzeiten nur aus einem älteren Aushang. Die Redaktion fragt deshalb beim Verkehrsunternehmen nach, bevor der Artikel erscheint.", "question": "Warum fragt die Redaktion beim Verkehrsunternehmen nach?", "answer": "Sie möchte die Angaben vor der Veröffentlichung überprüfen.", "options": ["Sie möchte die Angaben vor der Veröffentlichung überprüfen.", "Sie möchte den Aushang heimlich entfernen.", "Sie möchte keine Fahrzeiten nennen."]},
+  {"text": "Auf dem Schulhof sollen neue Sitzbänke stehen. Einige Kinder wünschen sie sich nahe dem Fußballfeld, andere suchen einen ruhigen Platz zum Lesen. Der Schülerrat schlägt zwei getrennte Bereiche vor.", "question": "Welches Problem löst der Vorschlag des Schülerrats?", "answer": "Er berücksichtigt unterschiedliche Wünsche an den Schulhof.", "options": ["Er berücksichtigt unterschiedliche Wünsche an den Schulhof.", "Er verbietet allen Kindern das Lesen.", "Er verlegt die Schule an einen anderen Ort."]},
+  {"text": "Ein Bach ist nach starkem Regen braun gefärbt. Im Bericht der Stadt steht, dass abgeschwemmte Erde die Färbung verursacht. Ob zusätzlich Schadstoffe enthalten sind, wird noch untersucht.", "question": "Welche Aussage ist durch den Bericht abgesichert?", "answer": "Abgeschwemmte Erde ist eine Ursache der Färbung.", "options": ["Abgeschwemmte Erde ist eine Ursache der Färbung.", "Der Bach enthält sicher keine Schadstoffe.", "Die Untersuchung ist bereits vollständig abgeschlossen."]},
+  {"text": "Nora bereitet ein Referat vor. In einem Lexikon findet sie eine andere Jahreszahl als auf einer privaten Webseite ohne Quellenangabe. Statt eine Zahl zu raten, sucht sie nach dem Originaldokument.", "question": "Welche Fähigkeit zeigt Nora?", "answer": "Sie prüft widersprüchliche Informationen anhand ihrer Herkunft.", "options": ["Sie prüft widersprüchliche Informationen anhand ihrer Herkunft.", "Sie entscheidet ausschließlich nach der schöneren Gestaltung.", "Sie hält jede Internetseite für gleich zuverlässig."]},
+  {"text": "Auf dem Plakat steht: Unsere Aufführung beginnt um 18 Uhr. Einlass ist ab 17:30 Uhr. Die Türen werden während der ersten Szene geschlossen gehalten. Sami kommt um 18:05 Uhr.", "question": "Welche Folge ist nach dem Plakat möglich?", "answer": "Sami muss bis zum Ende der ersten Szene warten.", "options": ["Sami muss bis zum Ende der ersten Szene warten.", "Sami darf das Theater nie wieder besuchen.", "Die Vorstellung beginnt wegen Sami erst später."]},
+  {"text": "Eine Stadt testet für vier Wochen eine neue Fahrradstraße. Vor und nach dem Test werden Verkehr und Lärm gemessen. Erst danach soll entschieden werden, ob die Regelung bleibt.", "question": "Warum wird vor und nach dem Test gemessen?", "answer": "Die Stadt möchte die Auswirkungen vergleichen.", "options": ["Die Stadt möchte die Auswirkungen vergleichen.", "Die Stadt hat die dauerhafte Entscheidung schon im Text bekannt gegeben.", "Die Messung soll das Radfahren grundsätzlich verbieten."]},
+  {"text": "Mira verspricht ihrer Freundin, beim Umzug zu helfen. Am selben Nachmittag wird sie zu einem Konzert eingeladen. Sie sagt die Einladung ab und hilft beim Tragen der Kisten.", "question": "Welche Eigenschaft zeigt Miras Entscheidung besonders?", "answer": "Zuverlässigkeit", "options": ["Zuverlässigkeit", "Gleichgültigkeit", "Verschwendung"]},
+  {"text": "Ein Jugendlicher entdeckt auf einer Wanderung einen umgestürzten Baum auf dem Weg. Er findet einen sicheren Umweg, informiert die Gruppe und meldet das Hindernis später der zuständigen Stelle.", "question": "Welche Überschrift fasst den Text am besten zusammen?", "answer": "Ein Hindernis erkennen und verantwortungsvoll handeln", "options": ["Ein Hindernis erkennen und verantwortungsvoll handeln", "Eine Wanderung ohne jedes Problem", "Ein Baum wird absichtlich gefällt"]},
+  {"text": "Im Bericht über das Sportfest steht, welche Wettbewerbe stattfanden und wie viele Klassen teilnahmen. Im Kommentar daneben erklärt eine Schülerin, warum sie das Fest gelungen fand.", "question": "Wodurch unterscheiden sich Bericht und Kommentar hier?", "answer": "Der Kommentar enthält ausdrücklich eine persönliche Bewertung.", "options": ["Der Kommentar enthält ausdrücklich eine persönliche Bewertung.", "Nur der Bericht darf Wörter enthalten.", "Der Kommentar nennt überhaupt kein Thema."]},
+  {"text": "Zwei Klassen sammeln Altpapier. Klasse A sammelt insgesamt mehr, hat aber doppelt so viele Kinder wie Klasse B. Die Lehrerin schlägt vor, auch die Menge pro Kind zu betrachten.", "question": "Wozu dient der zusätzliche Vergleich?", "answer": "Er berücksichtigt die unterschiedliche Größe der Klassen.", "options": ["Er berücksichtigt die unterschiedliche Größe der Klassen.", "Er beweist, dass eine Klasse nichts gesammelt hat.", "Er ersetzt die Messung durch eine beliebige Schätzung."]},
+  {"text": "Eine Bibliothek führt einen neuen Rückgabeautomaten ein. Bücher können nun auch abgegeben werden, wenn die Ausleihtheke geschlossen ist. Die Ausleihe neuer Bücher bleibt an die Öffnungszeiten gebunden.", "question": "Welche Handlung wird durch die Änderung zusätzlich möglich?", "answer": "Bücher außerhalb der Öffnungszeiten der Theke zurückgeben", "options": ["Bücher außerhalb der Öffnungszeiten der Theke zurückgeben", "Zu jeder Zeit neue Bücher an der Theke ausleihen", "Alle ausgeliehenen Bücher dauerhaft behalten"]},
+  {"text": "Eine Klasse untersucht, wie schnell Kresse wächst. Alle Töpfe erhalten dieselbe Erde und gleich viel Wasser. Nur die Lichtmenge unterscheidet sich. Die Kinder vergleichen die Pflanzen täglich.", "question": "Warum bleiben Erde und Wassermenge gleich?", "answer": "So lässt sich der Einfluss des Lichts besser untersuchen.", "options": ["So lässt sich der Einfluss des Lichts besser untersuchen.", "Damit alle Pflanzen sicher gleich schnell wachsen.", "Damit die Lichtmenge keine Rolle spielen kann."]},
+  {"text": "In einem Leserbrief fordert ein Vater einen Zebrastreifen vor der Schule. Er beschreibt die schwierige Überquerung am Morgen und nennt beobachtete gefährliche Situationen.", "question": "Welche Funktion haben die beschriebenen Situationen?", "answer": "Sie begründen seine Forderung.", "options": ["Sie begründen seine Forderung.", "Sie erklären den Bau eines Fahrrads.", "Sie sollen die Schule aus dem Ort entfernen."]},
+  {"text": "Luca findet einen Schlüssel auf dem Sportplatz. Zuerst möchte er ihn einfach liegen lassen. Dann denkt er an seine eigene Suche nach einem verlorenen Schlüssel und bringt den Fund zur Aufsicht.", "question": "Was verändert Lucas Entscheidung?", "answer": "Er versetzt sich in die Lage einer Person, die etwas verloren hat.", "options": ["Er versetzt sich in die Lage einer Person, die etwas verloren hat.", "Er erhält im Text eine Belohnung.", "Der Schlüssel beginnt zu sprechen."]},
+  {"text": "Auf einer Verpackung steht, dass sie vollständig recycelbar ist. Im Informationstext wird erklärt, dass Recycling außerdem eine richtige Trennung und Sammlung voraussetzt.", "question": "Welche Schlussfolgerung passt?", "answer": "Recycelbar bedeutet nicht, dass jede weggeworfene Verpackung tatsächlich recycelt wird.", "options": ["Recycelbar bedeutet nicht, dass jede weggeworfene Verpackung tatsächlich recycelt wird.", "Recycelbare Verpackungen müssen nicht gesammelt werden.", "Die Mülltrennung hat laut Text keine Bedeutung."]},
+  {"text": "Eine Schule möchte eine Wiese für den Sportunterricht nutzen. Dort wachsen im Frühjahr seltene Blumen. Die Gruppen einigen sich darauf, einen Teil der Fläche auszusparen.", "question": "Was kennzeichnet die Einigung?", "answer": "Sie verbindet Nutzung mit Rücksicht auf die Pflanzen.", "options": ["Sie verbindet Nutzung mit Rücksicht auf die Pflanzen.", "Sie verlangt, sämtliche Blumen zu entfernen.", "Sie verbietet jede Bewegung auf dem Schulgelände."]},
+  {"text": "In der Geschichte zieht Lina in eine neue Stadt. Anfangs antwortet sie im Unterricht kaum. Nachdem sie im Theaterprojekt eine Rolle übernommen hat, spricht sie häufiger mit anderen Kindern.", "question": "Welche Entwicklung beschreibt der Text?", "answer": "Lina gewinnt durch eine gemeinsame Tätigkeit mehr Kontakt zu anderen.", "options": ["Lina gewinnt durch eine gemeinsame Tätigkeit mehr Kontakt zu anderen.", "Lina zieht im Verlauf des Textes erneut um.", "Lina verliert jedes Interesse an Gesprächen."]},
+  {"text": "Die Wandergruppe plant eine lange Strecke. Der Wetterbericht kündigt für den Nachmittag Gewitter an. Die Leitung wählt deshalb eine kürzere Route mit einer früh erreichbaren Schutzhütte.", "question": "Wie wirkt sich die neue Information auf die Planung aus?", "answer": "Die Leitung passt Strecke und Schutzmöglichkeiten an das Wetter an.", "options": ["Die Leitung passt Strecke und Schutzmöglichkeiten an das Wetter an.", "Die Leitung verlängert die Strecke ohne Pause.", "Der Wetterbericht verändert im Text die Jahreszeit."]},
+  {"text": "Ein Sachbuch beschreibt zuerst, wie ein Wasserrad gebaut ist. Anschließend erklärt es mit Pfeilen, wie fließendes Wasser das Rad bewegt. Der Text und die Zeichnung ergänzen sich.", "question": "Welche Information liefern die Pfeile besonders?", "answer": "Die Bewegungsrichtung im dargestellten Ablauf", "options": ["Die Bewegungsrichtung im dargestellten Ablauf", "Das genaue Alter des Buches", "Die persönliche Meinung des Zeichners"]},
+  {"text": "Ein Artikel meldet, dass immer mehr Kinder mit dem Fahrrad zur Schule kommen. Als Beleg nennt er eine Zählung an zwei Tagen. Die Redaktion weist darauf hin, dass Regen das Ergebnis beeinflussen kann.", "question": "Warum wird auf den Regen hingewiesen?", "answer": "Die Bedingungen der Zählung können die Zahl der Fahrräder beeinflussen.", "options": ["Die Bedingungen der Zählung können die Zahl der Fahrräder beeinflussen.", "Bei Regen gibt es grundsätzlich keine Schulen.", "Die genannte Zählung ist laut Text frei erfunden."]},
+  {"text": "Vor dem Klassenausflug liest Jona die Hinweise: Festes Schuhwerk ist erforderlich. Eine Regenjacke wird empfohlen. Ein eigenes Fernglas ist freiwillig. Er kann nur einen kleinen Rucksack mitnehmen.", "question": "Welche Ausrüstung ist nach den Hinweisen verbindlich?", "answer": "Festes Schuhwerk", "options": ["Festes Schuhwerk", "Ein eigenes Fernglas", "Ein zusätzlicher großer Koffer"]},
+  {"text": "Ein Museum zeigt dieselbe Landschaft auf zwei Bildern aus verschiedenen Zeiten. Auf dem älteren Bild verläuft ein Bach offen. Auf dem neueren stehen dort Häuser. Die Beschriftung erklärt, dass der Bach unterirdisch verlegt wurde.", "question": "Welche Frage beantwortet die Beschriftung?", "answer": "Warum der Bach auf dem neueren Bild nicht mehr offen zu sehen ist", "options": ["Warum der Bach auf dem neueren Bild nicht mehr offen zu sehen ist", "Wer alle Häuser gebaut hat", "Wie viel jedes Bild gekostet hat"]}
+]);
+germanRegularVerbs.push("wohnen", "leben", "suchen", "holen", "packen", "feiern", "lieben", "üben", "hören", "führen", "fühlen", "zählen");
+
 function makeFocusedGermanQuestion(topic) {
   if (germanGradeSixCards[topic.mode]) {
     const [text, answer, distractor] = pickRandom(germanGradeSixCards[topic.mode]);
@@ -990,22 +1879,22 @@ function makeGermanQuestion(topic) {
       return { text: `Schreibe das Wort richtig: ${wrong}`, answer, hint: germanSpellingHintsByGrade[progress.grade] };
     }
     case "de-wordclass": {
-      const pool = germanWords.slice(0, progress.grade <= 2 ? 8 : progress.grade <= 4 ? 9 : germanWords.length);
+      const pool = progress.grade <= 2 ? germanWords.filter((item) => !["Gedanke", "Freiheit", "untersuchen", "ungewöhnlich", "entdecken", "vorsichtig"].includes(item.word)) : germanWords;
       const item = pickRandom(pool);
       return { text: `Zu welcher Wortart gehört „${item.word}“? (Nomen, Verb oder Adjektiv)`, answer: item.type, hint: "Nomen bezeichnen Dinge, Verben Tätigkeiten und Adjektive Eigenschaften." };
     }
     case "de-wordorder": {
-      const pool = germanSentences.slice(0, progress.grade <= 4 ? 8 : germanSentences.length);
+      const pool = germanSentences.slice(0, progress.grade <= 4 ? 32 : germanSentences.length);
       const item = pickRandom(pool);
       const words = [...item.words];
       for (let index = words.length - 1; index > 0; index -= 1) {
         const swapIndex = randomInt(0, index);
         [words[index], words[swapIndex]] = [words[swapIndex], words[index]];
       }
-      return { key: `sentence:${item.answer}`, text: `Ordne die Wörter zu einem Satz: ${words.join(" / ")}`, answer: item.answer, caseSensitive: true, hint: "Achte auf die Satzstellung, den Satzanfang und das Satzzeichen am Ende." };
+      return { key: `sentence:${item.answer}`, text: `Ordne die Wörter zu einem Satz: ${words.join(" / ")}. Beginne mit „${item.words.slice(0, item.words[0] === "Am" ? 2 : 1).join(" ")}“.`, answer: item.alternatives || item.answer, caseSensitive: true, hint: "Beachte den vorgegebenen Satzanfang. Schreibe einen Aussagesatz mit Punkt am Ende." };
     }
     case "de-vocabulary": {
-      const pool = germanVocabulary.slice(0, progress.grade <= 2 ? 8 : progress.grade <= 4 ? 9 : germanVocabulary.length);
+      const pool = progress.grade <= 2 ? germanVocabulary.filter((item) => !["kostbar", "erlauben", "sorgfältig", "überlegen", "unverzüglich", "behutsam", "antworten", "bauen", "hilfsbereit"].includes(item.word)) : germanVocabulary;
       const item = pickRandom(pool);
       return { text: `Welches Wort bedeutet ungefähr dasselbe wie „${item.word}“? (${item.options.join(", ")})`, answer: item.answer, hint: "Suche das Wort mit einer ähnlichen Bedeutung." };
     }
@@ -1028,7 +1917,7 @@ function makeGermanQuestion(topic) {
           answer = verb;
         } else if (person.pronoun === "ich") {
           // Stamm-e fällt vor der Endung -e weg: sammle, wandre
-          answer = `${verb.replace(/e([lr])n$/, "$1")}e`;
+          answer = [`${stem}e`, `${verb.replace(/e([lr])n$/, "$1")}e`];
         } else {
           answer = `${stem}${person.present}`;
         }
@@ -1038,9 +1927,9 @@ function makeGermanQuestion(topic) {
       return { text: `Setze „${verb}“ für „${person.pronoun}“ ins ${tenseLabel}: ${person.pronoun} ___`, answer, hint: "Bestimme zuerst den Wortstamm und ergänze die passende Verbendung." };
     }
     case "de-punctuation": {
-      const pool = progress.grade === 6 ? germanPunctuationQuestions.filter((item) => item.answer.includes(",")) : germanPunctuationQuestions.slice(0, progress.grade < 4 ? 8 : germanPunctuationQuestions.length);
+      const pool = progress.grade === 6 ? germanPunctuationQuestions.filter((item) => item.answer.includes(",")) : progress.grade < 4 ? germanPunctuationQuestions.filter((item) => !item.answer.includes(",")) : germanPunctuationQuestions;
       const item = pickRandom(pool);
-      return { text: `Setze Großschreibung und Satzzeichen richtig: ${item.text}`, answer: item.answer, caseSensitive: true, hint: item.hint };
+      return { text: `Setze Großschreibung und Satzzeichen richtig: ${item.text} (Ende mit ${item.answer.endsWith("?") ? "einem Fragezeichen" : item.answer.endsWith("!") ? "einem Ausrufezeichen" : "einem Punkt"}.)`, answer: item.answer, caseSensitive: true, hint: item.hint };
     }
     case "de-reading": {
       if (progress.grade === 1) {
@@ -1051,7 +1940,7 @@ function makeGermanQuestion(topic) {
         const [text, answer, distractor] = pickRandom(germanMainIdeaTexts);
         return { key: `reading:${text}`, text: `Lies: "${text}"\nWelche Aussage fasst den ganzen Text am besten zusammen?`, answer, options: shuffled([answer, distractor]), hint: "Überlege, worum es im ganzen Text geht. Prüfe, ob die Aussage zum Text passt." };
       }
-      const item = pickRandom(germanIntermediateTexts);
+      const item = pickRandom(progress.grade >= 5 ? germanAdvancedTexts : germanIntermediateTexts);
       return { key: `reading:${item.text}`, text: `Lies: "${item.text}"\nFrage: ${item.question}`, answer: item.answer, options: shuffled(item.options), hint: "Suche im Text die Information, die zur Frage passt." };
     }
     case "de-words": {
@@ -1065,7 +1954,7 @@ function makeGermanQuestion(topic) {
     }
     case "de-capitalization": {
       // Groß-/Kleinschreibung üben: zeige kleingeschriebenen Satz, Antworte mit korrekter Großschreibung
-      const item = pickRandom(germanSentences.slice(0, progress.grade < 5 ? 8 : germanSentences.length));
+      const item = pickRandom(germanSentences.slice(0, progress.grade < 5 ? 32 : germanSentences.length));
       const lower = item.answer.toLowerCase();
       return { text: `Setze Großschreibung und Satzzeichen: ${lower}`, answer: item.answer, caseSensitive: true, hint: "Achte auf Satzanfang und Nomen (Großschreibung)." };
     }
@@ -1076,25 +1965,26 @@ function makeGermanQuestion(topic) {
 
 function questionIdentity(question) {
   if (question.key) return question.key;
-  // Tauschaufgaben im selben Ablauf nicht als neue Aufgabe zählen.
-  const arithmetic = question.text.match(/^Wie viel ist (\d+) ([+×]) (\d+)\?$/);
-  if (arithmetic) return `${arithmetic[2]}:${[Number(arithmetic[1]), Number(arithmetic[3])].sort((a, b) => a - b).join(":")}`;
+  // Tauschaufgaben auch bei Dezimalzahlen und Brüchen als denselben Inhalt erkennen.
+  const arithmetic = question.text.match(/^(?:Wie viel ist|Berechne) (-?\d+(?:[,.]\d+|\/\d+)?) ([+×]) (-?\d+(?:[,.]\d+|\/\d+)?)[?.]/);
+  if (arithmetic) return `${arithmetic[2]}:${[parseAnswer(arithmetic[1]), parseAnswer(arithmetic[3])].sort((a, b) => a - b).join(":")}`;
   return question.text.normalize("NFC").trim().replace(/\s+/g, " ");
 }
 
 function makeUniqueQuestions(topic, count) {
-  const questions = [];
-  const seen = new Set();
-  // Auch bei erschöpften Pools oder ungünstiger Zufallsfolge bleibt die App bedienbar.
-  for (let attempt = 0; questions.length < count && attempt < count * 256; attempt += 1) {
+  const candidates = new Map();
+  // Größere Auswahl sammeln, damit bekannte Aufgaben nicht aus Zufall früh zurückkehren.
+  // Die Obergrenze verhindert Stillstand bei endlichen Pools oder konstanter Zufallsfolge.
+  for (let attempt = 0; attempt < count * 128 && candidates.size < Math.max(count * 16, 128); attempt += 1) {
     const question = progress.subject === "german" ? makeGermanQuestion(topic) : makeQuestion(topic);
     const identity = questionIdentity(question);
-    if (!seen.has(identity)) {
-      seen.add(identity);
-      questions.push(question);
-    }
+    if (!candidates.has(identity)) candidates.set(identity, question);
   }
-  return questions;
+  const recent = new Map((questionHistory[questionHistoryKey()] || []).map((identity, index) => [identity, index + 1]));
+  // Unbekannte Aufgaben zuerst, danach die am längsten nicht gezeigten. Gleichstände mischen.
+  return shuffled([...candidates.values()])
+    .sort((left, right) => (recent.get(questionIdentity(left)) || 0) - (recent.get(questionIdentity(right)) || 0))
+    .slice(0, count);
 }
 
 function buildErrorReport() {
@@ -1178,14 +2068,16 @@ function startLesson(topicIndex) {
   const topics = (progress.subject === "german" ? germanCurriculum : curriculum)[progress.grade];
   const topic = topics[topicIndex];
   const count = exercisesPerLesson;
+  const questions = makeUniqueQuestions(topic, count);
+  rememberQuestions(questions);
   activeLesson = {
     topic,
     topicIndex,
-    questions: makeUniqueQuestions(topic, count),
+    questions,
     position: 0,
     correct: 0,
-    firstAttempts: Array(count).fill(null),
-    submissions: Array(count).fill(null),
+    firstAttempts: Array(questions.length).fill(null),
+    submissions: Array(questions.length).fill(null),
     resolved: false
   };
   renderLesson();

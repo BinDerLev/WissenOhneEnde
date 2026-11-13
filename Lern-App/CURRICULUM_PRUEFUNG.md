@@ -91,7 +91,7 @@ Klasse 6 ist auswählbar und wird im gespeicherten Lernstand unterstützt. Sie e
 3. **Verfahren statt nur Ergebnisse prüfen.** „Schriftlich rechnen“ prüft bislang nur das Endergebnis. Stellenwerte, Überträge, Zwischenschritte und Fehlersuche benötigen eigene Formate. Auch Sachaufgaben sollten mehrere Operationen und begründete Entscheidungen verlangen; aktuelle Geldaufgaben sind überwiegend Preis-mal-Anzahl.
 4. **Deutsch verbreitern.** Schreiben, Planen und Überarbeiten eigener Texte, Handschrift, Sprechen/Zuhören, Medien und literarische Auseinandersetzung fehlen. Dafür sind andere Aufgaben- und Rückmeldungsformen erforderlich als automatische Richtig/Falsch-Eingaben.
 5. **Echte Lernprogression.** Rechtschreibung und erste Leseformate sind jetzt abgestuft; viele andere Wort-, Satz- und Aufgabenpools bleiben zwischen Klassen ähnlich. Einstiegsdiagnose und Schwierigkeitsanpassung fehlen. Das Feld `difficulty` steuert bisher keine allgemeine Anpassung.
-6. **Wiederholungen über mehrere Einheiten steuern.** Die Korrektur verhindert inhaltliche Doppelungen innerhalb eines Durchlaufs. Eine dauerhafte Aufgabenhistorie oder zeitlich verteilte Wiederholung gibt es noch nicht; gleiche Aufgaben können beim Neustart wiederkehren.
+6. **Wiederholungssteuerung seit 13. November ergänzt.** Größere Inhaltspools und eine lokal gespeicherte Aufgabenhistorie bevorzugen neue bzw. länger nicht gezeigte Aufgaben auch beim Neustart. Umfang, Qualitätsreview und verbleibende Grenzen stehen in [Aufgabenvielfalt und Qualitätsprüfung](CONTENT_VARIETY.md). Eine adaptive Wiederholung gezielt nach individuellen Fehlern bleibt ein möglicher nächster Schritt.
 
 ## Prüfung
 

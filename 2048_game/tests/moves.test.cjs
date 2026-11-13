@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const element = () => ({ textContent: '', disabled: false, innerHTML: '', style: {}, classList: { add() {} }, setAttribute() {}, addEventListener() {}, appendChild() {}, getAnimations: () => [] });
+const element = () => ({ textContent: '', disabled: false, innerHTML: '', style: { setProperty() {} }, classList: { add() {} }, setAttribute() {}, addEventListener() {}, appendChild() {}, getAnimations: () => [] });
 const context = vm.createContext({
   document: { getElementById: element, addEventListener() {}, createElement: element },
   window: { addEventListener() {}, setInterval() {} },
@@ -43,4 +43,46 @@ test('invalid moves preserve undo history; rapid input cannot create extra turns
   vm.runInContext('animating = true', context);
   await vm.runInContext(`applyMove('left')`, context);
   assert.deepEqual(evaluate('grid[0]'), [0,0,0,2]);
+});
+
+test('each new move enables one undo, restoring board, score and daily randomness', async () => {
+  vm.runInContext(`
+    animating = false;
+    animateMove = async () => {};
+    mode = 'daily'; activeDailyDate = todayDate;
+    dailyConfig = { fourChance: 10 }; dailyRandomState = 123;
+    grid = [[2,2,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+    score = 0; combo = 1; previousState = null;
+  `, context);
+  const initial = evaluate('grid');
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await vm.runInContext(`applyMove('left')`, context);
+    assert.equal(evaluate('undoBtn.disabled'), false);
+    assert.equal(evaluate('score'), 4);
+    vm.runInContext('undo()', context);
+    assert.deepEqual(evaluate('grid'), initial);
+    assert.equal(evaluate('score'), 0);
+    assert.equal(evaluate('dailyRandomState'), 123);
+    assert.equal(evaluate('undoBtn.disabled'), true);
+    vm.runInContext('undo()', context);
+    assert.deepEqual(evaluate('grid'), initial);
+  }
+});
+
+test('undo of a finished round cancels the scheduled return', async () => {
+  let restarts = 0;
+  context.window.GameRoundSession = { finish() {}, restart() { restarts++; } };
+  context.document.querySelector = () => ({ remove() {} });
+  vm.runInContext(`
+    mode = 'standard';
+    grid = [[1024,1024,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+    showGameOverOverlay = () => {};
+  `, context);
+  await vm.runInContext(`applyMove('left')`, context);
+  assert.equal(evaluate('roundFinished'), true);
+  assert.equal(evaluate('undoBtn.disabled'), false);
+  vm.runInContext('undo()', context);
+  assert.equal(restarts, 1);
+  assert.equal(evaluate('roundFinished || gameWon || gameOver'), false);
+  assert.deepEqual(evaluate('grid[0]'), [1024,1024,0,0]);
 });
