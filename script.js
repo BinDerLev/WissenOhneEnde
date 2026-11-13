@@ -22,11 +22,11 @@ const gameCatalog = [
         imageAlt: 'Gefangen Unter Wasser',
         title: 'Gefangen Unter Wasser',
         type: 'Abenteuer • Puzzle',
-        description: 'Tauche in eine mysteriöse Unterwasserwelt ein, löse drei Rätsel und find den Schatz!',
-        rating: '⭐⭐⭐⭐⭐',
-        score: '5/5',
+        description: 'Tauche in eine mysteriöse Unterwasserwelt ein, löse drei Rätsel und find den Schatz! Das Abenteuer wartet auf dich.',
+        rating: '⭐⭐⭐⭐',
+        score: '4/5',
         categories: ['adventure'],
-        tags: ['Abenteuer', 'Rätsel', 'Action']
+        tags: ['Abenteuer', 'Rätsel', 'Textabenteuer']
     },
     {
         href: 'chess/index.html',
@@ -34,11 +34,11 @@ const gameCatalog = [
         imageAlt: 'Schach',
         title: 'Schach',
         type: 'Strategie',
-        description: 'Spiele gegen eine intelligente KI in drei verschiedenen Schwierigkeitsstufen!',
+        description: 'Spiele gegen eine intelligente KI in drei verschiedenen Schwierigkeitsstufen! Der Klassiker unter den Strategiespielen.',
         rating: '⭐⭐⭐⭐⭐',
         score: '5/5',
         categories: ['strategy'],
-        tags: ['Strategie', 'KI']
+        tags: ['Strategie', 'KI', 'Klassiker']
     },
     {
         href: 'snake_game/index.html',
@@ -46,11 +46,11 @@ const gameCatalog = [
         imageAlt: 'Snake Game',
         title: 'Snake Game',
         type: 'Action • Klassiker',
-        description: 'Das legendäre Snake-Spiel! Lenke die Schlange und sammle so viel Futter wie möglich.',
+        description: 'Das legendäre Snake-Spiel! Lenke die Schlange und sammle so viel Futter wie möglich. Benutze Tages-Challenge für Herausforderungen und Highscores.',
         rating: '⭐⭐⭐⭐',
         score: '4/5',
         categories: ['action'],
-        tags: ['Klassiker', 'Action']
+        tags: ['Klassiker', 'Action',]
     },
     {
         href: 'Brick-Bracker/index.html',
@@ -58,9 +58,9 @@ const gameCatalog = [
         imageAlt: 'Breakout',
         title: 'Breakout - Brick Breaker',
         type: 'Action',
-        description: 'Zerstöre alle Blöcke mit dem Ball! Mehrere Level mit steigender Schwierigkeit.',
-        rating: '⭐⭐⭐⭐',
-        score: '4/5',
+        description: 'Zerstöre alle Blöcke mit dem Ball! Pass auf das der Ball nicht ins Aus geht. Der Klassiker unter den Arcade-Spielen.',
+        rating: '⭐⭐⭐⭐⭐',
+        score: '5/5',
         categories: ['action'],
         tags: ['Action', 'Arcade']
     },
@@ -70,9 +70,9 @@ const gameCatalog = [
         imageAlt: '2048',
         title: '2048',
         type: 'Puzzle • Strategie',
-        description: 'Kombiniere Zahlen um 2048 zu erreichen! Ein süchtig machendes Zahlenpuzzle.',
-        rating: '⭐⭐⭐⭐⭐',
-        score: '5/5',
+        description: 'Kombiniere Zahlen um 2048 zu erreichen! Der echte Klassiker unter den Puzzlespielen. Realisiere deine Strategie und knacke deinen Highscore!',
+        rating: '⭐⭐⭐',
+        score: '3/5',
         categories: ['puzzle'],
         tags: ['Puzzle', 'Zahlen']
     },
@@ -82,7 +82,7 @@ const gameCatalog = [
         imageAlt: 'Memory',
         title: 'Memory',
         type: 'Puzzle • Konzentration',
-        description: 'Finde alle Kartenpaare und knacke deinen persönlichen Punkte-Rekord!',
+        description: 'Finde alle Kartenpaare und knacke deinen persönlichen Punkte-Rekord! Drei Schwierigkeitsstufen warten auf dich.',
         rating: '⭐⭐⭐⭐⭐',
         score: '5/5',
         categories: ['puzzle'],
@@ -95,8 +95,8 @@ const gameCatalog = [
         title: 'Asteroids',
         type: 'Action • Arcade',
         description: 'Klassisches Weltraum-Abenteuer! Schieße auf Asteroiden und überlebe jede Wave!',
-        rating: '⭐⭐⭐⭐⭐',
-        score: '5/5',
+        rating: '⭐⭐',
+        score: '2/5',
         categories: ['action'],
         tags: ['Action', 'Weltraum']
     },
@@ -107,8 +107,8 @@ const gameCatalog = [
         title: 'Neon Runner',
         type: 'Action • Arcade',
         description: 'Springe durch eine neonfarbene Stadt, sammle Kristalle und überlebe so lange wie möglich!',
-        rating: '⭐⭐⭐⭐⭐',
-        score: '5/5',
+        rating: '⭐⭐⭐⭐',
+        score: '4/5',
         categories: ['action'],
         tags: ['Action', 'Speedrun']
     },
@@ -131,8 +131,8 @@ const gameCatalog = [
         title: 'Tic-Tac-Toe & Vier Gewinnt',
         type: 'Strategie',
         description: 'Zwei klassische Strategiespiele! Spiele gegen einen anderen Spieler oder gegen die KI.',
-        rating: '⭐⭐⭐⭐⭐',
-        score: '5/5',
+        rating: '⭐⭐⭐⭐',
+        score: '4/5',
         categories: ['strategy'],
         tags: ['Strategie', 'Klassiker']
     },
