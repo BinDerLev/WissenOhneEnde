@@ -1,0 +1,1617 @@
+{
+  "advertising": {
+    "file": "advertising.svg",
+    "description": "Werbung oder Bekanntmachung: Megafon",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "age": {
+    "file": "age.svg",
+    "description": "Alter und Wachstum: kleines und größeres Kind",
+    "scope": "Keine konkrete Altersangabe."
+  },
+  "animal-care": {
+    "file": "animal-care.svg",
+    "description": "Tierpflege: Hund und Futterschale",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "apple": {
+    "file": "apple.svg",
+    "description": "Apfel mit Stiel und Blatt",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "arm": {
+    "file": "arm.svg",
+    "description": "Angewinkelter Arm mit Ellenbogen und Hand",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "art": {
+    "file": "art.svg",
+    "description": "Kunstunterricht: Malerpalette und Pinsel",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "assembly": {
+    "file": "assembly.svg",
+    "description": "Versammlung: mehrere Kinder und eine sprechende Person",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "autumn": {
+    "file": "autumn.svg",
+    "description": "Herbst: Baum mit gelben und roten Blättern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "baby": {
+    "file": "baby.svg",
+    "description": "Baby im Wickeltuch",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "baking": {
+    "file": "baking.svg",
+    "description": "Backofen mit einem Kuchen auf dem Blech",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "ball": {
+    "file": "ball.svg",
+    "description": "Spielball mit zwei geschwungenen Mustern",
+    "scope": "Neutraler Ball, nicht zwingend ein bestimmter Sportball."
+  },
+  "banana": {
+    "file": "banana.svg",
+    "description": "Gebogene Banane mit Schale",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "basketball": {
+    "file": "basketball.svg",
+    "description": "Basketball mit gebogenen Segmentlinien",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "bathroom": {
+    "file": "bathroom.svg",
+    "description": "Badezimmer: Badewanne und Dusche",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "bear": {
+    "file": "bear.svg",
+    "description": "Bär mit kleinen runden Ohren und breiter Schnauze",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "bed": {
+    "file": "bed.svg",
+    "description": "Bett mit Kissen und Decke",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "bedroom": {
+    "file": "bedroom.svg",
+    "description": "Schlafzimmer: Bett und Nachttischlampe",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "bee": {
+    "file": "bee.svg",
+    "description": "Biene mit gestreiftem Hinterleib, Flügeln und sechs angedeuteten Beinen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "bike": {
+    "file": "bike.svg",
+    "description": "Fahrrad mit zwei Rädern, Sattel und Lenker",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "bird": {
+    "file": "bird.svg",
+    "description": "Kleiner Vogel mit Flügel, Schnabel und Schwanz",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "birthday": {
+    "file": "birthday.svg",
+    "description": "Geburtstagskuchen mit Kerzen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "biscuit": {
+    "file": "biscuit.svg",
+    "description": "Runder Keks mit Schokoladenstückchen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "board": {
+    "file": "board.svg",
+    "description": "Leere Schultafel auf Gestell",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "board-game": {
+    "file": "board-game.svg",
+    "description": "Brettspiel mit Spielfeldweg, Spielfigur und Würfel",
+    "scope": "Keine besondere Spielregel oder Siegerposition abgebildet."
+  },
+  "book": {
+    "file": "book.svg",
+    "description": "Aufgeschlagenes Buch",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "boots": {
+    "file": "boots.svg",
+    "description": "Ein Paar Stiefel mit hohen Schäften",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "bottle": {
+    "file": "bottle.svg",
+    "description": "Getränkeflasche mit Schraubdeckel",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "box": {
+    "file": "box.svg",
+    "description": "Geschlossene Pappkiste mit sichtbaren Kanten",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "bread": {
+    "file": "bread.svg",
+    "description": "Brotscheibe mit Kruste und Krume",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "break": {
+    "file": "break.svg",
+    "description": "Schulpause mit Pausenobst und Trinkflasche",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "brother": {
+    "file": "brother.svg",
+    "description": "Jüngere Person mit kurzem Haar",
+    "scope": "Verwandtschaft und Geschlecht sind im Bild nur konventionell angedeutet; für reine Rollendifferenzierung besser das Familienmotiv verwenden."
+  },
+  "bus": {
+    "file": "bus.svg",
+    "description": "Bus mit großen Fenstern und Rädern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "butter": {
+    "file": "butter.svg",
+    "description": "Butterstück auf einer kleinen Platte",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "butterfly": {
+    "file": "butterfly.svg",
+    "description": "Schmetterling mit vier Flügeln und Fühlern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "cake": {
+    "file": "cake.svg",
+    "description": "Kuchenstück mit Creme und einer Kirsche",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "calendar": {
+    "file": "calendar.svg",
+    "description": "Kalenderblatt mit neutralem Raster ohne Ziffern oder Monatsnamen",
+    "scope": "Für Tage und Monate nur thematisch, keine konkrete Tages-/Monatsidentifikation."
+  },
+  "camera": {
+    "file": "camera.svg",
+    "description": "Fotoapparat mit Objektiv",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "canteen": {
+    "file": "canteen.svg",
+    "description": "Schulkantine: Esstisch mit Teller und Besteck",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "cap": {
+    "file": "cap.svg",
+    "description": "Baseballkappe mit Schirm",
+    "scope": "Im Gegensatz zum Hut keine umlaufende Krempe."
+  },
+  "car": {
+    "file": "car.svg",
+    "description": "Auto im Seitenprofil mit zwei sichtbaren Rädern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "carrot": {
+    "file": "carrot.svg",
+    "description": "Karotte mit Blätterbüschel",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "castle": {
+    "file": "castle.svg",
+    "description": "Burg mit Zinnen und Tor",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "cat": {
+    "file": "cat.svg",
+    "description": "Katze mit spitzen Ohren und Schnurrhaaren",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "celebration": {
+    "file": "celebration.svg",
+    "description": "Allgemeine Feier: bunte Wimpel, Sterne und Konfetti",
+    "scope": "Allgemeines Festthema ohne bestimmte religiöse Tradition oder Geburtstag; keine Aussage darüber, wie einzelne Familien feiern."
+  },
+  "chair": {
+    "file": "chair.svg",
+    "description": "Stuhl mit Lehne und vier angedeuteten Beinen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "cheese": {
+    "file": "cheese.svg",
+    "description": "Käsekeil mit Löchern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "chess": {
+    "file": "chess.svg",
+    "description": "Schachfigur als Turm mit Zinnen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "choir": {
+    "file": "choir.svg",
+    "description": "Chor: singende Gruppe und Musiknote",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "cinema": {
+    "file": "cinema.svg",
+    "description": "Kino mit Leinwand und Sitzreihen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "classmate": {
+    "file": "classmate.svg",
+    "description": "Zwei Kinder mit gemeinsamem Schulbuch",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "classroom": {
+    "file": "classroom.svg",
+    "description": "Klassenzimmer mit Tafel und zwei Lernplätzen",
+    "scope": "Neutrales Kontextbild, keine Anzahl von Kindern aus einem Text dargestellt."
+  },
+  "cleaning": {
+    "file": "cleaning.svg",
+    "description": "Putzen: Besen und Eimer",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "clock": {
+    "file": "clock.svg",
+    "description": "Zeit-Thema ohne konkret ablesbare Uhrzeit",
+    "scope": "Keine konkret ablesbare Uhrzeit, damit unterschiedliche Uhrzeiten in Sätzen nicht widersprochen werden."
+  },
+  "clothes": {
+    "file": "clothes.svg",
+    "description": "Kleidung allgemein: T-Shirt und lange Hose",
+    "scope": "Kleidungsgruppe als neutraler Kontext, keine Aussage zur tatsächlich getragenen Kleidung."
+  },
+  "cloudy": {
+    "file": "cloudy.svg",
+    "description": "Wolke ohne Niederschlag",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "club": {
+    "file": "club.svg",
+    "description": "Verein oder Schul-AG als gemeinsame Gruppe",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "coat": {
+    "file": "coat.svg",
+    "description": "Langer Mantel mit Revers und Knöpfen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "coffee": {
+    "file": "coffee.svg",
+    "description": "Kaffeetasse und Kaffeebohne",
+    "scope": "Im Gegensatz zur Tee-Tasse mit Kaffeebohne, ohne Teebeutel."
+  },
+  "cold": {
+    "file": "cold.svg",
+    "description": "Thermometer mit niedrigem kaltem Füllstand",
+    "scope": "Keine Temperaturziffern; zeigt nur relative Temperatur."
+  },
+  "colour-black": {
+    "file": "colour-black.svg",
+    "description": "Farbklecks: black",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "colour-blue": {
+    "file": "colour-blue.svg",
+    "description": "Farbklecks: blue",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "colour-brown": {
+    "file": "colour-brown.svg",
+    "description": "Farbklecks: brown",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "colour-green": {
+    "file": "colour-green.svg",
+    "description": "Farbklecks: green",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "colour-grey": {
+    "file": "colour-grey.svg",
+    "description": "Farbklecks: grey",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "colour-orange": {
+    "file": "colour-orange.svg",
+    "description": "Farbklecks: orange",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "colour-pink": {
+    "file": "colour-pink.svg",
+    "description": "Farbklecks: pink",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "colour-purple": {
+    "file": "colour-purple.svg",
+    "description": "Farbklecks: purple",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "colour-red": {
+    "file": "colour-red.svg",
+    "description": "Farbklecks: red",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "colour-white": {
+    "file": "colour-white.svg",
+    "description": "Farbklecks: white",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "colour-yellow": {
+    "file": "colour-yellow.svg",
+    "description": "Farbklecks: yellow",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "colours": {
+    "file": "colours.svg",
+    "description": "Farben allgemein: Palette mit mehreren unterschiedlichen Farbtupfern",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "competition": {
+    "file": "competition.svg",
+    "description": "Wettbewerb: Siegerpokal ohne Rangziffern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "computer": {
+    "file": "computer.svg",
+    "description": "Computer mit Bildschirm und Standfuß",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "conversation": {
+    "file": "conversation.svg",
+    "description": "Gespräch: zwei leere Sprechblasen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "cooking": {
+    "file": "cooking.svg",
+    "description": "Kochtopf auf Herd mit Dampf",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "count-eight": {
+    "file": "count-eight.svg",
+    "description": "Genau 8 getrennte blaue Punkte",
+    "scope": "Keine Ziffer und keine zusätzlichen Kreise oder Zierpunkte."
+  },
+  "count-eleven": {
+    "file": "count-eleven.svg",
+    "description": "Genau 11 getrennte blaue Punkte",
+    "scope": "Keine Ziffer und keine zusätzlichen Kreise oder Zierpunkte."
+  },
+  "count-five": {
+    "file": "count-five.svg",
+    "description": "Genau 5 getrennte blaue Punkte",
+    "scope": "Keine Ziffer und keine zusätzlichen Kreise oder Zierpunkte."
+  },
+  "count-four": {
+    "file": "count-four.svg",
+    "description": "Genau 4 getrennte blaue Punkte",
+    "scope": "Keine Ziffer und keine zusätzlichen Kreise oder Zierpunkte."
+  },
+  "count-nine": {
+    "file": "count-nine.svg",
+    "description": "Genau 9 getrennte blaue Punkte",
+    "scope": "Keine Ziffer und keine zusätzlichen Kreise oder Zierpunkte."
+  },
+  "count-one": {
+    "file": "count-one.svg",
+    "description": "Genau 1 getrennte blaue Punkte",
+    "scope": "Keine Ziffer und keine zusätzlichen Kreise oder Zierpunkte."
+  },
+  "count-seven": {
+    "file": "count-seven.svg",
+    "description": "Genau 7 getrennte blaue Punkte",
+    "scope": "Keine Ziffer und keine zusätzlichen Kreise oder Zierpunkte."
+  },
+  "count-six": {
+    "file": "count-six.svg",
+    "description": "Genau 6 getrennte blaue Punkte",
+    "scope": "Keine Ziffer und keine zusätzlichen Kreise oder Zierpunkte."
+  },
+  "count-ten": {
+    "file": "count-ten.svg",
+    "description": "Genau 10 getrennte blaue Punkte",
+    "scope": "Keine Ziffer und keine zusätzlichen Kreise oder Zierpunkte."
+  },
+  "count-three": {
+    "file": "count-three.svg",
+    "description": "Genau 3 getrennte blaue Punkte",
+    "scope": "Keine Ziffer und keine zusätzlichen Kreise oder Zierpunkte."
+  },
+  "count-twelve": {
+    "file": "count-twelve.svg",
+    "description": "Genau 12 getrennte blaue Punkte",
+    "scope": "Keine Ziffer und keine zusätzlichen Kreise oder Zierpunkte."
+  },
+  "count-twenty": {
+    "file": "count-twenty.svg",
+    "description": "Genau 20 getrennte blaue Punkte",
+    "scope": "Keine Ziffer und keine zusätzlichen Kreise oder Zierpunkte."
+  },
+  "count-two": {
+    "file": "count-two.svg",
+    "description": "Genau 2 getrennte blaue Punkte",
+    "scope": "Keine Ziffer und keine zusätzlichen Kreise oder Zierpunkte."
+  },
+  "cow": {
+    "file": "cow.svg",
+    "description": "Kuh mit Flecken, Hörnern und breitem Maul",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "cup": {
+    "file": "cup.svg",
+    "description": "Leere Tasse mit Henkel und Untertasse",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "cycling": {
+    "file": "cycling.svg",
+    "description": "Fahrrad mit zwei Rädern, Sattel und Lenker",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "dancing": {
+    "file": "dancing.svg",
+    "description": "Tanzende Person mit bewegten Armen und Beinen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "desk": {
+    "file": "desk.svg",
+    "description": "Schreibtisch mit Tischplatte und Schublade",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "dice": {
+    "file": "dice.svg",
+    "description": "Spielwürfel mit sichtbarer Fünferseite",
+    "scope": "Nur als Spielthema verwenden, nicht wenn eine andere Würfelzahl gefragt ist."
+  },
+  "dictionary": {
+    "file": "dictionary.svg",
+    "description": "Wörterbuch mit zwei Spalten ohne Buchstaben",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "directions": {
+    "file": "directions.svg",
+    "description": "Wegbeschreibung: zwei unbeschriftete Wegweiser",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "document": {
+    "file": "document.svg",
+    "description": "Dokument als Papierblatt ohne Schrift",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "dog": {
+    "file": "dog.svg",
+    "description": "Hund mit langen Schlappohren und Schnauze",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "door": {
+    "file": "door.svg",
+    "description": "Tür mit Fenster und Türknauf",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "drawing": {
+    "file": "drawing.svg",
+    "description": "Papier und Bleistift mit einer gezeichneten Linie",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "dress": {
+    "file": "dress.svg",
+    "description": "Kleid mit Oberteil, Taille und Rockteil",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "drinks": {
+    "file": "drinks.svg",
+    "description": "Getränke allgemein: Wasserglas, Milchkarton, Saftglas und Tasse",
+    "scope": "Neutraler Getränkekontext mit verschiedenen Gefäßen, ohne Fruchtsorte oder bevorzugte Antwort."
+  },
+  "drums": {
+    "file": "drums.svg",
+    "description": "Trommel mit zwei Schlägeln",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "duck": {
+    "file": "duck.svg",
+    "description": "Ente mit flachem Schnabel auf Wasserlinie",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "ear": {
+    "file": "ear.svg",
+    "description": "Ohr mit Ohrmuschel und Ohrläppchen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "egg": {
+    "file": "egg.svg",
+    "description": "Ei, als aufgeschnittenes Ei mit Eigelb gezeigt",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "elephant": {
+    "file": "elephant.svg",
+    "description": "Elefant mit großen Ohren, Stoßzahnansätzen und gebogenem Rüssel",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "email": {
+    "file": "email.svg",
+    "description": "E-Mail oder Brief: geschlossener Umschlag",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "exercise-book": {
+    "file": "exercise-book.svg",
+    "description": "Schulheft mit Spiralbindung und Linien",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "eye": {
+    "file": "eye.svg",
+    "description": "Auge mit Iris und Pupille",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "family": {
+    "file": "family.svg",
+    "description": "Familie mit Erwachsenen und Kind",
+    "scope": "Symbolisiert Zusammenleben, nicht eine allein gültige Familienform."
+  },
+  "farewell": {
+    "file": "farewell.svg",
+    "description": "Verabschiedung: winkende Person",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "father": {
+    "file": "father.svg",
+    "description": "Erwachsene Bezugsperson mit kurzem Haar",
+    "scope": "Verwandtschaft und Geschlecht sind im Bild nur konventionell angedeutet; für reine Rollendifferenzierung besser das Familienmotiv verwenden."
+  },
+  "feelings": {
+    "file": "feelings.svg",
+    "description": "Gefühle allgemein: freundliches und trauriges Gesicht",
+    "scope": "Zeigt mehrere Gefühle, keine Lösung auf die Frage nach einem einzigen Gefühl."
+  },
+  "film": {
+    "file": "film.svg",
+    "description": "Film: Filmklappe mit Abspielsymbol",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "fish": {
+    "file": "fish.svg",
+    "description": "Fisch mit Flossen, Schwanz und einem sichtbaren Auge",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "flat": {
+    "file": "flat.svg",
+    "description": "Mehrgeschossiges Wohnhaus mit mehreren Wohnungen",
+    "scope": "Symbolisiert Wohnung im Mehrfamilienhaus, nicht ein einzelnes Zimmer."
+  },
+  "flour": {
+    "file": "flour.svg",
+    "description": "Mehl: heller Papierbeutel und Mehlhäufchen",
+    "scope": "Keine Körner, damit von Reis gut unterscheidbar."
+  },
+  "flower": {
+    "file": "flower.svg",
+    "description": "Blühende Blume",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "flowers": {
+    "file": "flowers.svg",
+    "description": "Blumen oder Pflanzen: blühende Blume",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "food": {
+    "file": "food.svg",
+    "description": "Essen allgemein: leerer Teller und Besteck ohne konkrete Lebensmittel",
+    "scope": "Neutraler Themenhinweis für Hörfragen; zeigt keine konkrete Antwortzutat."
+  },
+  "foot": {
+    "file": "foot.svg",
+    "description": "Fuß im Seitenprofil mit Knöchel und Zehen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "football": {
+    "file": "football.svg",
+    "description": "Fußball mit dunklen Feldern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "friend": {
+    "file": "friend.svg",
+    "description": "Zwei befreundete Kinder reichen einander die Hand",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "frog": {
+    "file": "frog.svg",
+    "description": "Frosch mit hervorstehenden Augen und angewinkelten Hinterbeinen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "game": {
+    "file": "game.svg",
+    "description": "Spielcontroller mit Richtungskreuz und Aktionstasten",
+    "scope": "Allgemeines digitales Spielthema; für Brettspielregeln board-game.svg oder dice.svg verwenden."
+  },
+  "garden": {
+    "file": "garden.svg",
+    "description": "Garten mit Zaun, Baum und Blume",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "garden-gate": {
+    "file": "garden-gate.svg",
+    "description": "Gartentor oder Gatter mit Verschluss",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "gate": {
+    "file": "gate.svg",
+    "description": "Geschlossenes Gatter mit Verschluss",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "geography": {
+    "file": "geography.svg",
+    "description": "Erdkunde: Globus mit Landflächen und Gestell",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "gift": {
+    "file": "gift.svg",
+    "description": "Geschenkpaket mit Schleife",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "giraffe": {
+    "file": "giraffe.svg",
+    "description": "Giraffe mit langem Hals, Fellflecken und zwei Hörnchen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "gloves": {
+    "file": "gloves.svg",
+    "description": "Zwei Fingerhandschuhe mit je fünf Fingern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "glue": {
+    "file": "glue.svg",
+    "description": "Klebstoffflasche mit Spitze",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "goat": {
+    "file": "goat.svg",
+    "description": "Ziege mit schmalem Kopf, Hörnern und Bart",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "grandfather": {
+    "file": "grandfather.svg",
+    "description": "Ältere Person mit grauem Haar und Brille",
+    "scope": "Verwandtschaft und Geschlecht sind im Bild nur konventionell angedeutet; für reine Rollendifferenzierung besser das Familienmotiv verwenden."
+  },
+  "grandmother": {
+    "file": "grandmother.svg",
+    "description": "Ältere Person mit grauem Haar",
+    "scope": "Verwandtschaft und Geschlecht sind im Bild nur konventionell angedeutet; für reine Rollendifferenzierung besser das Familienmotiv verwenden."
+  },
+  "grapes": {
+    "file": "grapes.svg",
+    "description": "Weintraube mit mehreren Beeren und Blatt",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "greeting": {
+    "file": "greeting.svg",
+    "description": "Begrüßung: winkende Person",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "guinea-pig": {
+    "file": "guinea-pig.svg",
+    "description": "Meerschweinchen mit gedrungenem länglichem Körper und kleinen Ohren",
+    "scope": "Bewusst deutlich anderer Körper als beim Hamster."
+  },
+  "guitar": {
+    "file": "guitar.svg",
+    "description": "Gitarre mit Korpus, Schallloch und Hals",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "hair": {
+    "file": "hair.svg",
+    "description": "Haarfrisur als eigenständiges Motiv",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "hamster": {
+    "file": "hamster.svg",
+    "description": "Hamster mit runden Ohren, Backentaschen und Schneidezähnen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "hand": {
+    "file": "hand.svg",
+    "description": "Geöffnete Hand mit fünf Fingern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "happy": {
+    "file": "happy.svg",
+    "description": "Lächelndes Gesicht",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "hat": {
+    "file": "hat.svg",
+    "description": "Hut mit umlaufender Krempe",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "head": {
+    "file": "head.svg",
+    "description": "Kopf mit Haaren und Gesicht",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "headteacher": {
+    "file": "headteacher.svg",
+    "description": "Schulleitung als Lehrperson im Schulkontext",
+    "scope": "Rolle nicht allein visuell eindeutig; thematische Unterstützung."
+  },
+  "health": {
+    "file": "health.svg",
+    "description": "Gesundheit: Herz mit neutraler Pulslinie",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "helmet": {
+    "file": "helmet.svg",
+    "description": "Fahrradhelm mit Lüftungsschlitzen und Kinnriemen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "help": {
+    "file": "help.svg",
+    "description": "Hilfe: zwei einander reichende Hände",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "hen": {
+    "file": "hen.svg",
+    "description": "Henne mit rotem Kamm und Schnabel",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "history": {
+    "file": "history.svg",
+    "description": "Geschichte: alte Schriftrolle ohne lesbare Schrift",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "hobby": {
+    "file": "hobby.svg",
+    "description": "Freizeitinteressen: Musik und Lesen",
+    "scope": "Symbolisiert Freizeit allgemein, nicht ein konkretes Hobby."
+  },
+  "homework": {
+    "file": "homework.svg",
+    "description": "Hausaufgaben: Blatt und Bleistift",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "horse": {
+    "file": "horse.svg",
+    "description": "Pferd mit Mähne, langem Kopf und Schweif",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "hospital": {
+    "file": "hospital.svg",
+    "description": "Krankenhaus mit rotem medizinischem Kreuz",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "hot": {
+    "file": "hot.svg",
+    "description": "Thermometer mit hohem heißem Füllstand",
+    "scope": "Keine Temperaturziffern; zeigt nur relative Temperatur."
+  },
+  "hot-pan": {
+    "file": "hot-pan.svg",
+    "description": "Heiße Pfanne mit langem Griff und aufsteigendem Dampf",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "house": {
+    "file": "house.svg",
+    "description": "Einzelnes Wohnhaus mit Dach und Haustür",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "hungry": {
+    "file": "hungry.svg",
+    "description": "Hungriges Kind mit leerem Teller",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "ice-cream": {
+    "file": "ice-cream.svg",
+    "description": "Eiscreme in einer Waffel",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "invitation": {
+    "file": "invitation.svg",
+    "description": "Einladung: Karte steckt in einem Umschlag",
+    "scope": "Ohne Geburtstag oder anderen bestimmten Anlass festzulegen."
+  },
+  "jacket": {
+    "file": "jacket.svg",
+    "description": "Kurze Jacke mit Reißverschluss",
+    "scope": "Endet deutlich höher als das Mantelmotiv."
+  },
+  "journey": {
+    "file": "journey.svg",
+    "description": "Reise: gepackter Reisekoffer",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "juice": {
+    "file": "juice.svg",
+    "description": "Glas Saft mit Strohhalm, ohne festgelegte Frucht",
+    "scope": "Keine konkrete Frucht dargestellt; auch für Apfelsaft geeignet."
+  },
+  "jumper": {
+    "file": "jumper.svg",
+    "description": "Pullover mit langen Ärmeln und Bündchen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "jumping": {
+    "file": "jumping.svg",
+    "description": "Springende Person mit angezogenen Beinen über einer Bodenlinie",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "key": {
+    "file": "key.svg",
+    "description": "Schlüssel mit rundem Kopf und Bart",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "kitchen": {
+    "file": "kitchen.svg",
+    "description": "Küche mit Arbeitsplatte, Spülbecken und Unterschränken",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "lamp": {
+    "file": "lamp.svg",
+    "description": "Tischlampe mit Schirm und Standfuß",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "leg": {
+    "file": "leg.svg",
+    "description": "Ein Bein mit Knie und Fuß",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "library": {
+    "file": "library.svg",
+    "description": "Bibliotheksregal mit vielen Büchern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "lion": {
+    "file": "lion.svg",
+    "description": "Löwe mit großer Mähne",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "listening": {
+    "file": "listening.svg",
+    "description": "Zuhören: Ohr mit Schallwellen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "litter": {
+    "file": "litter.svg",
+    "description": "Abfall: Mülleimer und Papierstück",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "living-room": {
+    "file": "living-room.svg",
+    "description": "Wohnzimmer: Sofa und Stehlampe",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "lunch-box": {
+    "file": "lunch-box.svg",
+    "description": "Brotdose mit Deckel und Verschluss",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "map": {
+    "file": "map.svg",
+    "description": "Landkarte mit Weg und Ortsmarkierung",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "mask": {
+    "file": "mask.svg",
+    "description": "Theater- oder Bastelmaske mit Augenöffnungen und Haltebändern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "meeting": {
+    "file": "meeting.svg",
+    "description": "Treffen oder Gespräch: zwei leere Sprechblasen",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "menu": {
+    "file": "menu.svg",
+    "description": "Speisekarte: Karte mit Bestecksymbol, ohne Schrift",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "microphone": {
+    "file": "microphone.svg",
+    "description": "Mikrofon für Sprach- oder Tonaufnahme",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "milk": {
+    "file": "milk.svg",
+    "description": "Milchflasche mit weißem Inhalt und blauem Etikett ohne Schrift",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "model": {
+    "file": "model.svg",
+    "description": "Gebautes Modell aus Holz- oder Spielbausteinen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "money": {
+    "file": "money.svg",
+    "description": "Geld: Geldbörse und neutrale Münze",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "monkey": {
+    "file": "monkey.svg",
+    "description": "Affengesicht mit runden Ohren und heller Gesichtspartie",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "mother": {
+    "file": "mother.svg",
+    "description": "Erwachsene Bezugsperson mit dunklem Haar",
+    "scope": "Verwandtschaft und Geschlecht sind im Bild nur konventionell angedeutet; für reine Rollendifferenzierung besser das Familienmotiv verwenden."
+  },
+  "mouse": {
+    "file": "mouse.svg",
+    "description": "Maus mit sehr großen runden Ohren und langem dünnem Schwanz",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "mouth": {
+    "file": "mouth.svg",
+    "description": "Lippen und geöffneter Mund",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "museum": {
+    "file": "museum.svg",
+    "description": "Museum: klassisches Gebäude mit Säulen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "music": {
+    "file": "music.svg",
+    "description": "Zwei verbundene Musiknoten",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "name": {
+    "file": "name.svg",
+    "description": "Vorstellen: Person mit Namensschild ohne lesbare Schrift",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "nature": {
+    "file": "nature.svg",
+    "description": "Natur: grüner Baum auf einer Wiese",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "neighbour": {
+    "file": "neighbour.svg",
+    "description": "Zwei benachbarte Wohnhäuser",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "news": {
+    "file": "news.svg",
+    "description": "Nachrichtentext: Zeitung mit Bild und neutralen Linien ohne Schrift",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "newspaper": {
+    "file": "newspaper.svg",
+    "description": "Zeitung mit Bild und neutralen Linien ohne Schrift",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "nose": {
+    "file": "nose.svg",
+    "description": "Nase im Profil mit Nasenflügel",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "notebook": {
+    "file": "notebook.svg",
+    "description": "Schulheft mit Spiralbindung und Linien",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "page": {
+    "file": "page.svg",
+    "description": "Einzelne Buch- oder Papierseite ohne Text",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "painting": {
+    "file": "painting.svg",
+    "description": "Malerpalette mit verschiedenen Farbtupfern und Pinsel",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "paper": {
+    "file": "paper.svg",
+    "description": "Blatt Papier mit gefalteter Ecke",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "park": {
+    "file": "park.svg",
+    "description": "Park mit Baum und Sitzbank",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "pasta": {
+    "file": "pasta.svg",
+    "description": "Teller mit langen gelben Nudeln",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "path": {
+    "file": "path.svg",
+    "description": "Gewundener Spazierweg durch grüne Landschaft",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "payment": {
+    "file": "payment.svg",
+    "description": "Bezahlen: Geldbörse mit Münze ohne Währung",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "pe": {
+    "file": "pe.svg",
+    "description": "Sportunterricht: Sportgeräte",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "pear": {
+    "file": "pear.svg",
+    "description": "Birne mit schmalem Hals und breitem Unterteil",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "pen": {
+    "file": "pen.svg",
+    "description": "Kugelschreiber mit Clip",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "pencil": {
+    "file": "pencil.svg",
+    "description": "Bleistift mit Holzspitze und Radierkappe",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "pencil-case": {
+    "file": "pencil-case.svg",
+    "description": "Federmäppchen mit Reißverschluss",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "person": {
+    "file": "person.svg",
+    "description": "Person: neutrales Kind",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "pets": {
+    "file": "pets.svg",
+    "description": "Haustiere allgemein: Katze, Hund und Kaninchen",
+    "scope": "Breiter Tierkontext; keines der Tiere tut etwas oder befindet sich an einem bestimmten Ort."
+  },
+  "phone": {
+    "file": "phone.svg",
+    "description": "Mobiltelefon",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "photo": {
+    "file": "photo.svg",
+    "description": "Fotografie: Fotoapparat",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "photography": {
+    "file": "photography.svg",
+    "description": "Fotografie: Fotoapparat mit Objektiv",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "piano": {
+    "file": "piano.svg",
+    "description": "Klavier mit sichtbaren weißen und schwarzen Tasten",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "picnic": {
+    "file": "picnic.svg",
+    "description": "Picknick: Decke mit Essen",
+    "scope": "Allgemeiner Picknickkontext, keine genaue Speisenauswahl behauptet."
+  },
+  "picture": {
+    "file": "picture.svg",
+    "description": "Gerahmtes Landschaftsbild",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "pig": {
+    "file": "pig.svg",
+    "description": "Schwein mit Rüssel und Ringelschwanz",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "planning": {
+    "file": "planning.svg",
+    "description": "Planen: Kalender mit Häkchen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "playground": {
+    "file": "playground.svg",
+    "description": "Spielplatzrutsche mit Leiter",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "pocket-money": {
+    "file": "pocket-money.svg",
+    "description": "Geldbörse mit Münze ohne Währung oder Zahlen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "podcast": {
+    "file": "podcast.svg",
+    "description": "Podcast oder Tonaufnahme: Mikrofon",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "potato": {
+    "file": "potato.svg",
+    "description": "Kartoffel mit unregelmäßiger Schale und Augen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "practice": {
+    "file": "practice.svg",
+    "description": "Üben oder Training: Bewegung und Wiederholungspfeil",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "presentation": {
+    "file": "presentation.svg",
+    "description": "Präsentation: Person zeigt auf leere Leinwand",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "privacy": {
+    "file": "privacy.svg",
+    "description": "Datenschutz und Privatsphäre: Vorhängeschloss",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "pupil": {
+    "file": "pupil.svg",
+    "description": "Schulkind mit Rucksack",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "question": {
+    "file": "question.svg",
+    "description": "Frage oder Nachfragen: Sprechblase mit Fragezeichen",
+    "scope": "Fragezeichen ist ein universelles Symbol, kein Text."
+  },
+  "rabbit": {
+    "file": "rabbit.svg",
+    "description": "Kaninchen mit langen aufrechten Ohren",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "rain": {
+    "file": "rain.svg",
+    "description": "Regenwolke mit Regentropfen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "rainy": {
+    "file": "rainy.svg",
+    "description": "Regenwolke mit Regentropfen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "reading": {
+    "file": "reading.svg",
+    "description": "Lesen: aufgeschlagenes Buch",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "recipe": {
+    "file": "recipe.svg",
+    "description": "Rezept: Blatt mit Kochtopfsymbol ohne lesbare Schrift",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "recycling": {
+    "file": "recycling.svg",
+    "description": "Umwelt und Wiederverwertung: drei kreisförmig angeordnete Recyclingpfeile",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "repeat": {
+    "file": "repeat.svg",
+    "description": "Wiederholen: zwei gegenläufige Kreispfeile",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "reusable-bottle": {
+    "file": "reusable-bottle.svg",
+    "description": "Wiederverwendbare Trinkflasche mit Tragegriff und Kreislaufsymbol",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "review": {
+    "file": "review.svg",
+    "description": "Prüfen oder Bewertung: Dokument mit Lupe",
+    "scope": "Keine Sterne oder Wertungsstufe, damit keine konkrete Bewertung behauptet wird."
+  },
+  "rice": {
+    "file": "rice.svg",
+    "description": "Schale mit Reis und erkennbaren Reiskörnern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "riding": {
+    "file": "riding.svg",
+    "description": "Reitende Person auf einem Pferd",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "room": {
+    "file": "room.svg",
+    "description": "Leeres Zimmer als räumliche Ecke mit Fenster",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "rubber": {
+    "file": "rubber.svg",
+    "description": "Zweifarbiger Radiergummi",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "ruler": {
+    "file": "ruler.svg",
+    "description": "Lineal mit Messstrichen ohne Ziffern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "running": {
+    "file": "running.svg",
+    "description": "Laufende Person mit angewinkelten Beinen und Armen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "sad": {
+    "file": "sad.svg",
+    "description": "Trauriges Gesicht",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "salad": {
+    "file": "salad.svg",
+    "description": "Salatschüssel mit grünen Blättern und Tomaten",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "sandwich": {
+    "file": "sandwich.svg",
+    "description": "Dreieckiges belegtes Sandwich mit sichtbaren Füllungen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "scarf": {
+    "file": "scarf.svg",
+    "description": "Schal mit zwei herabhängenden Enden und Fransen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "school": {
+    "file": "school.svg",
+    "description": "Schulgebäude mit Eingangsportal und Fahne ohne Zeichen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "school-bag": {
+    "file": "school-bag.svg",
+    "description": "Schulrucksack mit Tragegriff und Vordertasche",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "science": {
+    "file": "science.svg",
+    "description": "Naturwissenschaften: Laborkolben mit Flüssigkeit und Blasen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "scissors": {
+    "file": "scissors.svg",
+    "description": "Schere mit zwei Griffen und gekreuzten Klingen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "sheep": {
+    "file": "sheep.svg",
+    "description": "Schaf mit wolligem Körper und dunklem Kopf",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "shelf": {
+    "file": "shelf.svg",
+    "description": "Einzelnes Wandregalbrett mit Halterungen und Büchern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "shirt": {
+    "file": "shirt.svg",
+    "description": "Hemd mit Kragen und Knopfleiste",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "shoes": {
+    "file": "shoes.svg",
+    "description": "Ein Paar Halbschuhe",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "shop": {
+    "file": "shop.svg",
+    "description": "Kleines Geschäft mit Markise und Schaufenster",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "shopping": {
+    "file": "shopping.svg",
+    "description": "Einkauf: Geschäft und Geldbörse",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "shopping-bag": {
+    "file": "shopping-bag.svg",
+    "description": "Einkaufstüte mit zwei Tragegriffen",
+    "scope": "Keine Schulterriemen, deutlich anderer Umriss als Schulrucksack."
+  },
+  "shorts": {
+    "file": "shorts.svg",
+    "description": "Kurze Hose mit zwei kurzen Hosenbeinen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "singing": {
+    "file": "singing.svg",
+    "description": "Singende Person mit Mikrofon und Musiknoten",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "sister": {
+    "file": "sister.svg",
+    "description": "Jüngere Person mit Zöpfen",
+    "scope": "Verwandtschaft und Geschlecht sind im Bild nur konventionell angedeutet; für reine Rollendifferenzierung besser das Familienmotiv verwenden."
+  },
+  "skating": {
+    "file": "skating.svg",
+    "description": "Rollschuh mit Schaft, Schnürung und Rollen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "skirt": {
+    "file": "skirt.svg",
+    "description": "Rock mit Bund und Falten",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "sleep": {
+    "file": "sleep.svg",
+    "description": "Schlafen: Bett mit Kopf auf Kissen",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "sleeping": {
+    "file": "sleeping.svg",
+    "description": "Schlafen: Bett mit Kopf auf dem Kissen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "snow": {
+    "file": "snow.svg",
+    "description": "Schneeflocke mit sechs Armen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "snowy": {
+    "file": "snowy.svg",
+    "description": "Schneeflocke mit sechs Armen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "socks": {
+    "file": "socks.svg",
+    "description": "Zwei Socken mit Schaft und Ferse",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "sofa": {
+    "file": "sofa.svg",
+    "description": "Sofa mit Sitzfläche und Armlehnen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "soup": {
+    "file": "soup.svg",
+    "description": "Schale mit heißer Suppe und Dampf",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "sport": {
+    "file": "sport.svg",
+    "description": "Sportthema: Fußball und Tennisschläger",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "spring": {
+    "file": "spring.svg",
+    "description": "Frühling: blühende Blume",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "stairs": {
+    "file": "stairs.svg",
+    "description": "Treppe aus vier Stufen mit Handlauf",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "station": {
+    "file": "station.svg",
+    "description": "Bahnhof mit Bahnsteig, Zug und Schienen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "strawberry": {
+    "file": "strawberry.svg",
+    "description": "Erdbeere mit grünem Blätterkelch und Samen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "street": {
+    "file": "street.svg",
+    "description": "Straße mit neutraler gestrichelter Mittellinie",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "subject": {
+    "file": "subject.svg",
+    "description": "Schulfach: Buch und kleine Tafel",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "sugar": {
+    "file": "sugar.svg",
+    "description": "Zucker: weiße Zuckerwürfel",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "summer": {
+    "file": "summer.svg",
+    "description": "Sommer: Sonne über einer grünen Wiese",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "sun": {
+    "file": "sun.svg",
+    "description": "Sonne mit Strahlen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "sunny": {
+    "file": "sunny.svg",
+    "description": "Sonne mit Strahlen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "supermarket": {
+    "file": "supermarket.svg",
+    "description": "Supermarkt mit Einkaufswagensymbol ohne Schrift",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "swimming": {
+    "file": "swimming.svg",
+    "description": "Schwimmendes Kind mit Kopf, Armbewegung und Wasserwellen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "swimming-pool": {
+    "file": "swimming-pool.svg",
+    "description": "Schwimmbecken mit Wasserwellen und Einstiegsleiter",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "t-shirt": {
+    "file": "t-shirt.svg",
+    "description": "Kurzärmliges T-Shirt",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "table": {
+    "file": "table.svg",
+    "description": "Runder Tisch mit vier Beinen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "tea": {
+    "file": "tea.svg",
+    "description": "Tasse mit Tee, Henkel und Dampf",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "teacher": {
+    "file": "teacher.svg",
+    "description": "Lehrkraft zeigt auf kleine Tafel",
+    "scope": "Keine Festlegung eines Geschlechts."
+  },
+  "team": {
+    "file": "team.svg",
+    "description": "Mannschaft oder Gruppe von Kindern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "teamwork": {
+    "file": "teamwork.svg",
+    "description": "Zusammenarbeit: gemeinsame Gruppe",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "tennis": {
+    "file": "tennis.svg",
+    "description": "Tennisschläger und Tennisball",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "theatre": {
+    "file": "theatre.svg",
+    "description": "Theater: Bühne mit aufgezogenen roten Vorhängen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "thirsty": {
+    "file": "thirsty.svg",
+    "description": "Durstiges Kind mit Wasserbecher",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "ticket": {
+    "file": "ticket.svg",
+    "description": "Eintrittskarte mit seitlichen Abrissen, ohne Preis oder Ziffern",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "tiger": {
+    "file": "tiger.svg",
+    "description": "Tigerkopf mit Streifen, ohne Löwenmähne",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "timetable": {
+    "file": "timetable.svg",
+    "description": "Stundenplan als Kalender-Raster ohne konkrete Stunden oder Schrift",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "tired": {
+    "file": "tired.svg",
+    "description": "Müdes Gesicht mit halb geschlossenen Augen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "tomato": {
+    "file": "tomato.svg",
+    "description": "Tomate mit sternförmigem grünem Kelch",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "traffic-light": {
+    "file": "traffic-light.svg",
+    "description": "Verkehrsampel mit roten, gelben und grünen Linsen",
+    "scope": "Alle drei Linsen gleichermaßen sichtbar; zeigt kein aktives Signal."
+  },
+  "train": {
+    "file": "train.svg",
+    "description": "Zug von vorne mit Schienen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "travel": {
+    "file": "travel.svg",
+    "description": "Reisen: Koffer",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "tree": {
+    "file": "tree.svg",
+    "description": "Grüner Baum",
+    "scope": "Thematischer Kontext; keine zusätzliche Aussage zu Zahl, Farbe, Ort oder Handlung eines Satzes."
+  },
+  "trousers": {
+    "file": "trousers.svg",
+    "description": "Lange Hose mit zwei Hosenbeinen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "umbrella": {
+    "file": "umbrella.svg",
+    "description": "Regenschirm mit gewölbtem Schirm und gebogenem Griff",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "uniform": {
+    "file": "uniform.svg",
+    "description": "Schulkleidung: einheitliches Oberteil mit Krawatte",
+    "scope": "Beispielhafte Uniform, keine Behauptung über alle Schulen."
+  },
+  "vegetables": {
+    "file": "vegetables.svg",
+    "description": "Gemüse: Karotte und Tomate",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "walking": {
+    "file": "walking.svg",
+    "description": "Gehende Person mit aufrechter Haltung",
+    "scope": "Von running.svg durch ruhige Armhaltung und kleine Schrittweite unterschieden."
+  },
+  "wardrobe": {
+    "file": "wardrobe.svg",
+    "description": "Geschlossener hoher Kleiderschrank mit zwei Türen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "warm": {
+    "file": "warm.svg",
+    "description": "Thermometer mit mittlerem warmem Füllstand",
+    "scope": "Keine Temperaturziffern; zeigt nur relative Temperatur."
+  },
+  "washing": {
+    "file": "washing.svg",
+    "description": "Waschen: Hände über einer Schüssel mit Wasser und Seifenblasen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "water": {
+    "file": "water.svg",
+    "description": "Durchsichtiger Becher mit Wasser",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "waterfall": {
+    "file": "waterfall.svg",
+    "description": "Wasserfall: Wasser stürzt über eine Felsstufe in ein Becken",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "watering": {
+    "file": "watering.svg",
+    "description": "Gießen: Gießkanne gießt eine Pflanze",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "weather": {
+    "file": "weather.svg",
+    "description": "Wetter allgemein: Sonne, Regenwolke und Schneeflocke",
+    "scope": "Zeigt mehrere Wetterarten gleichberechtigt und legt für Hörfragen keinen einzelnen Zustand fest."
+  },
+  "weekend": {
+    "file": "weekend.svg",
+    "description": "Kalender mit markiertem freien Bereich",
+    "scope": "Symbolisiert freie Tage, keine konkrete Kalenderzuordnung."
+  },
+  "window": {
+    "file": "window.svg",
+    "description": "Fenster mit Kreuzrahmen",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "windy": {
+    "file": "windy.svg",
+    "description": "Windlinien und ein verwehtes Blatt",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "winter": {
+    "file": "winter.svg",
+    "description": "Winter: Schneemann und Schneeflocke",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "work": {
+    "file": "work.svg",
+    "description": "Arbeiten: Person an einem Schreibtisch mit Computer",
+    "scope": "Allgemeines Arbeitsthema, keine bestimmte Berufsrolle."
+  },
+  "writing": {
+    "file": "writing.svg",
+    "description": "Schreiben: Papier und Bleistift",
+    "scope": "Konkretes Motiv; bei Textaufgaben als Themenhinweis verwenden, nicht als zusätzliche Tatsachenbehauptung."
+  },
+  "zoo": {
+    "file": "zoo.svg",
+    "description": "Zoo: Eingang mit zwei unterschiedlichen Tiermotiven",
+    "scope": "Breiter Zookontext, keine konkrete Handlung oder Haltung der Tiere als Satzinformation."
+  }
+}
