@@ -342,9 +342,6 @@ document.addEventListener("keydown", (event) => {
   if (
     event.code === "Space"
     && gameState === "playing"
-    && event.target !== modeSelect
-    && event.target !== startButton
-    && event.target !== dropButton
   ) {
     event.preventDefault();
     dropBlock();
