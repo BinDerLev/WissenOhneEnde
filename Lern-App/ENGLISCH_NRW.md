@@ -30,7 +30,7 @@ Wortschatzthemen mischen die richtige Lösung mit drei anderen Begriffen aus dem
 
 ## Hören und Sprechen
 
-Alle englischen Wörter, Textstellen und Antworten verwenden mit dem lokalen neuronalen Sprachmodell **Kokoro 82M** und der weiblichen Stimme **Heart (en-US)** erzeugte MP3-Aufnahmen. Beim Auswählen einer englischen Antwort wird diese automatisch abgespielt, auch bei einem falschen Versuch. Deutsche Antworten und Anweisungen werden nicht vorgelesen. Englische Teile gemischter Texte sind ausdrücklich gekennzeichnet; es gibt keine automatische Spracherkennung und keinen Rückfall auf die Browser- oder Systemstimme.
+Alle englischen Wörter, Textstellen und Antworten verwenden mit dem lokalen neuronalen Sprachmodell **Kokoro 82M** und der weiblichen Stimme **Emma (en-GB, britisches Englisch)** erzeugte MP3-Aufnahmen. Beim Auswählen einer englischen Antwort wird diese automatisch abgespielt, auch bei einem falschen Versuch. Deutsche Antworten und Anweisungen werden nicht vorgelesen. Englische Teile gemischter Texte sind ausdrücklich gekennzeichnet; es gibt keine automatische Spracherkennung und keinen Rückfall auf die Browser- oder Systemstimme.
 
 Unterstrichene englische Wörter und Lautsprecherknöpfe erlauben das erneute Anhören. Bei mehrteiligen Antworten lassen sich unter „Wörter anhören“ auch einzelne Wörter abspielen, ohne die Antwort auszuwählen. Ein aufklappbarer Hörtext bietet die gleichen Wort- und Satzknöpfe. Nach einer richtigen Antwort wartet der automatische Aufgabenwechsel auf das Ende der Wiedergabe. Beim Aufgabenwechsel oder Verlassen der Übung stoppt der Ton.
 
@@ -47,7 +47,7 @@ Das Angebot übt ausgewählte Teilkompetenzen. Es ersetzt weder Unterricht noch 
 
 ## Audioclips reproduzieren
 
-Die Nutzerwahl vom 14. November ist **Heart**. Die Systemstimmen Daniel, Samantha und Karen werden nicht mehr verwendet. Quelle für das Sprachmodell und die Stimmen: [Kokoro 82M](https://huggingface.co/hexgrad/Kokoro-82M), [Stimmenübersicht](https://huggingface.co/hexgrad/Kokoro-82M/blob/main/VOICES.md) und [Kokoro ONNX](https://github.com/thewh1teagle/kokoro-onnx).
+Die Nutzerwahl vom 14. November ist **Emma (britisches Englisch)**. Sie ersetzt die vorher verwendete Heart-Stimme. Die Systemstimmen Daniel, Samantha und Karen werden nicht mehr verwendet. Quelle für das Sprachmodell und die Stimmen: [Kokoro 82M](https://huggingface.co/hexgrad/Kokoro-82M), [Stimmenübersicht](https://huggingface.co/hexgrad/Kokoro-82M/blob/main/VOICES.md) und [Kokoro ONNX](https://github.com/thewh1teagle/kokoro-onnx).
 
 Die Erzeugung verwendet das vollständige FP32-Modell, 24 kHz, Sprechtempo `0.95` und Mono-MP3 mit 64 kbit/s. `ENGLISH_AUDIO_SPEED` verändert die Sprechgeschwindigkeit, nicht die Natürlichkeit des Stimmenmodells. Eine höhere MP3-Bitrate allein würde eine robotische Stimme nicht natürlicher machen. Whisper ist Spracherkennung und wird zur Erzeugung dieser Clips nicht verwendet.
 
@@ -59,11 +59,11 @@ uv pip install --python .cache/english-audio/bin/python -r scripts/requirements-
 mkdir -p .cache/kokoro
 curl -fL -o .cache/kokoro/kokoro-v1.0.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/kokoro-v1.0.onnx
 curl -fL -o .cache/kokoro/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/voices-v1.0.bin
-ENGLISH_AUDIO_PYTHON=.cache/english-audio/bin/python ENGLISH_AUDIO_MODEL_DIR=.cache/kokoro node scripts/build-english-audio.cjs
+node scripts/build-english-audio.cjs --replace
 node scripts/verify-english-audio.cjs
 ```
 
-Modell und Stimmen werden anhand ihrer SHA-256-Prüfsummen kontrolliert. Der Generator veröffentlicht das neue Manifest erst nach erfolgreicher Erzeugung aller 3.343 Aufnahmen. `node scripts/verify-english-audio.cjs` prüft die vollständige Textzuordnung, die Modell-/Stimmenkennung und MP3-Dateien. Stichproben mit einzelnen Wörtern und längeren Texten werden zusätzlich decodiert und auf vorhandene Audiosamples geprüft. Dies ist eine technische Prüfung, kein unabhängiges Urteil über subjektive Stimmqualität.
+Das Skript erkennt die Pythonumgebung und Modelldateien unter `.cache/` automatisch. Emma (`bf_emma`, `en-GB`) ist die Standardstimme; `ENGLISH_AUDIO_VOICE` erlaubt bei Bedarf eine andere unterstützte Stimme. `--replace` entfernt die zuvor im Manifest verwendeten Aufnahmen erst nach erfolgreicher Erzeugung und Umschaltung auf die neuen Dateien. Modell und Stimmen werden anhand ihrer SHA-256-Prüfsummen kontrolliert. Der Generator veröffentlicht das neue Manifest erst nach erfolgreicher Erzeugung aller 3.343 Aufnahmen. `node scripts/verify-english-audio.cjs` prüft die vollständige Textzuordnung, die Modell-/Stimmenkennung und MP3-Dateien. Stichproben mit einzelnen Wörtern und längeren Texten werden zusätzlich decodiert und auf vorhandene Audiosamples geprüft. Dies ist eine technische Prüfung, kein unabhängiges Urteil über subjektive Stimmqualität.
 
 
 ## Bilder zu Aufgaben und Sätzen

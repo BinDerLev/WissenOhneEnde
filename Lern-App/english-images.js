@@ -110,6 +110,15 @@ const englishStoryQuestionKeys = {
   6: ["castle", "gift", "music", "reusable-bottle", "team", "nature", "station", "money", "presentation", "review", "soup", "rainy", "invitation", "family", "dictionary", "jacket", "playground", "museum", "meeting", "writing", "privacy", "nature", "cow", "podcast"]
 };
 
+// Mediation images should show the information the German question asks for.
+// Some story-wide themes (notably birthdays and activities) obscure that focus.
+const englishMediationQuestionImageOverrides = {
+  3: { 0: "count-eight", 7: "count-two", 14: "count-six", 23: "count-two" },
+  4: { 1: "calendar", 3: "calendar", 10: "clock", 14: "calendar" },
+  5: { 5: "calendar", 10: "calendar", 13: "calendar", 18: "clock", 23: "calendar" },
+  6: { 2: "clock", 6: "station", 18: "clock" }
+};
+
 // A listening question must not be answered by its illustration before the
 // recording has been heard. These rows name a neutral topic or known subject.
 const englishListeningImageKeys = {
@@ -163,13 +172,15 @@ function setEnglishCardImages(grade, topic, card, index, key) {
     ...(card.audioText ? [card.audioText] : []), ...(card.modelText ? [card.modelText] : [])
   ];
   for (const passage of passages) register(passage, englishKnownPhraseImage(passage) || card.image);
-  if (["reading", "listening", "mediation"].includes(topic.mode)) {
+    if (["reading", "listening", "mediation"].includes(topic.mode)) {
     const story = englishStories[grade][index];
     const sentences = splitEnglishImageSentences(story[0]);
     const keys = englishStorySentenceKeys[grade][index];
     if (sentences.length !== keys.length) throw new Error(`English story image mismatch ${grade}/${index}: ${sentences.length} sentences, ${keys.length} images`);
     sentences.forEach((sentence, sentenceIndex) => { card.sentenceImages[englishImageTextKey(sentence)] = englishImage(keys[sentenceIndex]); });
-    card.sentenceImages[englishImageTextKey(story[1])] = englishImage(topic.mode === "listening" ? englishListeningImageKeys[grade][index] : englishStoryQuestionKeys[grade][index]);
+    const mediationKey = topic.mode === "mediation" ? englishMediationQuestionImageOverrides[grade]?.[index] : null;
+    card.sentenceImages[englishImageTextKey(story[1])] = englishImage(topic.mode === "listening" ? englishListeningImageKeys[grade][index] : mediationKey || englishStoryQuestionKeys[grade][index]);
+    if (topic.mode === "mediation" && mediationKey) card.image = englishImage(mediationKey);
     card.sentenceImages[englishImageTextKey(story[0])] = card.image;
   }
   englishImageAudit.push({ grade, mode: topic.mode, index, text: card.text, image: card.image, sentenceImages: card.sentenceImages });

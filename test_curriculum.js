@@ -1789,7 +1789,7 @@ test("mixed-language text marks only English and its rendered controls never nes
   vm.runInContext('progress.subject = "english"; progress.grade = 4; startLesson(englishCurriculum[4].findIndex(topic => topic.mode === "shopping"));', context);
   const html = vm.runInContext("lessonView.innerHTML", context);
   assert.match(html, /data-english-choice-audio=/);
-  assert.match(html, /Wörter anhören/);
+  assert.match(html, /aria-label="Englische Antwort anhören:/);
   let buttonDepth = 0;
   for (const tag of html.match(/<\/?button\b[^>]*>/g)) {
     buttonDepth += tag.startsWith("</") ? -1 : 1;
@@ -1850,8 +1850,8 @@ test("English scenes appear on each story sentence and option without nesting bu
     assert.ok(depth >= 0 && depth <= 1);
   }
   assert.equal(depth, 0);
-  assert.equal(vm.runInContext("englishAudioVoice.id", context), "af_heart");
-  assert.match(vm.runInContext("lessonView.innerHTML", context), /Englische Stimme: Heart/);
+  assert.equal(vm.runInContext("englishAudioVoice.id", context), "bf_emma");
+  assert.match(vm.runInContext("lessonView.innerHTML", context), /Englische Stimme: Emma/);
 });
 
 test("reviewed English images distinguish menus, shopping bags, boxes and board games", () => {
