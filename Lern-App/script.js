@@ -319,45 +319,60 @@ syncPlatformUnlock();
 
 let activeLesson = null;
 let pointRewardCleanup = null;
+let lessonAdvanceTimer = null;
 
 function clearPointReward() {
+  if (lessonAdvanceTimer !== null) {
+    clearTimeout(lessonAdvanceTimer);
+    lessonAdvanceTimer = null;
+  }
   if (pointRewardCleanup) pointRewardCleanup();
   pointRewardCleanup = null;
   if (pointsCount) pointsCount.textContent = String(progress.points);
   if (pointsLabel) pointsLabel.textContent = progress.points === 1 ? "Punkt" : "Punkte";
+  updateLessonPoints();
 }
 
-function animatePointReward(amount, correct) {
+function updateLessonPoints(points = activeLesson?.points || 0) {
+  const lessonPoints = document.querySelector("#lesson-points");
+  if (lessonPoints) lessonPoints.textContent = `★ ${points} ${points === 1 ? "Punkt" : "Punkte"} in dieser Einheit`;
+}
+
+function animatePointReward(amount) {
   clearPointReward();
+  const lesson = activeLesson;
+  const position = lesson.position;
+  const advance = () => {
+    if (activeLesson === lesson && activeLesson.position === position && !lessonView.hidden) nextQuestion();
+  };
+  const advanceWithoutAnimation = () => {
+    if (typeof window === "undefined") return;
+    lessonAdvanceTimer = setTimeout(() => {
+      lessonAdvanceTimer = null;
+      advance();
+    }, 900);
+  };
   if (!document.body || !pointsCount || typeof requestAnimationFrame !== "function" ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    advanceWithoutAnimation();
+    return;
+  }
 
   const illustration = document.querySelector(".task-illustration");
   const total = document.querySelector(".points-total");
-  if (!illustration || !total) return;
+  if (!illustration || !total) {
+    advanceWithoutAnimation();
+    return;
+  }
   const grade = progress.grade;
   const before = progress.points - amount;
   const layer = document.createElement("div");
-  layer.className = `point-reward${correct ? " is-success" : " is-effort"}`;
+  layer.className = "point-reward is-success";
   layer.dataset.grade = String(grade);
   layer.setAttribute("aria-hidden", "true");
   document.body.appendChild(layer);
 
-  let target = total.getBoundingClientRect();
-  let previewCount = null;
-  // Keep the destination visible when the header has scrolled off screen.
-  if (target.top < 0 || target.bottom > window.innerHeight) {
-    const preview = document.createElement("div");
-    preview.className = "points-total reward-total-preview";
-    const star = document.createElement("span");
-    star.textContent = "★";
-    previewCount = document.createElement("strong");
-    previewCount.textContent = String(before);
-    preview.appendChild(star);
-    preview.appendChild(previewCount);
-    layer.appendChild(preview);
-    target = preview.getBoundingClientRect();
-  }
+  const target = total.getBoundingClientRect();
   const origin = illustration.getBoundingClientRect();
   const x = Math.max(64, Math.min(window.innerWidth - 64, origin.left + origin.width / 2));
   const y = Math.max(110, Math.min(window.innerHeight - 90, origin.top + origin.height / 2));
@@ -370,28 +385,28 @@ function animatePointReward(amount, correct) {
   badge.className = "reward-flying-points";
   badge.textContent = `+${amount}`;
   layer.appendChild(badge);
-  if (correct) {
-    const count = [0, 14, 12, 10, 9, 7, 6][grade];
-    for (let index = 0; index < count; index += 1) {
-      const star = document.createElement("span");
-      const angle = index / count * Math.PI * 2;
-      const distance = 40 + (index % 3) * 15;
-      star.className = "reward-sparkle";
-      star.textContent = index % 2 ? "✦" : "★";
-      star.style.setProperty("--spark-x", `${Math.cos(angle) * distance}px`);
-      star.style.setProperty("--spark-y", `${Math.sin(angle) * distance}px`);
-      star.style.setProperty("--spark-delay", `${index % 4 * 60}ms`);
-      star.style.setProperty("--spark-color", `var(--reward-color-${index % 3})`);
-      layer.appendChild(star);
-    }
-    illustration.classList.add("is-celebrating");
-    illustration.dataset.rewardGrade = String(grade);
+  const count = [0, 14, 12, 10, 9, 7, 6][grade];
+  for (let index = 0; index < count; index += 1) {
+    const star = document.createElement("span");
+    const angle = index / count * Math.PI * 2;
+    const distance = 40 + (index % 3) * 15;
+    star.className = "reward-sparkle";
+    star.textContent = index % 2 ? "✦" : "★";
+    star.style.setProperty("--spark-x", `${Math.cos(angle) * distance}px`);
+    star.style.setProperty("--spark-y", `${Math.sin(angle) * distance}px`);
+    star.style.setProperty("--spark-delay", `${index % 4 * 60}ms`);
+    star.style.setProperty("--spark-color", `var(--reward-color-${index % 3})`);
+    layer.appendChild(star);
   }
+  illustration.classList.add("is-celebrating");
+  illustration.dataset.rewardGrade = String(grade);
 
   let frame;
   let start;
+  const lessonBefore = activeLesson.points - amount;
   pointsCount.textContent = String(before);
   if (pointsLabel) pointsLabel.textContent = before === 1 ? "Punkt" : "Punkte";
+  updateLessonPoints(lessonBefore);
   const cleanup = () => {
     cancelAnimationFrame(frame);
     layer.remove();
@@ -402,19 +417,24 @@ function animatePointReward(amount, correct) {
   const tick = (now) => {
     if (start === undefined) start = now;
     const elapsed = now - start;
-    const collected = Math.min(amount, Math.max(0, Math.floor((elapsed - 780) / 170) + 1));
+    const collected = Math.min(amount, Math.floor(elapsed / 170));
     const displayed = before + collected;
     pointsCount.textContent = String(displayed);
     if (pointsLabel) pointsLabel.textContent = displayed === 1 ? "Punkt" : "Punkte";
-    if (previewCount) previewCount.textContent = String(displayed);
+    updateLessonPoints(lessonBefore + collected);
     total.classList.toggle("is-collecting", collected > 0);
-    if (elapsed < 1600) {
+    if (elapsed < amount * 170 + 340) {
       frame = requestAnimationFrame(tick);
     } else {
       clearPointReward();
+      advance();
     }
   };
-  frame = requestAnimationFrame(tick);
+  // Count only after the flying badge has actually reached its destination.
+  badge.addEventListener("animationend", (event) => {
+    if (event.target !== badge || event.animationName !== "points-fly" || pointRewardCleanup !== cleanup) return;
+    frame = requestAnimationFrame(tick);
+  }, { once: true });
 }
 
 const questionHistoryStorageKey = "lernlabor-question-history-v1";
@@ -2356,7 +2376,7 @@ function renderLesson() {
     </header>
     <div class="lesson-rewards">
       <span class="lesson-points" id="lesson-points">★ ${activeLesson.points} ${activeLesson.points === 1 ? "Punkt" : "Punkte"} in dieser Einheit</span>
-      <p>Direkt richtig: +2 Punkte. Erst falsch: +1 Punkt fürs Probieren, dann +1 fürs Lösen.</p>
+      <p>Beim ersten Versuch richtig: +2 Punkte. Später richtig: +1 Punkt. Du darfst es beliebig oft versuchen.</p>
     </div>
     <div class="lesson-progress" aria-label="Fortschritt">
       <div class="lesson-progress-label"><span>Dein Fortschritt</span><span id="progress-count">${answered} von ${questions.length} gelöst</span></div>
@@ -2379,8 +2399,8 @@ function renderLesson() {
       <h2 class="question${question.note ? " question-with-note" : ""}"${question.note ? ' aria-describedby="question-note"' : ""}>${question.text}${question.note ? '<sup class="question-note-marker" aria-hidden="true">*</sup>' : ""}</h2>
       ${question.note ? `<p class="question-note" id="question-note">* ${escapeHtml(question.note)}</p>` : ""}
       ${question.options ? `
-        <div class="options-list" id="options-list">
-           ${question.options.map((o, i) => `<button class="option-button" data-choice="${escapeHtml(String(o))}">${String.fromCharCode(65+i)}) ${escapeHtml(String(o))}</button>`).join('')}
+        <div class="options-list" id="options-list" role="group" aria-label="Wähle deine Antwort">
+           ${question.options.map((o, i) => `<button class="option-button" type="button" data-choice="${escapeHtml(String(o))}"><span class="option-letter" aria-hidden="true">${String.fromCharCode(65+i)}</span><span class="option-text">${escapeHtml(String(o))}</span><span class="option-status" aria-hidden="true">→</span></button>`).join('')}
         </div>
       ` : `
         <form class="answer-form" id="answer-form">
@@ -2395,7 +2415,7 @@ function renderLesson() {
           <button class="hint-button" id="hint-button" type="button">Tipp ansehen</button>
           <button class="hint-button" id="report-button" type="button">Fehler melden</button>
         </div>
-        <button class="secondary-button" id="next-button" type="button" hidden>Nächste Aufgabe →</button>
+        <span class="auto-advance-note" id="auto-advance-note" hidden>Danach geht’s automatisch weiter …</span>
       </div>
       <p class="hint-text" id="hint-text" hidden>${question.hint}</p>
     </article>
@@ -2422,7 +2442,6 @@ function renderLesson() {
   document.querySelector("#report-button").addEventListener("click", (event) => {
     reportExerciseError(event.currentTarget);
   });
-  document.querySelector("#next-button").addEventListener("click", nextQuestion);
   const answerInputEl = document.querySelector("#answer-input");
   if (answerInputEl) answerInputEl.focus();
 }
@@ -2480,15 +2499,27 @@ function checkAnswer(event, submittedAnswer) {
     if (isCorrect) activeLesson.correct += 1;
   }
 
-  const earnedPoints = firstAttempt ? (isCorrect ? 2 : 1) : (isCorrect ? 1 : 0);
+  const earnedPoints = isCorrect ? (firstAttempt ? 2 : 1) : 0;
   if (earnedPoints) {
     activeLesson.points = (activeLesson.points || 0) + earnedPoints;
     progress.points += earnedPoints;
     if (pointsCount) pointsCount.textContent = String(progress.points);
     if (pointsLabel) pointsLabel.textContent = progress.points === 1 ? "Punkt" : "Punkte";
-    const lessonPoints = document.querySelector("#lesson-points");
-    if (lessonPoints) lessonPoints.textContent = `★ ${activeLesson.points} ${activeLesson.points === 1 ? "Punkt" : "Punkte"} in dieser Einheit`;
+    updateLessonPoints();
     persistProgress();
+  }
+
+  const optionsList = document.getElementById("options-list");
+  if (optionsList) {
+    optionsList.querySelectorAll(".option-button").forEach((button) => {
+      const selected = button.getAttribute("data-choice") === rawSubmitted;
+      button.classList.toggle("is-correct", selected && isCorrect);
+      button.classList.toggle("is-mistake", selected && !isCorrect);
+      button.classList.toggle("is-muted", !selected && isCorrect);
+      button.disabled = isCorrect;
+      const status = button.querySelector(".option-status");
+      if (status) status.textContent = selected ? (isCorrect ? "✓" : "↻") : "→";
+    });
   }
 
   if (isCorrect) {
@@ -2496,7 +2527,7 @@ function checkAnswer(event, submittedAnswer) {
     feedback.className = "feedback correct";
     feedback.textContent = firstAttempt
       ? `Richtig! +2 Punkte.${question.solution ? ` ${question.solution}` : ""}`
-      : "Geschafft! +1 Punkt fürs Dranbleiben. Du hast jetzt beide Punkte für diese Aufgabe!";
+      : "Geschafft! +1 Punkt fürs Dranbleiben. Du hast die Aufgabe richtig gelöst!";
     // hide/disable input or option buttons
     const submitBtn = document.querySelector("#answer-form button");
     if (submitBtn) submitBtn.hidden = true;
@@ -2505,23 +2536,17 @@ function checkAnswer(event, submittedAnswer) {
       input.readOnly = true;
       input.focus();
     }
-    const optionsList = document.getElementById('options-list');
-    if (optionsList) {
-      optionsList.querySelectorAll('.option-button').forEach(b => b.disabled = true);
-    }
-    const nextBtn = document.querySelector("#next-button");
-    if (nextBtn) nextBtn.hidden = false;
+    const advanceNote = document.querySelector("#auto-advance-note");
+    if (advanceNote) advanceNote.hidden = false;
     const hintBtn = document.querySelector("#hint-button");
     if (hintBtn) hintBtn.hidden = true;
   } else {
     feedback.className = "feedback incorrect";
-    feedback.textContent = firstAttempt
-      ? "+1 Punkt fürs Probieren! Noch nicht ganz – mit dem Tipp findest du die Lösung und holst dir den zweiten Punkt."
-      : "Du schaffst das! Dein Punkt bleibt. Nutze den Tipp und hole dir den zweiten Punkt mit der richtigen Lösung.";
+    feedback.textContent = "Noch nicht ganz. Nutze den Tipp und versuche es weiter – du hast beliebig viele Versuche. Für die richtige Lösung bekommst du einen Punkt!";
     if (input) input.select();
   }
   updateLessonProgress();
-  if (earnedPoints) animatePointReward(earnedPoints, isCorrect);
+  if (earnedPoints) animatePointReward(earnedPoints);
 }
 
 function updateLessonProgress() {
@@ -2539,7 +2564,7 @@ function updateLessonProgress() {
 }
 
 function nextQuestion() {
-  if (!activeLesson || !activeLesson.resolved || activeLesson.finished) return;
+  if (!activeLesson || !activeLesson.resolved || activeLesson.finished || pointRewardCleanup || lessonAdvanceTimer !== null) return;
   const last = activeLesson.position === activeLesson.questions.length - 1;
   if (last) {
     finishLesson();
@@ -2579,18 +2604,31 @@ function finishLesson() {
       ? "Richtig gut! Du bist auf einem guten Weg."
       : "Gut geübt! Mit jeder Runde wird es leichter.";
   lessonView.innerHTML = `
-    <div class="summary-card">
-      <span class="summary-icon" aria-hidden="true">✓</span>
+    <div class="summary-card" tabindex="-1">
+      <div class="completion-stage" data-grade="${progress.grade}" aria-hidden="true">
+        <span class="completion-ring"></span><span class="completion-ring completion-ring-outer"></span>
+        ${Array.from({ length: 28 }, (_, index) => {
+          const angle = index / 28 * Math.PI * 2;
+          const radius = 76 + index % 3 * 22;
+          return `<span class="completion-spark" style="--spark-x:${Math.cos(angle) * radius}px;--spark-y:${Math.sin(angle) * radius}px;--spark-delay:${index % 5 * 70}ms;--spark-color:${["#e9b550", "#80b9a3", "#91adca", "#d99b9e"][index % 4]}">${index % 3 ? "✦" : "★"}</span>`;
+        }).join("")}
+        <span class="completion-coin">★</span>
+        <span class="completion-plus">+1</span>
+      </div>
       <p class="eyebrow">EINHEIT ABGESCHLOSSEN</p>
       <h2>Das hast du gut gemacht!</h2>
       <p>${message}</p>
-      <div class="summary-score"><strong>+${activeLesson.points || 0} Punkte gesammelt!</strong><span>${progress.points} Punkte insgesamt</span></div>
-      <p>Alle ${questions.length} Aufgaben bei „${topic.title}“ geschafft. Dafür gibt es auch eine Münze für die Spiele!</p>
+      <div class="summary-coin-reward">+1 Münze für die Spiele!</div>
+      <div class="summary-score"><strong>+${activeLesson.points || 0} ${activeLesson.points === 1 ? "Punkt" : "Punkte"} gesammelt!</strong><span>${progress.points} ${progress.points === 1 ? "Punkt" : "Punkte"} insgesamt</span></div>
+      <p>Alle ${questions.length} Aufgaben bei „${topic.title}“ geschafft.</p>
       <button class="primary-button" id="finish-button" type="button">Zur Themenübersicht</button>
+      <a class="secondary-button summary-games-link" href="../index.html">Zu den Spielen →</a>
     </div>
   `;
   document.querySelector("#finish-button").addEventListener("click", renderDashboard);
   completedCount.textContent = String(progress.completed);
+  document.querySelector(".summary-card")?.focus({ preventScroll: true });
+  lessonView.scrollIntoView?.({ behavior: typeof window !== "undefined" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "smooth" : "auto", block: "start" });
 }
 
 gradeSelect.addEventListener("change", () => {

@@ -323,28 +323,32 @@ test("points reward first answers and corrections once and survive leaving and r
   vm.runInContext('checkAnswer(null, String(activeLesson.questions[0].answer)); nextQuestion();', context);
   assert.equal(vm.runInContext("progress.points", context), 2, "submitting a resolved answer must not award more points");
   vm.runInContext('checkAnswer(null, String(activeLesson.questions[1].answer + 1000));', context);
-  assert.equal(vm.runInContext("progress.points", context), 3);
+  assert.equal(vm.runInContext("progress.points", context), 2, "the first mistake must not award a point");
+  assert.equal(JSON.parse(localStorage.getItem("mathekompass-progress")).points, 2);
   assert.equal(elements.get("#progress-count").textContent, "1 von 8 gelöst");
-  vm.runInContext('checkAnswer(null, String(activeLesson.questions[1].answer + 1001)); nextQuestion();', context);
-  assert.equal(vm.runInContext("progress.points", context), 3, "repeated mistakes must not award points");
+  vm.runInContext('for (let attempt = 0; attempt < 25; attempt += 1) checkAnswer(null, String(activeLesson.questions[1].answer + 1001 + attempt)); nextQuestion();', context);
+  assert.equal(vm.runInContext("progress.points", context), 2, "unlimited mistakes must not award points");
   assert.equal(vm.runInContext("activeLesson.position", context), 1, "unresolved exercises cannot be skipped");
   vm.runInContext('checkAnswer(null, String(activeLesson.questions[1].answer));', context);
-  assert.equal(vm.runInContext("progress.points", context), 4);
+  assert.equal(vm.runInContext("progress.points", context), 3);
+  assert.equal(vm.runInContext("activeLesson.points", context), 3);
+  vm.runInContext('checkAnswer(null, String(activeLesson.questions[1].answer));', context);
+  assert.equal(vm.runInContext("progress.points", context), 3, "a corrected answer is rewarded only once");
   assert.equal(vm.runInContext("activeLesson.correct", context), 1, "corrections preserve first-attempt statistics");
   assert.equal(elements.get("#progress-count").textContent, "2 von 8 gelöst");
   assert.equal(elements.get('.progress-segment[data-question="1"]').classList.contains("is-correct"), true);
   vm.runInContext('nextQuestion(); checkAnswer(null, ""); checkAnswer(null, "abc"); checkAnswer(null, "1/0");', context);
-  assert.equal(vm.runInContext("progress.points", context), 4);
+  assert.equal(vm.runInContext("progress.points", context), 3);
   assert.equal(vm.runInContext("activeLesson.firstAttempts[2]", context), null, "invalid numbers must not count as attempts");
   vm.runInContext("renderDashboard(); startLesson(0);", context);
   assert.equal(vm.runInContext("activeLesson.points", context), 0);
-  assert.equal(vm.runInContext("progress.points", context), 4);
+  assert.equal(vm.runInContext("progress.points", context), 3);
   const restored = createLearningContext({ "mathekompass-progress": localStorage.getItem("mathekompass-progress") });
-  assert.equal(vm.runInContext("progress.points", restored.context), 4);
-  assert.equal(restored.elements.get("#points-count").textContent, "4");
+  assert.equal(vm.runInContext("progress.points", restored.context), 3);
+  assert.equal(restored.elements.get("#points-count").textContent, "3");
 });
 
-test("choice exercises award two points in total and finished lessons cannot award twice", () => {
+test("corrected choice exercises award one point and finished lessons cannot award twice", () => {
   const { context, localStorage } = createLearningContext();
   vm.runInContext(`
     progress.subject = "german";
@@ -354,12 +358,37 @@ test("choice exercises award two points in total and finished lessons cannot awa
     checkAnswer(null, "Baum"); checkAnswer(null, "Baum"); checkAnswer(null, "Haus");
     nextQuestion(); nextQuestion(); finishLesson();
   `, context);
-  assert.equal(vm.runInContext("progress.points", context), 2);
+  assert.equal(vm.runInContext("progress.points", context), 1);
   assert.equal(vm.runInContext("progress.completed", context), 1);
   assert.equal(vm.runInContext("progress.sessions[0].correct", context), 0);
-  assert.equal(vm.runInContext("progress.sessions[0].points", context), 2);
+  assert.equal(vm.runInContext("progress.sessions[0].points", context), 1);
   assert.equal(localStorage.getItem("gamehub-coin-balance"), "1");
-  assert.ok(vm.runInContext('lessonView.innerHTML.includes("+2 Punkte gesammelt!")', context));
+  assert.ok(vm.runInContext('lessonView.innerHTML.includes("+1 Punkt gesammelt!")', context));
+});
+
+test("choice cards mark only the selected answer and preserve retries until the answer is correct", () => {
+  const { context, elements } = createLearningContext();
+  const buttons = ["Haus", "Baum"].map((choice) => {
+    const button = createElement();
+    button.setAttribute("data-choice", choice);
+    const status = createElement();
+    button.querySelector = () => status;
+    return button;
+  });
+  context.document.getElementById("options-list").querySelectorAll = () => buttons;
+  vm.runInContext(`activeLesson = { questions: [{ answer: "Haus", options: ["Haus", "Baum"] }], position: 0, correct: 0, points: 0, firstAttempts: [null], submissions: [], resolved: false }; checkAnswer(null, "Baum");`, context);
+  assert.equal(buttons[1].classList.contains("is-mistake"), true);
+  assert.equal(buttons[1].querySelector().textContent, "↻");
+  assert.equal(buttons.every(button => !button.disabled), true);
+  assert.equal(vm.runInContext("progress.points", context), 0);
+  vm.runInContext('checkAnswer(null, "Haus")', context);
+  assert.equal(buttons[0].classList.contains("is-correct"), true);
+  assert.equal(buttons[0].querySelector().textContent, "✓");
+  assert.equal(buttons[1].classList.contains("is-mistake"), false);
+  assert.equal(buttons[1].classList.contains("is-muted"), true);
+  assert.equal(buttons.every(button => button.disabled), true);
+  assert.equal(vm.runInContext("progress.points", context), 1);
+  assert.ok(elements.get("#feedback").textContent.includes("+1 Punkt"));
 });
 
 test("point totals migrate old saves and reject malformed values", () => {
@@ -369,7 +398,7 @@ test("point totals migrate old saves and reject malformed values", () => {
   }
 });
 
-test("point flights count each earned point, vary by grade and clean up on navigation", () => {
+test("point totals wait for flight completion, then count each point and clean up on navigation", () => {
   for (let grade = 1; grade <= 6; grade += 1) {
     const { context, elements } = createLearningContext();
     const frames = new Map();
@@ -383,6 +412,10 @@ test("point flights count each earned point, vary by grade and clean up on navig
       frames.clear();
       scheduled.forEach(callback => callback(time));
     };
+    const finishFlight = (layer) => {
+      const badge = layer.children[0];
+      badge.listeners.get("animationend")[0]({ target: badge, animationName: "points-fly" });
+    };
     vm.runInContext(`progress.grade = ${grade}; startLesson(0); checkAnswer(null, String(activeLesson.questions[0].answer));`, context);
     const layer = context.document.body.children.at(-1);
     assert.equal(layer.dataset.grade, String(grade));
@@ -391,32 +424,122 @@ test("point flights count each earned point, vary by grade and clean up on navig
     assert.equal(layer.children.length - 1, [0, 14, 12, 10, 9, 7, 6][grade]);
     assert.equal(vm.runInContext("progress.points", context), 2, "points are saved before any animation frame");
     assert.equal(elements.get("#points-count").textContent, "0");
+    assert.equal(elements.get("#lesson-points").textContent, "★ 0 Punkte in dieser Einheit");
     runFrame(0);
     runFrame(800);
+    runFrame(5000);
+    assert.equal(elements.get("#points-count").textContent, "0", "the total stays unchanged until the flight animation ends");
+    finishFlight(layer);
+    runFrame(0);
+    runFrame(169);
+    assert.equal(elements.get("#points-count").textContent, "0");
+    runFrame(170);
     assert.equal(elements.get("#points-count").textContent, "1");
-    runFrame(1000);
+    runFrame(340);
     assert.equal(elements.get("#points-count").textContent, "2");
-    runFrame(1700);
+    assert.equal(elements.get("#lesson-points").textContent, "★ 2 Punkte in dieser Einheit");
+    runFrame(700);
     assert.equal(frames.size, 0);
     assert.equal(vm.runInContext("pointRewardCleanup", context), null);
+    assert.equal(vm.runInContext("activeLesson.position", context), 1, "the next exercise appears automatically after counting finishes");
     vm.runInContext('nextQuestion(); checkAnswer(null, String(activeLesson.questions[1].answer + 1000));', context);
-    const effort = context.document.body.children.at(-1);
-    assert.ok(effort.className.includes("is-effort"));
-    assert.equal(effort.children.length, 1, "mistakes get a gentle point badge without success fireworks");
-    vm.runInContext('checkAnswer(null, String(activeLesson.questions[1].answer)); renderDashboard();', context);
+    assert.equal(frames.size, 0, "mistakes must not trigger a reward animation");
+    assert.equal(context.document.body.children.length, 1, "mistakes must not create a new reward layer");
+    assert.equal(elements.get("#points-count").textContent, "2");
+    vm.runInContext('checkAnswer(null, String(activeLesson.questions[1].answer));', context);
+    const correction = context.document.body.children.at(-1);
+    assert.ok(correction.className.includes("is-success"), "corrections are positive events too");
+    assert.equal(correction.children[0].textContent, "+1");
+    assert.equal(correction.children.length, layer.children.length, "both correct outcomes get the same stars");
+    runFrame(0);
+    runFrame(800);
+    assert.equal(elements.get("#points-count").textContent, "2", "the +1 reward also waits for arrival");
+    finishFlight(correction);
+    runFrame(0);
+    runFrame(170);
+    assert.equal(elements.get("#points-count").textContent, "3");
+    vm.runInContext('renderDashboard();', context);
     assert.equal(frames.size, 0, "leaving a lesson cancels every pending animation frame");
-    assert.equal(elements.get("#points-count").textContent, "4");
+    assert.equal(elements.get("#points-count").textContent, "3");
+    vm.runInContext('startLesson(0); checkAnswer(null, String(activeLesson.questions[0].answer)); renderDashboard();', context);
+    finishFlight(context.document.body.children.at(-1));
+    assert.equal(frames.size, 0, "a canceled flight cannot start a late count");
+    assert.equal(elements.get("#points-count").textContent, "5");
   }
 });
 
-test("reduced motion keeps point rewards immediate without particles or animation frames", () => {
+test("reduced motion awards points immediately and advances after a short pause, with cancellable navigation", () => {
   const { context, elements } = createLearningContext();
+  const timers = new Map();
+  let timerId = 0;
+  context.setTimeout = (callback, delay) => { assert.equal(delay, 900); timers.set(++timerId, callback); return timerId; };
+  context.clearTimeout = (id) => timers.delete(id);
   context.document.body = createElement();
   context.window = { matchMedia: () => ({ matches: true }) };
   context.requestAnimationFrame = () => { throw new Error("reduced motion must not schedule animations"); };
   vm.runInContext('startLesson(0); checkAnswer(null, String(activeLesson.questions[0].answer));', context);
   assert.equal(elements.get("#points-count").textContent, "2");
   assert.equal(context.document.body.children.length, 0);
+  assert.equal(vm.runInContext("activeLesson.position", context), 0);
+  assert.equal(timers.size, 1);
+  const resume = [...timers.values()][0];
+  timers.clear();
+  resume();
+  assert.equal(vm.runInContext("activeLesson.position", context), 1);
+  vm.runInContext('checkAnswer(null, String(activeLesson.questions[1].answer + 1000));', context);
+  assert.equal(timers.size, 0, "wrong answers never advance automatically");
+  vm.runInContext('checkAnswer(null, String(activeLesson.questions[1].answer));', context);
+  assert.equal(timers.size, 1);
+  const canceled = [...timers.values()][0];
+  vm.runInContext('renderDashboard(); startLesson(0);', context);
+  assert.equal(timers.size, 0);
+  canceled();
+  assert.equal(vm.runInContext("activeLesson.position", context), 0, "a canceled timer cannot advance another lesson");
+});
+
+test("eight automatic advances finish the lesson with one coin and a larger celebration", () => {
+  const { context, localStorage, elements } = createLearningContext({ "gamehub-coin-balance": "2" });
+  const frames = new Map();
+  let frameId = 0;
+  context.requestAnimationFrame = (callback) => { frames.set(++frameId, callback); return frameId; };
+  context.cancelAnimationFrame = (id) => frames.delete(id);
+  context.window = { innerWidth: 1280, innerHeight: 800, matchMedia: () => ({ matches: false }) };
+  context.document.body = createElement();
+  const runFrame = (time) => {
+    const scheduled = [...frames.values()];
+    frames.clear();
+    scheduled.forEach(callback => callback(time));
+  };
+  vm.runInContext("startLesson(0)", context);
+  for (let position = 0; position < 8; position += 1) {
+    if (position === 2) vm.runInContext('checkAnswer(null, String(activeLesson.questions[activeLesson.position].answer + 1000));', context);
+    assert.equal(vm.runInContext("activeLesson.position", context), position);
+    vm.runInContext('checkAnswer(null, String(activeLesson.questions[activeLesson.position].answer)); nextQuestion();', context);
+    assert.equal(vm.runInContext("activeLesson.position", context), position, "manual input cannot skip the point flight");
+    assert.equal(vm.runInContext("progress.completed", context), 0);
+    assert.equal(localStorage.getItem("gamehub-coin-balance"), "2");
+    const badge = context.document.body.children.at(-1).children[0];
+    const end = () => badge.listeners.get("animationend")[0]({ target: badge, animationName: "points-fly" });
+    end();
+    runFrame(0);
+    runFrame(340);
+    assert.equal(vm.runInContext("activeLesson.position", context), position, "the next exercise waits until counting has finished");
+    runFrame(700);
+    end();
+    assert.equal(frames.size, 0, "late animation events must not advance twice");
+  }
+  assert.equal(vm.runInContext("activeLesson.finished", context), true);
+  assert.equal(vm.runInContext("progress.completed", context), 1);
+  assert.equal(vm.runInContext("progress.points", context), 15);
+  assert.equal(localStorage.getItem("gamehub-coin-balance"), "3");
+  assert.equal(elements.get("#coin-count").textContent, "3");
+  const summary = vm.runInContext("lessonView.innerHTML", context);
+  assert.ok(summary.includes('class="completion-stage"'));
+  assert.ok(summary.includes("+1 Münze für die Spiele!"));
+  assert.ok(summary.includes('href="../index.html"'));
+  vm.runInContext("nextQuestion(); finishLesson();", context);
+  assert.equal(localStorage.getItem("gamehub-coin-balance"), "3");
+  assert.equal(vm.runInContext("progress.sessions.length", context), 1);
 });
 
 test("all topics have existing local decorative illustrations and focused modes override generic skills", () => {

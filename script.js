@@ -95,8 +95,8 @@ const gameCatalog = [
         title: 'Asteroids',
         type: 'Action • Arcade',
         description: 'Klassisches Weltraum-Abenteuer! Schieße auf Asteroiden und überlebe jede Wave!',
-        rating: '⭐⭐',
-        score: '2/5',
+        rating: '⭐⭐⭐⭐⭐',
+        score: '5/5',
         categories: ['action'],
         tags: ['Action', 'Weltraum']
     },
