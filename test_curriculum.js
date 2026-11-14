@@ -124,6 +124,9 @@ function createLearningContext(storageValues = {}) {
       }
     }
   });
+  for (const file of ["english.js", "english-speech.js", "english-images.js", "english-audio-manifest.js", "english-audio.js"]) {
+    new vm.Script(fs.readFileSync(path.join(root, "Lern-App", file), "utf8"), { filename: file }).runInContext(context);
+  }
   new vm.Script(learningAppSource, { filename: learningAppPath }).runInContext(context);
   return { context, localStorage, clipboardTexts, dispatchKeyDown, elements };
 }
@@ -1542,4 +1545,326 @@ test("ratio context selection also terminates with a constant random source", ()
   const questions = context.makeUniqueQuestions({ skill: "ratio" }, 8);
   assert.equal(questions.length, 1);
   assertNumericQuestionMatchesTask("ratio", questions[0]);
+});
+
+test("English covers grades 3–6 with at least 24 usable cards per topic and progressing texts", () => {
+  const { context } = createLearningContext();
+  const curricula = vm.runInContext("englishCurriculum", context);
+  const pools = vm.runInContext("englishPools", context);
+  assert.deepEqual(Object.keys(curricula).map(Number), [3, 4, 5, 6]);
+  let total = 0;
+  let previousTextLength = 0;
+  for (const [grade, topics] of Object.entries(curricula)) {
+    assert.ok(topics.length >= 10, `grade ${grade}: enough distinct objectives`);
+    assert.equal(new Set(topics.map(topic => topic.mode)).size, topics.length);
+    for (const topic of topics) {
+      const cards = pools[grade][topic.mode];
+      assert.ok(cards.length >= 24, `grade ${grade}: ${topic.title}`);
+      assert.equal(new Set(cards.map(card => card.text)).size, cards.length, `duplicate content: ${topic.title}`);
+      for (const card of cards) {
+        assert.ok(card.text && card.answer && card.hint, `${topic.title}: complete task`);
+        if (card.choices) {
+          assert.equal(new Set(card.choices).size, card.choices.length, `${topic.title}: duplicate options`);
+          assert.ok(card.choices.includes(card.answer), `${topic.title}: answer must be offered`);
+          assert.ok(card.choices.length >= 3);
+        }
+      }
+      assert.ok(fs.existsSync(path.join(root, "Lern-App", "illustrations", `${context.taskIllustration(topic)}.svg`)));
+      total += cards.length;
+    }
+    const listening = pools[grade].listening;
+    const averageLength = listening.reduce((sum, card) => sum + card.audioText.split(/\s+/).length, 0) / listening.length;
+    assert.ok(averageLength > previousTextLength, "listening texts become longer in each grade");
+    previousTextLength = averageLength;
+    for (const card of listening) {
+      assert.ok(!card.text.includes(card.audioText), "the listening prompt must not reveal the transcript");
+    }
+  }
+  assert.equal(total, 1056);
+  assert.ok(learningAppHtml.indexOf('src="english.js') < learningAppHtml.indexOf('src="script.js'), "load English pools before the app");
+  assert.match(learningAppHtml, /value="english"/);
+});
+
+test("every English topic supplies three complete rounds without repeats across random seeds", () => {
+  for (const seed of [1, 42, 0xdeadbeef]) {
+    const { context } = createLearningContext();
+    useDeterministicRandom(context, seed);
+    const curricula = vm.runInContext("englishCurriculum", context);
+    for (const [grade, topics] of Object.entries(curricula)) {
+      vm.runInContext(`progress.subject = "english"; progress.grade = ${grade};`, context);
+      for (const topic of topics) {
+        vm.runInContext(`questionHistory[questionHistoryKey()] = [];`, context);
+        const seen = new Set();
+        for (let round = 0; round < 3; round++) {
+          const questions = context.makeUniqueQuestions(topic, 8);
+          assert.equal(questions.length, 8, `${seed}: ${grade}: ${topic.title}`);
+          for (const question of questions) {
+            const key = context.questionIdentity(question);
+            assert.ok(!seen.has(key), `${seed}: ${grade}: repeated ${topic.title}`);
+            seen.add(key);
+            if (question.options) {
+              assert.equal(new Set(question.options).size, question.options.length);
+              assert.ok(question.options.includes(question.answer));
+            }
+          }
+          context.rememberQuestions(questions);
+        }
+        assert.equal(seen.size, 24);
+      }
+    }
+  }
+  const { context } = createLearningContext();
+  vm.runInContext('progress.subject = "english"; progress.grade = 3; Math.random = () => 0;', context);
+  assert.equal(context.makeUniqueQuestions(vm.runInContext("englishCurriculum[3][0]", context), 8).length, 1);
+});
+
+test("English selection is limited to supported grades and preserves existing subjects", () => {
+  for (const grade of [1, 2, 3.5, 7, "3"]) {
+    const { context } = createLearningContext({ "mathekompass-progress": JSON.stringify({ subject: "english", grade }) });
+    assert.equal(vm.runInContext("progress.subject", context), "math");
+  }
+  const { context, elements } = createLearningContext({ "mathekompass-progress": JSON.stringify({ subject: "english", grade: 3 }) });
+  assert.equal(elements.get("#welcome-title").textContent, "Englisch, Schritt für Schritt.");
+  assert.ok(vm.runInContext("topicGrid.innerHTML", context).includes("Tiere entdecken"));
+  elements.get("#grade-select").value = "2";
+  elements.get("#grade-select").listeners.get("change")[0]();
+  assert.equal(vm.runInContext("progress.subject", context), "math");
+  assert.equal(vm.runInContext("progress.grade", context), 2);
+  elements.get("#grade-select").value = "6";
+  elements.get("#grade-select").listeners.get("change")[0]();
+  elements.get("#subject-select").value = "english";
+  elements.get("#subject-select").listeners.get("change")[0]();
+  assert.equal(vm.runInContext("progress.grade", context), 6);
+  vm.runInContext("startLesson(0)", context);
+  assert.equal(vm.runInContext("activeLesson.questions.length", context), 8);
+  assert.match(vm.runInContext("lessonView.innerHTML", context), /ENGLISCH ÜBEN/);
+  assert.notEqual(context.topicProgressKey("english", 3, 0, {}), context.topicProgressKey("german", 3, 0, {}));
+});
+
+test("English completions, coins, parent report and question history survive a reload", () => {
+  const { context, localStorage } = createLearningContext({ "mathekompass-progress": JSON.stringify({ subject: "english", grade: 5 }) });
+  useDeterministicRandom(context, 510);
+  vm.runInContext('startLesson(0); activeLesson.correct = 8; finishLesson();', context);
+  assert.equal(localStorage.getItem("gamehub-coin-balance"), "1");
+  assert.equal(vm.runInContext("progress.sessions[0].subject", context), "english");
+  const restored = createLearningContext({
+    "mathekompass-progress": localStorage.getItem("mathekompass-progress"),
+    "lernlabor-question-history-v1": localStorage.getItem("lernlabor-question-history-v1")
+  }).context;
+  assert.equal(vm.runInContext("progress.subject", restored), "english");
+  assert.equal(vm.runInContext("progress.grade", restored), 5);
+  assert.equal(vm.runInContext('questionHistory["english:5"].length', restored), 8);
+  vm.runInContext("renderParentReport()", restored);
+  assert.match(vm.runInContext("parentReport.innerHTML", restored), /<td>Englisch<\/td>/);
+  assert.match(vm.runInContext("parentReport.innerHTML", restored), /Schule, Alltag und Freizeit/);
+});
+
+test("English writing accepts harmless typography without accepting a wrong tense or word", () => {
+  const { context } = createLearningContext();
+  for (const [expected, answer, correct] of [
+    ["I'm ten.", "I’m ten", true],
+    ["Yesterday I wrote a story.", " yesterday  I wrote a story ", true],
+    ["Yesterday I wrote a story.", "Yesterday I write a story.", false],
+    ["My name is Mia.", "My name is Ben.", false],
+    ["My favourite colour is green.", "MY FAVOURITE COLOUR IS GREEN!", true]
+  ]) {
+    context.exampleAnswer = expected;
+    vm.runInContext('progress.subject = "english"; activeLesson = { questions: [{ text: "Schreibe nach Muster.", answer: exampleAnswer }], position: 0, correct: 0, firstAttempts: [null], submissions: [], resolved: false };', context);
+    context.checkAnswer(null, answer);
+    assert.equal(vm.runInContext("activeLesson.resolved", context), correct, answer);
+  }
+  vm.runInContext('progress.grade = 6; const learntCard = englishPools[6]["past-writing"].find(card => card.text.endsWith("Verb: learn.")); activeLesson = { questions: [learntCard], position: 0, correct: 0, firstAttempts: [null], submissions: [], resolved: false }; checkAnswer(null, "Yesterday I learnt a new word.");', context);
+  assert.equal(vm.runInContext("activeLesson.resolved", context), true);
+});
+
+test("English listening has a hidden transcript and an accessible fallback without audio APIs", () => {
+  const { context, elements } = createLearningContext();
+  vm.runInContext('progress.subject = "english"; progress.grade = 3; startLesson(englishCurriculum[3].findIndex(topic => topic.mode === "listening"));', context);
+  const html = vm.runInContext("lessonView.innerHTML", context);
+  assert.match(html, /<details class="audio-transcript">/);
+  assert.doesNotMatch(html, /<details[^>]*\bopen\b/);
+  assert.match(html, /id="audio-status" role="status"/);
+  elements.get("#english-audio-button").listeners.get("click")[0]();
+  assert.match(elements.get("#audio-status").textContent, /nicht verfügbar/);
+  const report = vm.runInContext("buildErrorReport()", context);
+  assert.match(report, /Fach: Englisch/);
+  assert.ok(report.includes(vm.runInContext("activeLesson.questions[0].audioText", context)));
+  assert.match(report, /Lern-App\/english.js/);
+});
+
+test("English audio uses recordings independently of the browser's installed voice", () => {
+  const { context } = createLearningContext();
+  const { recordings } = installEnglishAudioHarness(context);
+  let systemSpeech = 0;
+  context.window.speechSynthesis = { cancel() {}, getVoices() { return [{ lang: "de-DE" }]; }, speak() { systemSpeech++; } };
+  context.speakEnglish("Hello!");
+  context.speakEnglish("Goodbye!");
+  assert.equal(recordings.length, 2);
+  assert.equal(recordings[0].paused, true);
+  assert.equal(systemSpeech, 0);
+  context.renderDashboard();
+  assert.equal(recordings[1].paused, true);
+  vm.runInContext('progress.subject = "english"; progress.grade = 3; startLesson(0);', context);
+  context.speakEnglish("apple");
+  context.finishLesson();
+  assert.equal(recordings[2].paused, true);
+});
+
+function installEnglishAudioHarness(context) {
+  const recordings = [];
+  const rewardTimers = [];
+  context.setTimeout = callback => { rewardTimers.push(callback); return rewardTimers.length; };
+  context.clearTimeout = () => {};
+  context.window = {
+    setTimeout() { return 1000; },
+    clearTimeout() {},
+    Audio: class {
+      constructor(src) { this.src = src; this.paused = false; recordings.push(this); }
+      play() { return { catch: callback => { this.rejectPlay = callback; } }; }
+      pause() { this.paused = true; }
+    },
+    matchMedia() { return { matches: true }; }
+  };
+  return { recordings, rewardTimers };
+}
+
+test("clicking an English answer plays its MP3 and waits for completion before advancing", () => {
+  const { context } = createLearningContext();
+  const { recordings, rewardTimers } = installEnglishAudioHarness(context);
+  vm.runInContext('progress.subject = "english"; progress.grade = 3; startLesson(0);', context);
+  const question = vm.runInContext("activeLesson.questions[0]", context);
+  context.checkAnswer(null, question.answer);
+  assert.equal(recordings.length, 1);
+  assert.equal(recordings[0].src, vm.runInContext("englishAudioManifest", context)[question.answer]);
+  assert.equal(vm.runInContext("activeLesson.position", context), 0);
+  rewardTimers.shift()();
+  assert.equal(vm.runInContext("activeLesson.position", context), 0, "do not cut off the spoken answer");
+  recordings[0].onended();
+  assert.equal(vm.runInContext("activeLesson.position", context), 1);
+  assert.equal(vm.runInContext("englishPlayback", context), null);
+});
+
+test("wrong English choices are audible, while German choices and instructions stay silent", () => {
+  const { context } = createLearningContext();
+  const { recordings } = installEnglishAudioHarness(context);
+  vm.runInContext('progress.subject = "english"; progress.grade = 3; startLesson(0);', context);
+  const question = vm.runInContext("activeLesson.questions[0]", context);
+  const wrong = question.options.find(option => option !== question.answer);
+  context.checkAnswer(null, wrong);
+  assert.equal(recordings.length, 1);
+  assert.equal(recordings[0].src, vm.runInContext("englishAudioManifest", context)[wrong]);
+  assert.equal(vm.runInContext("activeLesson.resolved", context), false);
+  assert.equal(vm.runInContext("progress.points", context), 0);
+  vm.runInContext('startLesson(englishCurriculum[3].findIndex(topic => topic.mode === "mediation"));', context);
+  context.checkAnswer(null, vm.runInContext("activeLesson.questions[0].answer", context));
+  assert.equal(recordings.length, 1, "German answer must not be read aloud");
+  context.speakEnglish("Erkläre jemandem auf Deutsch");
+  assert.equal(recordings.length, 1, "unmarked instructions must not enter the player");
+});
+
+test("listen-only buttons and individual words do not submit answers or award points", () => {
+  const { context } = createLearningContext();
+  const { recordings } = installEnglishAudioHarness(context);
+  vm.runInContext('progress.subject = "english"; progress.grade = 3; startLesson(0);', context);
+  const question = vm.runInContext("activeLesson.questions[0]", context);
+  const event = dataset => ({ target: { closest() { return { dataset }; } }, preventDefault() {}, stopPropagation() {} });
+  context.handleEnglishSpeechClick(event({ englishChoiceAudio: question.answer }));
+  assert.equal(recordings.length, 1);
+  assert.equal(vm.runInContext("activeLesson.resolved", context), false);
+  assert.equal(vm.runInContext("progress.points", context), 0);
+  context.handleEnglishSpeechClick(event({ englishSpeech: "apple" }));
+  assert.equal(recordings.length, 2);
+  assert.equal(recordings[0].paused, true);
+  assert.equal(recordings[1].src, vm.runInContext('englishAudioManifest["apple"]', context));
+});
+
+test("mixed-language text marks only English and its rendered controls never nest buttons", () => {
+  const { context } = createLearningContext();
+  const warm = vm.runInContext('englishPools[3]["clothes-weather"].find(card => card.answer === "warm")', context);
+  const segments = context.englishTextSegments(warm.hint, warm.english.hint);
+  assert.equal(segments.filter(segment => segment.english).length, 1);
+  assert.equal(segments[0].english, false, "the German homograph remains German");
+  const passages = context.englishTextSegments("Deutsch: apple – Apfel", ["apple"]);
+  assert.equal(passages.filter(segment => segment.english).map(segment => segment.text).join(), "apple");
+  vm.runInContext('progress.subject = "english"; progress.grade = 4; startLesson(englishCurriculum[4].findIndex(topic => topic.mode === "shopping"));', context);
+  const html = vm.runInContext("lessonView.innerHTML", context);
+  assert.match(html, /data-english-choice-audio=/);
+  assert.match(html, /Wörter anhören/);
+  let buttonDepth = 0;
+  for (const tag of html.match(/<\/?button\b[^>]*>/g)) {
+    buttonDepth += tag.startsWith("</") ? -1 : 1;
+    assert.ok(buttonDepth >= 0 && buttonDepth <= 1, "no nested or unbalanced buttons");
+  }
+  assert.equal(buttonDepth, 0);
+  assert.doesNotMatch(context.renderEnglishText("Lies diesen Text", []), /data-english-speech/);
+  assert.match(context.renderEnglishText("Read this book.", ["Read this book."]), /data-english-speech="book"/);
+});
+
+test("audio cancellation ignores stale completion and never advances a lesson after leaving", () => {
+  const { context } = createLearningContext();
+  const { recordings, rewardTimers } = installEnglishAudioHarness(context);
+  vm.runInContext('progress.subject = "english"; progress.grade = 3; startLesson(0);', context);
+  context.checkAnswer(null, vm.runInContext("activeLesson.questions[0].answer", context));
+  rewardTimers.shift()();
+  const ended = recordings[0].onended;
+  context.renderDashboard();
+  assert.equal(recordings[0].paused, true);
+  ended();
+  assert.equal(vm.runInContext("activeLesson.position", context), 0);
+  assert.equal(vm.runInContext("englishAudioAdvance", context), null);
+  assert.equal(vm.runInContext("lessonView.hidden", context), true);
+});
+
+test("a missing clip never falls back to a German or device-dependent system voice", () => {
+  const { context, elements } = createLearningContext();
+  const { recordings } = installEnglishAudioHarness(context);
+  const spoken = [];
+  context.window.speechSynthesis = {
+    cancel() {},
+    getVoices() { return [{ lang: "de-DE" }, { lang: "en-GB" }]; },
+    speak(utterance) { spoken.push(utterance); }
+  };
+  context.window.SpeechSynthesisUtterance = class { constructor(text) { this.text = text; } };
+  context.speakEnglish("apple");
+  recordings[0].onerror();
+  recordings[0].rejectPlay(new Error("network"));
+  assert.equal(spoken.length, 0);
+  assert.equal(vm.runInContext("englishPlayback", context), null);
+  assert.match(elements.get("#audio-status").textContent, /nicht verfügbar/);
+});
+
+test("English scenes appear on each story sentence and option without nesting buttons", () => {
+  const { context } = createLearningContext();
+  vm.runInContext('progress.subject = "english"; progress.grade = 4; startLesson(englishCurriculum[4].findIndex(topic => topic.mode === "reading"));', context);
+  const question = vm.runInContext("activeLesson.questions[0]", context);
+  const story = question.modelText;
+  const sentences = context.splitEnglishImageSentences(story);
+  const html = context.renderEnglishText(story, [story], true, question);
+  assert.equal((html.match(/class="english-sentence-image"/g) || []).length, sentences.length);
+  assert.match(vm.runInContext("lessonView.innerHTML", context), /english-task-illustration/);
+  assert.match(vm.runInContext("lessonView.innerHTML", context), /class="english-option-image"/);
+  for (const sentence of sentences) assert.ok(html.includes(context.escapeHtml(sentence)), `missing sentence playback: ${sentence}`);
+  let depth = 0;
+  for (const tag of vm.runInContext("lessonView.innerHTML", context).match(/<\/?button\b[^>]*>/g)) {
+    depth += tag.startsWith("</") ? -1 : 1;
+    assert.ok(depth >= 0 && depth <= 1);
+  }
+  assert.equal(depth, 0);
+  assert.equal(vm.runInContext("englishAudioVoice.id", context), "af_heart");
+  assert.match(vm.runInContext("lessonView.innerHTML", context), /Englische Stimme: Heart/);
+});
+
+test("reviewed English images distinguish menus, shopping bags, boxes and board games", () => {
+  const { context } = createLearningContext();
+  const expected = [
+    [4, "shopping", 8, "menu"],
+    [4, "shopping", 17, "shopping-bag"],
+    [6, "comparison", 6, "box"],
+    [5, "texts-media", 2, "board-game"]
+  ];
+  for (const [grade, mode, index, image] of expected) {
+    assert.equal(vm.runInContext(`englishPools[${grade}][${JSON.stringify(mode)}][${index}].image.key`, context), image);
+  }
+  const story = vm.runInContext('englishPools[4].reading[21]', context);
+  assert.equal(context.getEnglishSentenceImage("Lucy wants a pet.", story).key, "pets");
 });

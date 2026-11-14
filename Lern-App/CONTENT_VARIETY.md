@@ -1,5 +1,7 @@
 # Aufgabenvielfalt und Qualitätsprüfung – 13. November 2026
 
+**Ergänzung vom 14. November:** Für Englisch stehen zusätzlich 44 Themen mit jeweils 24 Aufgaben zur Verfügung. Die gleiche gespeicherte Wiederholungssteuerung gilt auch dort. Lesen und Hören desselben Kurztextes teilen eine Inhaltskennung. Siehe [Umfang und Prüfung des Englischangebots](ENGLISCH_NRW.md).
+
 Die bisherigen acht Aufgaben pro Einheit waren als kurze Übungsrunde ausreichend. Der Vorrat dahinter war für wiederholtes Spielen zu klein: Bei einer Bestandsaufnahme von 101 Themen hatten 46 weniger als 24 beobachtete unterschiedliche Aufgaben. Davon waren 33 Deutschthemen. Besonders bei Pools mit acht Inhalten wurde praktisch die gesamte Einheit beim nächsten Besuch wiederholt.
 
 Die Einheit bleibt bei acht Aufgaben. Erweitert wurden die Inhaltspools und die Auswahl über mehrere Durchläufe.

@@ -1,4 +1,14 @@
 const exercisesPerLesson = 8;
+const subjectNames = { math: "Mathe", german: "Deutsch", english: "Englisch" };
+
+function currentTopics() {
+  const curricula = { math: curriculum, german: germanCurriculum, english: englishCurriculum };
+  return curricula[progress.subject]?.[progress.grade] || [];
+}
+
+function normalizeEnglishAnswer(value) {
+  return value.normalize("NFC").trim().replace(/[’‘]/g, "'").replace(/\s+/g, " ").replace(/[.!?]+$/, "").toLocaleLowerCase("en-GB");
+}
 
 const curriculum = {
   1: [
@@ -301,12 +311,12 @@ const savedSessions = Array.isArray(saved.sessions) ? saved.sessions : [];
 const progress = {
   // Saved progress outside the supported grade range falls back to grade 1.
   grade: Number.isInteger(saved.grade) && saved.grade >= 1 && saved.grade <= 6 ? saved.grade : 1,
-  subject: saved.subject === "german" ? "german" : "math",
+  subject: saved.subject === "english" && Number.isInteger(saved.grade) && saved.grade >= 3 && saved.grade <= 6 ? "english" : saved.subject === "german" ? "german" : "math",
   completed: Number.isInteger(saved.completed) && saved.completed >= 0 ? saved.completed : 0,
   points: Number.isSafeInteger(saved.points) && saved.points >= 0 ? saved.points : 0,
   topics: saved.topics && typeof saved.topics === "object" ? saved.topics : {},
   sessions: savedSessions.filter((session) =>
-    session && ["math", "german"].includes(session.subject) &&
+    session && ["math", "german", "english"].includes(session.subject) &&
     Number.isInteger(session.grade) && session.grade >= 1 && session.grade <= 10 &&
     typeof session.topicTitle === "string" &&
     Number.isInteger(session.correct) && session.correct >= 0 &&
@@ -447,7 +457,7 @@ function loadQuestionHistory() {
     const savedHistory = JSON.parse(localStorage.getItem(questionHistoryStorageKey) || "{}");
     if (savedHistory && typeof savedHistory === "object" && !Array.isArray(savedHistory)) {
       for (const [key, values] of Object.entries(savedHistory)) {
-        if (!/^(math|german):[1-6]$/.test(key) || !Array.isArray(values)) continue;
+        if (!/^(math|german|english):[1-6]$/.test(key) || !Array.isArray(values)) continue;
         history[key] = [...new Set(values.filter((value) => typeof value === "string" && value.length <= 1024))].slice(-questionHistoryLimit);
       }
     }
@@ -519,17 +529,20 @@ function syncPlatformUnlock(coinBalance) {
 }
 
 function topicProgressKey(subject, grade, index, topic) {
-  const base = subject === "math" ? `${grade}-${index}` : `german-${grade}-${index}`;
+  const base = subject === "math" ? `${grade}-${index}` : `${subject}-${grade}-${index}`;
   return topic.mode ? `${base}:${topic.mode}` : base;
 }
 
 function renderDashboard() {
+  stopEnglishAudio();
   clearPointReward();
   dashboard.hidden = false;
   lessonView.hidden = true;
   parentReport.hidden = true;
   gradeSelect.value = String(progress.grade);
   subjectSelect.value = progress.subject;
+  const englishOption = subjectSelect.querySelector('option[value="english"]');
+  if (englishOption) englishOption.disabled = progress.grade < 3;
   completedCount.textContent = String(progress.completed);
   if (pointsCount) pointsCount.textContent = String(progress.points);
   if (pointsLabel) pointsLabel.textContent = progress.points === 1 ? "Punkt" : "Punkte";
@@ -539,12 +552,12 @@ function renderDashboard() {
       coinCount.textContent = String(balance);
     }
   }
-  const subjectName = progress.subject === "german" ? "Deutsch" : "Mathe";
+  const subjectName = subjectNames[progress.subject];
   welcomeEyebrow.textContent = `DEIN ${subjectName.toLocaleUpperCase("de-DE")}-LERNPLATZ`;
   welcomeTitle.textContent = `${subjectName}, Schritt für Schritt.`;
   topicsTitle.textContent = `Themen für Klasse ${progress.grade}`;
 
-  const topics = (progress.subject === "german" ? germanCurriculum : curriculum)[progress.grade];
+  const topics = currentTopics();
   topicCount.textContent = `${topics.length} Themen`;
   topicGrid.innerHTML = topics.map((topic, index) => {
     const key = topicProgressKey(progress.subject, progress.grade, index, topic);
@@ -580,6 +593,7 @@ function escapeHtml(value) {
 }
 
 function renderParentReport() {
+  stopEnglishAudio();
   clearPointReward();
   dashboard.hidden = true;
   lessonView.hidden = true;
@@ -611,7 +625,7 @@ function renderParentReport() {
     .sort((left, right) => left.grade - right.grade || left.title.localeCompare(right.title, "de"))
     .map((stat) => `
       <tr>
-        <td>${stat.subject === "german" ? "Deutsch" : "Mathe"}</td>
+        <td>${subjectNames[stat.subject]}</td>
         <td>Klasse ${stat.grade}</td>
         <td>${escapeHtml(stat.title)}</td>
         <td>${stat.sessions}</td>
@@ -627,7 +641,7 @@ function renderParentReport() {
     return `
       <tr>
         <td>${date}</td>
-        <td>${session.subject === "german" ? "Deutsch" : "Mathe"}</td>
+        <td>${subjectNames[session.subject]}</td>
         <td>Klasse ${session.grade}</td>
         <td>${escapeHtml(session.topicTitle)}</td>
         <td>${session.correct} von ${session.total}</td>
@@ -2218,7 +2232,7 @@ function makeUniqueQuestions(topic, count) {
   // Größere Auswahl sammeln, damit bekannte Aufgaben nicht aus Zufall früh zurückkehren.
   // Die Obergrenze verhindert Stillstand bei endlichen Pools oder konstanter Zufallsfolge.
   for (let attempt = 0; attempt < count * 128 && candidates.size < Math.max(count * 16, 128); attempt += 1) {
-    const question = progress.subject === "german" ? makeGermanQuestion(topic) : makeQuestion(topic);
+    const question = progress.subject === "english" ? makeEnglishQuestion(topic) : progress.subject === "german" ? makeGermanQuestion(topic) : makeQuestion(topic);
     const identity = questionIdentity(question);
     if (!candidates.has(identity)) candidates.set(identity, question);
   }
@@ -2244,7 +2258,7 @@ function makeUniqueQuestions(topic, count) {
 function buildErrorReport() {
   const { topic, questions, position, firstAttempts, submissions } = activeLesson;
   const question = questions[position];
-  const subject = progress.subject === "german" ? "Deutsch" : "Mathe";
+  const subject = subjectNames[progress.subject];
   const firstAttempt = firstAttempts[position] === null
     ? "noch nicht beantwortet"
     : firstAttempts[position] ? "richtig" : "falsch";
@@ -2263,6 +2277,7 @@ function buildErrorReport() {
     options,
     "Frage:",
     question.text,
+    question.audioText ? `Hörtext: ${question.audioText}` : "",
     question.note ? `Hinweis: ${question.note}` : "",
     "",
     `Zuletzt eingegebene Antwort: ${submitted}`,
@@ -2270,7 +2285,7 @@ function buildErrorReport() {
     `Tipp: ${question.hint}`,
     "",
     "Kontext für die Bearbeitung:",
-    `Die Aufgabe wurde von makeQuestion()/makeGermanQuestion() in Lern-App/script.js erzeugt (skill "${topic.skill}").`,
+    `Die Aufgabe wurde von ${progress.subject === "english" ? "makeEnglishQuestion() in Lern-App/english.js" : "makeQuestion()/makeGermanQuestion() in Lern-App/script.js"} erzeugt (skill "${topic.skill}").`,
     "Bitte prüfe, ob die hinterlegte Lösung stimmt bzw. ob eine gültige Eingabe fälschlich abgelehnt wurde."
   ].join("\n");
 }
@@ -2321,6 +2336,7 @@ function reportExerciseError(button) {
 
 // Decorative illustrations describe the topic, without giving away an answer.
 function taskIllustration(topic) {
+  if (topic.skill?.startsWith("en-")) return topic.skill === "en-writing" ? "writing" : topic.skill === "en-words" ? "words" : "reading";
   if (topic.mode === "time") return "time";
   if (["data", "mean"].includes(topic.mode)) return "data";
   if (topic.mode === "volume") return "geometry";
@@ -2339,7 +2355,7 @@ function taskIllustration(topic) {
 }
 
 function startLesson(topicIndex) {
-  const topics = (progress.subject === "german" ? germanCurriculum : curriculum)[progress.grade];
+  const topics = currentTopics();
   const topic = topics[topicIndex];
   const count = exercisesPerLesson;
   const questions = makeUniqueQuestions(topic, count);
@@ -2359,19 +2375,21 @@ function startLesson(topicIndex) {
 }
 
 function renderLesson() {
+  stopEnglishAudio();
   clearPointReward();
   dashboard.hidden = true;
   lessonView.hidden = false;
   const { topic, questions, position } = activeLesson;
   const question = questions[position];
   const answered = position + (activeLesson.resolved ? 1 : 0);
-  const subjectName = progress.subject === "german" ? "Deutsch" : "Mathe";
+  const subjectName = subjectNames[progress.subject];
+  const taskImage = progress.subject === "english" && typeof getEnglishTaskImage === "function" ? getEnglishTaskImage(topic, question) : null;
 
   lessonView.innerHTML = `
     <button class="back-button" type="button" id="back-button"><span aria-hidden="true">←</span> Alle Themen</button>
     <header class="lesson-heading">
       <p class="eyebrow">KLASSE ${progress.grade} · ${subjectName.toLocaleUpperCase("de-DE")} ÜBEN</p>
-      <h1>${topic.title}</h1>
+      <h1>${progress.subject === "english" ? renderEnglishText(topic.title, topic.english?.title) : topic.title}</h1>
       <p>Eine kurze Erklärung und dann übst du es Schritt für Schritt.</p>
     </header>
     <div class="lesson-rewards">
@@ -2389,18 +2407,33 @@ function renderLesson() {
     </div>
     <article class="explanation-card">
       <p class="card-kicker">Kurz erklärt</p>
-      <p>${topic.explanation}</p>
+      <p>${progress.subject === "english" ? renderEnglishText(topic.explanation, topic.english?.explanation) : topic.explanation}</p>
     </article>
     <article class="exercise-card">
       <div class="exercise-topline">
         <div><p class="exercise-count">AUFGABE ${position + 1} VON ${questions.length}</p><p class="exercise-encouragement">Schritt für Schritt zum Aha!</p></div>
-        <img class="task-illustration" src="illustrations/${taskIllustration(topic)}.svg" width="144" height="104" alt="" aria-hidden="true">
+        ${taskImage
+          ? `<img class="task-illustration english-task-illustration" src="${escapeHtml(taskImage.src)}?v=20261114-reviewed" width="112" height="112" alt="${escapeHtml(taskImage.alt)}">`
+          : `<img class="task-illustration" src="illustrations/${taskIllustration(topic)}.svg" width="144" height="104" alt="" aria-hidden="true">`}
       </div>
-      <h2 class="question${question.note ? " question-with-note" : ""}"${question.note ? ' aria-describedby="question-note"' : ""}>${question.text}${question.note ? '<sup class="question-note-marker" aria-hidden="true">*</sup>' : ""}</h2>
+      <h2 class="question${question.note ? " question-with-note" : ""}"${question.note ? ' aria-describedby="question-note"' : ""}>${progress.subject === "english" ? renderEnglishText(question.text, question.english?.text, true, question) : escapeHtml(question.text)}${question.note ? '<sup class="question-note-marker" aria-hidden="true">*</sup>' : ""}</h2>
       ${question.note ? `<p class="question-note" id="question-note">* ${escapeHtml(question.note)}</p>` : ""}
+      ${question.audioText || question.modelText ? `
+        <div class="english-audio">
+          <button class="secondary-button" type="button" id="english-audio-button">${question.audioText ? "▶ Hörtext abspielen" : "▶ Anhören und nachsprechen"}</button>
+          <p class="section-copy" id="audio-status" role="status">${englishVoiceLabel()}${question.audioText ? "Höre zuerst zu. Du kannst den Text mehrmals abspielen." : "Sprich den englischen Text nach. Deine Aussprache wird nicht automatisch bewertet."}</p>
+          ${question.audioText ? `<details class="audio-transcript"><summary>Hörtext zum Mitlesen öffnen</summary><p lang="en">${renderEnglishText(question.audioText, [question.audioText], true, question)}</p></details>` : ""}
+        </div>
+      ` : ""}
+      ${progress.subject === "english" && !question.audioText && !question.modelText ? `<p class="section-copy english-audio-help" id="audio-status" role="status">${englishVoiceLabel()}Tippe auf englische Wörter oder 🔊. Beim Auswählen wird die englische Antwort vorgelesen.</p>` : ""}
       ${question.options ? `
         <div class="options-list" id="options-list" role="group" aria-label="Wähle deine Antwort">
-           ${question.options.map((o, i) => `<button class="option-button" type="button" data-choice="${escapeHtml(String(o))}"><span class="option-letter" aria-hidden="true">${String.fromCharCode(65+i)}</span><span class="option-text">${escapeHtml(String(o))}</span><span class="option-status" aria-hidden="true">→</span></button>`).join('')}
+           ${question.options.map((o, i) => {
+             const choice = String(o);
+             const passages = progress.subject === "english" ? question.english?.choices[choice] || [] : [];
+             const button = `<button class="option-button${passages.length ? " has-audio" : ""}" type="button" data-choice="${escapeHtml(choice)}"><span class="option-letter" aria-hidden="true">${String.fromCharCode(65+i)}</span><span class="option-text">${passages.length ? renderEnglishText(choice, passages, false, question) : escapeHtml(choice)}</span><span class="option-status" aria-hidden="true">→</span></button>`;
+             return passages.length ? `<div class="option-row">${button}${renderEnglishChoiceAudio(choice, passages)}</div>` : button;
+           }).join('')}
         </div>
       ` : `
         <form class="answer-form" id="answer-form">
@@ -2417,11 +2450,14 @@ function renderLesson() {
         </div>
         <span class="auto-advance-note" id="auto-advance-note" hidden>Danach geht’s automatisch weiter …</span>
       </div>
-      <p class="hint-text" id="hint-text" hidden>${question.hint}</p>
+      <p class="hint-text" id="hint-text" hidden>${progress.subject === "english" ? renderEnglishText(question.hint, question.english?.hint) : question.hint}</p>
     </article>
   `;
 
   document.querySelector("#back-button").addEventListener("click", renderDashboard);
+  if (question.audioText || question.modelText) {
+    document.querySelector("#english-audio-button").addEventListener("click", () => speakEnglish(question.audioText || question.modelText));
+  }
   const answerForm = document.querySelector("#answer-form");
   if (answerForm) answerForm.addEventListener("submit", checkAnswer);
   // options buttons
@@ -2483,16 +2519,22 @@ function checkAnswer(event, submittedAnswer) {
     if (input) input.focus();
     return;
   }
+  const normalizeText = progress.subject === "english" ? normalizeEnglishAnswer : value => value.toLocaleLowerCase("de-DE");
   const expectedAnswers = (Array.isArray(question.answer) ? question.answer : [question.answer]).map((expected) =>
-    typeof expected === "string" && !question.caseSensitive ? expected.toLocaleLowerCase("de-DE") : expected
+    typeof expected === "string" && !question.caseSensitive ? normalizeText(expected) : expected
   );
   const submitted = typeof answer === "string" && !question.caseSensitive
-    ? answer.toLocaleLowerCase("de-DE")
+    ? normalizeText(answer)
     : answer;
 
   const isCorrect = typeof question.answer === "number"
     ? Number.isFinite(answer) && Math.abs(answer - question.answer) < (question.numericTolerance ?? 0.011)
     : expectedAnswers.includes(submitted);
+
+  if (progress.subject === "english") {
+    const spoken = question.options ? question.english?.choices[rawSubmitted] || [] : isCorrect ? question.english?.answer || [] : [];
+    if (spoken.length) speakEnglish(spoken);
+  }
 
   if (firstAttempt) {
     activeLesson.firstAttempts[activeLesson.position] = isCorrect;
@@ -2528,6 +2570,10 @@ function checkAnswer(event, submittedAnswer) {
     feedback.textContent = firstAttempt
       ? `Richtig! +2 Punkte.${question.solution ? ` ${question.solution}` : ""}`
       : "Geschafft! +1 Punkt fürs Dranbleiben. Du hast die Aufgabe richtig gelöst!";
+    if (progress.subject === "english" && question.english?.answer.length) {
+      const solution = question.english.answer[0];
+      feedback.innerHTML = `${escapeHtml(feedback.textContent)} <span class="english-solution">${renderEnglishText(solution, [solution], true, question)}</span>`;
+    }
     // hide/disable input or option buttons
     const submitBtn = document.querySelector("#answer-form button");
     if (submitBtn) submitBtn.hidden = true;
@@ -2565,6 +2611,10 @@ function updateLessonProgress() {
 
 function nextQuestion() {
   if (!activeLesson || !activeLesson.resolved || activeLesson.finished || pointRewardCleanup || lessonAdvanceTimer !== null) return;
+  if (englishPlayback) {
+    englishAudioAdvance = () => nextQuestion();
+    return;
+  }
   const last = activeLesson.position === activeLesson.questions.length - 1;
   if (last) {
     finishLesson();
@@ -2577,6 +2627,7 @@ function nextQuestion() {
 
 function finishLesson() {
   if (activeLesson.finished) return;
+  stopEnglishAudio();
   clearPointReward();
   activeLesson.finished = true;
   const { topic, topicIndex, questions, correct } = activeLesson;
@@ -2633,12 +2684,14 @@ function finishLesson() {
 
 gradeSelect.addEventListener("change", () => {
   progress.grade = Number(gradeSelect.value);
+  if (progress.subject === "english" && progress.grade < 3) progress.subject = "math";
   persistProgress();
   renderDashboard();
 });
 
 subjectSelect.addEventListener("change", () => {
   progress.subject = subjectSelect.value;
+  if (progress.subject === "english" && progress.grade < 3) progress.grade = 3;
   persistProgress();
   renderDashboard();
 });
@@ -2662,6 +2715,7 @@ function handleEnterKeyAdvance(event) {
   nextQuestion();
 }
 document.addEventListener("keydown", handleEnterKeyAdvance);
+lessonView.addEventListener("click", handleEnglishSpeechClick);
 
 renderDashboard();
 

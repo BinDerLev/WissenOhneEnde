@@ -1,5 +1,7 @@
 # Curriculumprüfung – 12. November 2026
 
+**Ergänzung vom 14. November:** Englisch für Klasse 3–6 ist mit 44 Themen hinzugefügt. Quellen, Umfang, Klassenaufteilung und Grenzen sind in [Englisch nach NRW-Lehrplänen](ENGLISCH_NRW.md) dokumentiert. Die folgende Bestandsaufnahme bezieht sich auf Mathematik und Deutsch.
+
 ## Grundlage und Reichweite
 
 Geprüft wurden die Themen und Aufgabengeneratoren für Mathematik und Deutsch in Klasse 1–6. Zielprofil nach Vorgabe: **Nordrhein-Westfalen, Grundschule (Klasse 1–4) und Gymnasium G9 (Klasse 5–6)**.
