@@ -29,7 +29,7 @@ function createElement() {
   const attributes = new Map();
   return {
     listeners,
-    style: {},
+    style: { setProperty(name, value) { this[name] = String(value); } },
     classList: {
       add(name) {
         classes.add(name);
@@ -125,7 +125,7 @@ function createLearningContext(storageValues = {}) {
     }
   });
   new vm.Script(learningAppSource, { filename: learningAppPath }).runInContext(context);
-  return { context, localStorage, clipboardTexts, dispatchKeyDown };
+  return { context, localStorage, clipboardTexts, dispatchKeyDown, elements };
 }
 
 function createGameHubContext(storageValues = {}) {
@@ -313,6 +313,133 @@ test("completing a lesson records progress and awards one playable coin", () => 
   assert.equal(localStorage.getItem("gamehub-coin-balance"), "3");
   assert.equal(localStorage.getItem("gamehub-plays-left"), "3");
   assert.equal(localStorage.getItem("gamehub-lern-app-unlocked"), "true");
+});
+
+test("points reward first answers and corrections once and survive leaving and reloading", () => {
+  const { context, localStorage, elements } = createLearningContext();
+  vm.runInContext('startLesson(0); checkAnswer(null, String(activeLesson.questions[0].answer));', context);
+  assert.equal(vm.runInContext("progress.points", context), 2);
+  assert.equal(vm.runInContext("activeLesson.points", context), 2);
+  vm.runInContext('checkAnswer(null, String(activeLesson.questions[0].answer)); nextQuestion();', context);
+  assert.equal(vm.runInContext("progress.points", context), 2, "submitting a resolved answer must not award more points");
+  vm.runInContext('checkAnswer(null, String(activeLesson.questions[1].answer + 1000));', context);
+  assert.equal(vm.runInContext("progress.points", context), 3);
+  assert.equal(elements.get("#progress-count").textContent, "1 von 8 gelöst");
+  vm.runInContext('checkAnswer(null, String(activeLesson.questions[1].answer + 1001)); nextQuestion();', context);
+  assert.equal(vm.runInContext("progress.points", context), 3, "repeated mistakes must not award points");
+  assert.equal(vm.runInContext("activeLesson.position", context), 1, "unresolved exercises cannot be skipped");
+  vm.runInContext('checkAnswer(null, String(activeLesson.questions[1].answer));', context);
+  assert.equal(vm.runInContext("progress.points", context), 4);
+  assert.equal(vm.runInContext("activeLesson.correct", context), 1, "corrections preserve first-attempt statistics");
+  assert.equal(elements.get("#progress-count").textContent, "2 von 8 gelöst");
+  assert.equal(elements.get('.progress-segment[data-question="1"]').classList.contains("is-correct"), true);
+  vm.runInContext('nextQuestion(); checkAnswer(null, ""); checkAnswer(null, "abc"); checkAnswer(null, "1/0");', context);
+  assert.equal(vm.runInContext("progress.points", context), 4);
+  assert.equal(vm.runInContext("activeLesson.firstAttempts[2]", context), null, "invalid numbers must not count as attempts");
+  vm.runInContext("renderDashboard(); startLesson(0);", context);
+  assert.equal(vm.runInContext("activeLesson.points", context), 0);
+  assert.equal(vm.runInContext("progress.points", context), 4);
+  const restored = createLearningContext({ "mathekompass-progress": localStorage.getItem("mathekompass-progress") });
+  assert.equal(vm.runInContext("progress.points", restored.context), 4);
+  assert.equal(restored.elements.get("#points-count").textContent, "4");
+});
+
+test("choice exercises award two points in total and finished lessons cannot award twice", () => {
+  const { context, localStorage } = createLearningContext();
+  vm.runInContext(`
+    progress.subject = "german";
+    startLesson(0);
+    activeLesson.questions = [{ answer: "Haus", options: ["Haus", "Baum"] }];
+    activeLesson.firstAttempts = [null];
+    checkAnswer(null, "Baum"); checkAnswer(null, "Baum"); checkAnswer(null, "Haus");
+    nextQuestion(); nextQuestion(); finishLesson();
+  `, context);
+  assert.equal(vm.runInContext("progress.points", context), 2);
+  assert.equal(vm.runInContext("progress.completed", context), 1);
+  assert.equal(vm.runInContext("progress.sessions[0].correct", context), 0);
+  assert.equal(vm.runInContext("progress.sessions[0].points", context), 2);
+  assert.equal(localStorage.getItem("gamehub-coin-balance"), "1");
+  assert.ok(vm.runInContext('lessonView.innerHTML.includes("+2 Punkte gesammelt!")', context));
+});
+
+test("point totals migrate old saves and reject malformed values", () => {
+  for (const points of [undefined, -1, 0.5, "10", null, 1e100]) {
+    const { context } = createLearningContext({ "mathekompass-progress": JSON.stringify({ points }) });
+    assert.equal(vm.runInContext("progress.points", context), 0);
+  }
+});
+
+test("point flights count each earned point, vary by grade and clean up on navigation", () => {
+  for (let grade = 1; grade <= 6; grade += 1) {
+    const { context, elements } = createLearningContext();
+    const frames = new Map();
+    let frameId = 0;
+    context.requestAnimationFrame = (callback) => { frames.set(++frameId, callback); return frameId; };
+    context.cancelAnimationFrame = (id) => frames.delete(id);
+    context.window = { innerWidth: 1280, innerHeight: 800, matchMedia: () => ({ matches: false }) };
+    context.document.body = createElement();
+    const runFrame = (time) => {
+      const scheduled = [...frames.values()];
+      frames.clear();
+      scheduled.forEach(callback => callback(time));
+    };
+    vm.runInContext(`progress.grade = ${grade}; startLesson(0); checkAnswer(null, String(activeLesson.questions[0].answer));`, context);
+    const layer = context.document.body.children.at(-1);
+    assert.equal(layer.dataset.grade, String(grade));
+    assert.equal(layer.getAttribute("aria-hidden"), "true");
+    assert.equal(layer.children[0].textContent, "+2");
+    assert.equal(layer.children.length - 1, [0, 14, 12, 10, 9, 7, 6][grade]);
+    assert.equal(vm.runInContext("progress.points", context), 2, "points are saved before any animation frame");
+    assert.equal(elements.get("#points-count").textContent, "0");
+    runFrame(0);
+    runFrame(800);
+    assert.equal(elements.get("#points-count").textContent, "1");
+    runFrame(1000);
+    assert.equal(elements.get("#points-count").textContent, "2");
+    runFrame(1700);
+    assert.equal(frames.size, 0);
+    assert.equal(vm.runInContext("pointRewardCleanup", context), null);
+    vm.runInContext('nextQuestion(); checkAnswer(null, String(activeLesson.questions[1].answer + 1000));', context);
+    const effort = context.document.body.children.at(-1);
+    assert.ok(effort.className.includes("is-effort"));
+    assert.equal(effort.children.length, 1, "mistakes get a gentle point badge without success fireworks");
+    vm.runInContext('checkAnswer(null, String(activeLesson.questions[1].answer)); renderDashboard();', context);
+    assert.equal(frames.size, 0, "leaving a lesson cancels every pending animation frame");
+    assert.equal(elements.get("#points-count").textContent, "4");
+  }
+});
+
+test("reduced motion keeps point rewards immediate without particles or animation frames", () => {
+  const { context, elements } = createLearningContext();
+  context.document.body = createElement();
+  context.window = { matchMedia: () => ({ matches: true }) };
+  context.requestAnimationFrame = () => { throw new Error("reduced motion must not schedule animations"); };
+  vm.runInContext('startLesson(0); checkAnswer(null, String(activeLesson.questions[0].answer));', context);
+  assert.equal(elements.get("#points-count").textContent, "2");
+  assert.equal(context.document.body.children.length, 0);
+});
+
+test("all topics have existing local decorative illustrations and focused modes override generic skills", () => {
+  const { context } = createLearningContext();
+  const curricula = vm.runInContext("[curriculum, germanCurriculum]", context);
+  const seen = new Set();
+  for (const curriculum of curricula) {
+    for (const topics of Object.values(curriculum)) {
+      for (const topic of topics) {
+        const name = context.taskIllustration(topic);
+        seen.add(name);
+        const svg = fs.readFileSync(path.join(root, "Lern-App", "illustrations", `${name}.svg`), "utf8");
+        assert.ok(svg.includes('viewBox="0 0 144 104"'));
+      }
+    }
+  }
+  assert.equal(seen.size, 11);
+  assert.equal(context.taskIllustration({ skill: "money", mode: "time" }), "time");
+  assert.equal(context.taskIllustration({ skill: "add", mode: "fraction-add" }), "fractions");
+  assert.equal(context.taskIllustration({ skill: "add", mode: "volume" }), "geometry");
+  assert.equal(context.taskIllustration({ skill: "decimal", moneyContext: true }), "money");
+  vm.runInContext("startLesson(0)", context);
+  assert.ok(vm.runInContext('lessonView.innerHTML.includes(\'alt="" aria-hidden="true"\')', context));
 });
 
 test("locked games redirect to the learning app", () => {
@@ -515,6 +642,25 @@ function germanNumber(value) {
 }
 
 function assertNumericQuestionMatchesTask(skill, question) {
+  if (skill === "ratio") {
+    // Die drei Zahlen aus dem Aufgabentext auswerten, nicht die Generatordaten.
+    const numbers = question.text.match(/\d+(?:,\d+)?/g).map(germanNumber);
+    assert.equal(numbers.length, 3, `ratio must state two known values and one target: ${question.text}`);
+    const [givenQuantity, givenValue, target] = numbers;
+    const backwards = /(?:Für wie viele|Wie viele) /.test(question.text);
+    assert.ok(backwards || /(?:Wie viel|Welche Strecke) /.test(question.text), question.text);
+    const expected = backwards ? target / givenValue * givenQuantity : givenValue / givenQuantity * target;
+    assert.ok(Math.abs(question.answer - expected) < 1e-9, `ratio answer disagrees with task: ${question.text}`);
+    const firstStep = question.solution.match(/^([\d,]+) : (\d+) = ([\d,]+) /);
+    assert.ok(firstStep, `ratio solution must show the unit step: ${question.solution}`);
+    assert.equal(germanNumber(firstStep[1]), givenValue);
+    assert.equal(Number(firstStep[2]), givenQuantity);
+    assert.ok(Math.abs(germanNumber(firstStep[3]) - givenValue / givenQuantity) < 1e-9, `rounded unit step: ${question.solution}`);
+    const displayedResult = question.solution.match(/= ([\d,]+) [^=]*\.$/);
+    assert.ok(displayedResult, `ratio solution must state the result: ${question.solution}`);
+    assert.ok(Math.abs(germanNumber(displayedResult[1]) - expected) < 1e-9, `ratio solution has wrong result: ${question.solution}`);
+    return;
+  }
   const patterns = {
     "fraction-add": { expression: /Berechne (\d+)\/(\d+) \+ (\d+)\/(\d+)/, calculate: ([, a, b, c, d]) => Number(a) / Number(b) + Number(c) / Number(d) },
     "fraction-subtract": { expression: /Berechne (\d+)\/(\d+) − (\d+)\/(\d+)/, calculate: ([, a, b, c, d]) => Number(a) / Number(b) - Number(c) / Number(d) },
@@ -614,10 +760,6 @@ function assertNumericQuestionMatchesTask(skill, question) {
     equation: {
       expression: /Löse die Gleichung: (\d+)x \+ (\d+) = (\d+)\. Was ist x\?/,
       calculate: ([, factor, offset, result]) => (Number(result) - Number(offset)) / Number(factor)
-    },
-    ratio: {
-      expression: /(\d+) gleiche Stifte kosten (\d+) €. Wie viel kosten (\d+) Stifte/,
-      calculate: ([, count, total, target]) => Number(total) / Number(count) * Number(target)
     },
     powers: {
       expression: /Was ist √(\d+)\?/,
@@ -1159,4 +1301,122 @@ test("pressing Enter after a correct answer advances to the next exercise", () =
 
   dispatchKeyDown({ key: "Enter", shiftKey: false, preventDefault() {} });
   assert.equal(vm.runInContext("activeLesson.position", context), 1, "Enter must not skip an unresolved exercise");
+});
+
+test("ratio lessons mix eight contexts and avoid repeated content across three rounds", () => {
+  for (const seed of [1, 42, 20261113, 0xdeadbeef]) {
+    const { context } = createLearningContext();
+    useDeterministicRandom(context, seed);
+    vm.runInContext('progress.grade = 6; progress.subject = "math";', context);
+    const seen = new Set();
+    for (let round = 0; round < 3; round += 1) {
+      const questions = context.makeUniqueQuestions({ skill: "ratio" }, 8);
+      assert.equal(questions.length, 8);
+      assert.equal(new Set(questions.map(question => question.ratioContext)).size, 8, "different numbers must not crowd out different everyday situations");
+      for (const question of questions) {
+        assertNumericQuestionMatchesTask("ratio", question);
+        const identity = context.questionIdentity(question);
+        assert.ok(!seen.has(identity), `repeated ratio content: ${identity}`);
+        seen.add(identity);
+      }
+      context.rememberQuestions(questions);
+    }
+    assert.equal(seen.size, 24);
+  }
+});
+
+test("ratio scenarios use bounded everyday quantities, plausible example rates and explicit proportional conditions", () => {
+  const { context } = createLearningContext();
+  useDeterministicRandom(context, 0x131126);
+  vm.runInContext('progress.grade = 6; progress.subject = "math";', context);
+  // Unabhängige redaktionelle Grenzen in den Einheiten des Aufgabentextes.
+  const limits = {
+    bread: { noun: /Brötchen/, rate: [0.4, 0.6], quantity: [2, 10], money: true },
+    apples: { noun: /Äpfel/, rate: [1.8, 2.8], quantity: [1, 5], money: true },
+    fabric: { noun: /Baumwollstoff/, rate: [6, 12], quantity: [1, 6], money: true },
+    copies: { noun: /Schwarzweißkopien/, rate: [0.1, 0.2], quantity: [5, 50], money: true },
+    boat: { noun: /Tretboot/, rate: [0.3, 0.5], quantity: [15, 60], money: true },
+    pancakes: { noun: /Pfannkuchenrezept/, rate: [60, 100], quantity: [2, 8] },
+    rice: { noun: /ungekochter Reis/, rate: [60, 80], quantity: [1, 6] },
+    juice: { noun: /Gläser/, rate: [150, 250], quantity: [2, 8] },
+    walking: { noun: /Wandern/, rate: [0.05, 0.08], quantity: [10, 60] },
+    cycling: { noun: /fährt Ben/, rate: [0.2, 0.3], quantity: [10, 45] },
+    water: { noun: /Gartenschlauch/, rate: [6, 12], quantity: [1, 6] },
+    paint: { noun: /Wandfläche/, rate: [0.1, 0.15], quantity: [4, 20] },
+    ribbon: { noun: /Päckchen/, rate: [40, 75], quantity: [2, 8] }
+  };
+  const seen = new Set();
+  let larger = 0;
+  let smaller = 0;
+  let nonIntegralScale = 0;
+  for (let sample = 0; sample < 800; sample += 1) {
+    const question = context.makeQuestion({ skill: "ratio" });
+    assertNumericQuestionMatchesTask("ratio", question);
+    assert.ok(!/Stift/.test(question.text));
+    const [givenQuantity, givenValue, target] = question.text.match(/\d+(?:,\d+)?/g).map(germanNumber);
+    const rule = limits[question.ratioContext];
+    assert.ok(rule, `unreviewed ratio scenario: ${question.ratioContext}`);
+    assert.match(question.text, rule.noun);
+    const backwards = /(?:Für wie viele|Wie viele) /.test(question.text);
+    const targetQuantity = backwards ? question.answer : target;
+    const rate = givenValue / givenQuantity;
+    assert.ok(rate >= rule.rate[0] - 1e-9 && rate <= rule.rate[1] + 1e-9, `unrealistic rate: ${question.text}`);
+    for (const quantity of [givenQuantity, targetQuantity]) {
+      assert.ok(Number.isInteger(quantity) && quantity >= rule.quantity[0] && quantity <= rule.quantity[1], `unrealistic quantity: ${question.text}`);
+    }
+    assert.notEqual(givenQuantity, targetQuantity, "a ratio task must require a change in quantity");
+    if (rule.money) {
+      assert.doesNotMatch(question.text, /Mengenrabatt|Grundgebühr|Zeitrabatt/);
+      assert.match(question.note, /ohne Mengenrabatt|ohne Grundgebühr oder (?:Mengenrabatt|Zeitrabatt)/);
+      assert.match(question.text, /\d+,\d{2} €/);
+      assert.ok(Math.abs(question.answer * (backwards ? 1 : 100) - Math.round(question.answer * (backwards ? 1 : 100))) < 1e-9);
+    } else {
+      assert.match(question.text, /gleich|dieselbe/);
+    }
+    seen.add(`${question.ratioContext}:${backwards ? "quantity" : "value"}`);
+    if (targetQuantity > givenQuantity) larger++;
+    if (targetQuantity < givenQuantity) smaller++;
+    if (!Number.isInteger(targetQuantity / givenQuantity) && !Number.isInteger(givenQuantity / targetQuantity)) nonIntegralScale++;
+  }
+  assert.equal(seen.size, Object.keys(limits).length * 2, "every context must support both question directions");
+  assert.ok(larger > 0 && smaller > 0 && nonIntegralScale > 0, "vary quantity changes beyond integer multiples");
+});
+
+test("ratio answers accept decimal commas and points and preserve exact unit steps", () => {
+  const { context } = createLearningContext();
+  useDeterministicRandom(context, 1337);
+  let question;
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    const candidate = context.makeQuestion({ skill: "ratio" });
+    if (!Number.isInteger(candidate.answer) && candidate.text.includes("€")) {
+      question = candidate;
+      break;
+    }
+  }
+  assert.ok(question, "validate both decimal separators on an actual monetary fraction");
+  context.ratioExample = question;
+  const prepare = 'activeLesson = { questions: [ratioExample], position: 0, correct: 0, firstAttempts: [null], submissions: [], resolved: false };';
+  for (const input of [String(question.answer), String(question.answer).replace(".", ",")]) {
+    vm.runInContext(prepare, context);
+    context.checkAnswer(null, input);
+    assert.equal(vm.runInContext("activeLesson.resolved", context), true);
+  }
+  vm.runInContext(prepare, context);
+  context.checkAnswer(null, String(question.answer + 0.005));
+  assert.equal(vm.runInContext("activeLesson.resolved", context), false);
+  assert.equal(context.formatRatioNumber(0.125), "0,125", "paint's per-area consumption must not be rounded to a wrong value");
+  assert.equal(context.formatRatioNumber(1.5, true), "1,50");
+  // Die gemeldete frühere Aufgabe war rechnerisch korrekt, auch ohne Antwortversuch.
+  vm.runInContext('ratioExample = { text: "5 gleiche Stifte kosten 10 €. Wie viel kosten 15 Stifte? (in €)", answer: 30 };', context);
+  vm.runInContext(prepare, context);
+  context.checkAnswer(null, "30");
+  assert.equal(vm.runInContext("activeLesson.resolved", context), true);
+});
+
+test("ratio context selection also terminates with a constant random source", () => {
+  const { context } = createLearningContext();
+  vm.runInContext('progress.subject = "math"; progress.grade = 6; Math.random = () => 0;', context);
+  const questions = context.makeUniqueQuestions({ skill: "ratio" }, 8);
+  assert.equal(questions.length, 1);
+  assertNumericQuestionMatchesTask("ratio", questions[0]);
 });

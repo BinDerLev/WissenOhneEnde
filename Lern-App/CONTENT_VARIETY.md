@@ -26,6 +26,7 @@ Die Einheit bleibt bei acht Aufgaben. Erweitert wurden die Inhaltspools und die 
 | Münzen zusammenzählen | 12 | 32, mit 5-, 10- und 20-Cent-Münzen bis insgesamt 100 Cent |
 | Meter/Zentimeter | 8 | 40 in Klasse 2, 200 in Klasse 4/5, beide Umrechnungsrichtungen |
 | Zahlenfolgen | Klasse 1: 20 | steigende und fallende Folgen innerhalb des gewählten Zahlenraums |
+| Dreisatz in Klasse 6 | eine Stifte-Vorlage mit zufälligen Preisen von 2–8 € pro Stift | 13 Alltagssituationen mit begrenzten Mengen und Beispielpreisen; beide Fragerichtungen |
 
 Die Bestandsaufnahme nach dem Ausbau findet bei allen Deutschthemen mindestens 24 unterschiedliche Inhalte. Automatisierte Tests prüfen für jedes Deutschthema drei unmittelbar aufeinanderfolgende Einheiten mit insgesamt 24 verschiedenen Aufgaben. Bei einer ergänzenden Stichprobe von je 3000 Generierungen für alle 101 Themen bleiben nur zwei Mathethemen unter 24: Zehnerfreunde (11 Grundaufgaben) und Verdoppeln/Halbieren bis 20 (20 Aufgaben). Bei zufällig erzeugter Mathematik sind beobachtete Mengen Stichproben und keine exakten Gesamtzahlen; die oben angegebenen kleinen endlichen Pools lassen sich direkt aus den Daten bzw. Kombinationen bestimmen.
 
@@ -39,6 +40,16 @@ Die Bestandsaufnahme nach dem Ausbau findet bei allen Deutschthemen mindestens 2
 - Andere Wortmischungen desselben Satzes, anders sortierte Antwortoptionen und vertauschte Operanden bei Addition/Multiplikation erzeugen keine künstlich neuen Inhalte. Dies gilt jetzt auch für Brüche und Dezimalzahlen. Ebenso werden vertauschte Werte bei Mittelwerten und Quadermaßen zusammengefasst.
 
 Die Auswahl bleibt nach oben begrenzt und blockiert auch bei einer ungünstigen Zufallsfolge nicht. Bei erschöpften kleinen Grundlagenpools wird bewusst wiederholt, statt den Zahlenraum zu erhöhen oder dieselbe Rechnung nur anders zu formulieren. Bei den elf Zehnerfreunden sind in zwei Einheiten mit je acht Aufgaben mindestens fünf Wiederholungen unvermeidbar; genau dieses Minimum wird im Test erreicht.
+
+## Dreisatz: realistische Situationen statt anderer Stiftzahlen
+
+Die frühere Vorlage variierte nur die Zahlen und fragte ausschließlich nach einem größeren Einkauf. Die gemeldete Rechnung „5 Stifte für 10 €, gesucht: 15 Stifte“ ergab korrekt 30 €, war aber kein Nachweis sinnvoller Aufgabenvielfalt. Auch gleiche Stückpreise sind bei größeren Einkäufen ohne weitere Angabe keine sichere Annahme.
+
+Der Generator bietet jetzt Brötchen, lose Äpfel, Baumwollstoff, Schwarzweißkopien, Tretbootmiete, Pfannkuchen, Reisportionen, Saftgläser, Wandern, Radfahren, einen Gartenschlauch, Wandfarbe und Geschenkband. Eine Einheit wählt zuerst acht unterschiedliche Situationen aus. Die gespeicherte Historie bevorzugt weiterhin bisher unbekannte Aufgaben. Gefragt wird nach größeren und kleineren Mengen sowie in umgekehrter Richtung, etwa nach der Personenzahl zu einer gegebenen Reismenge. Die Mengen sind nicht ausschließlich ganzzahlige Vielfache der Ausgangsmenge.
+
+Beispielpreise und Mengen stammen aus begrenzten, redaktionell gewählten Bereichen: einfache Brötchen 0,40–0,60 € pro Stück, Äpfel 1,80–2,80 € pro kg, Baumwollstoff 6–12 € pro m, Kopien 0,10–0,20 € pro Seite und Tretboote 0,30–0,50 € pro Minute. Das sind Übungsannahmen, keine aktuellen Preisangebote. Preisaufgaben zeigen „* ohne Mengenrabatt“ als kleine Fußnote unter dem Aufgabentext. Dort stehen bei Kopien und minutengenauer Bootsmiete auch die weiteren Tarifbedingungen, etwa der Ausschluss einer Grundgebühr. Die Fußnote wird in Fehlermeldungen mitkopiert. Bewegung und Materialbedarf nennen weiterhin gleichbleibendes Tempo, gleich große Portionen bzw. gleichen Verbrauch im Text.
+
+Reis wird beispielsweise mit 60–80 g ungekochter Beilage pro Person angesetzt, Radfahren mit 12–18 km/h und Wandfarbe mit 0,10–0,15 l pro m² für einen Anstrich. Geldwerte werden aus ganzen Cent berechnet und mit zwei Nachkommastellen dargestellt. Zwischenwerte werden exakt ausgegeben, insbesondere auch 0,125 l Farbe pro m². Aufgaben, Tipp und Lösung nennen die gesuchte Größe und passende Einheiten.
 
 ## Zusätzlicher Qualitätsreview durch einen Subagenten
 
@@ -58,4 +69,4 @@ Das ist eine zusätzliche inhaltliche Prüfung durch einen KI-Subagenten, keine 
 
 ## Validierung
 
-`node test_curriculum.js` besteht mit 34 Tests. Die neuen Prüfungen umfassen mehrere Runden aller Deutschthemen, Wiederaufnahme nach Neuladen, gemeinsame Historie verwandter Themen, begrenzte Historiengröße, ungültige Speicherdaten, Speicherfehler, faire Rotation endlicher Zahlenfakten, mathematisch korrekte Lösungen der erweiterten Formate sowie akzeptierte Sprachvarianten. `node --check Lern-App/script.js` und `git diff --check` wurden ebenfalls ausgeführt.
+`node test_curriculum.js` besteht mit 38 Tests. Die Prüfungen umfassen mehrere Runden aller Deutschthemen, Wiederaufnahme nach Neuladen, gemeinsame Historie verwandter Themen, begrenzte Historiengröße, ungültige Speicherdaten, Speicherfehler, faire Rotation endlicher Zahlenfakten, mathematisch korrekte Lösungen der erweiterten Formate sowie akzeptierte Sprachvarianten. Vier zusätzliche Dreisatztests prüfen acht verschiedene Situationen pro Einheit, 24 unterschiedliche Aufgaben in drei Runden bei mehreren Zufallsstarts, 800 Aufgaben auf Mengen-/Preisgrenzen und korrekte Ergebnisse aus dem angezeigten Text, beide Fragerichtungen aller Situationen, Dezimalkomma/-punkt, exakte Zwischenwerte und den Abbruch bei konstanter Zufallsfolge. `node --check Lern-App/script.js` und `git diff --check` wurden ebenfalls ausgeführt.

@@ -199,7 +199,7 @@ const gradeSixMathTopics = [
   ["Punkt vor Strich", "term", "Berechne zuerst die Multiplikation, danach die Addition."]
 ];
 curriculum[6] = gradeSixMathTopics.map(([title, mode, explanation]) => ({ title, mode, skill: "add", icon: "∑", description: explanation, explanation, difficulty: "medium" }));
-curriculum[6].push({ title: "Dreisatz im Alltag", skill: "ratio", icon: "↗", description: "Gleichbleibende Stückpreise für andere Anzahlen nutzen.", explanation: "Berechne zuerst den Preis für ein Stück und dann den Preis für die gesuchte Anzahl.", difficulty: "medium" });
+curriculum[6].push({ title: "Dreisatz im Alltag", skill: "ratio", icon: "↗", description: "Mit Rezeptmengen, Strecken, Material und festen Tarifen rechnen.", explanation: "Prüfe, welche Größen proportional zusammenhängen. Rechne zuerst auf eine Einheit zurück und dann auf die gesuchte Menge. Der Preis, das Tempo oder der Verbrauch pro Einheit muss dabei gleich bleiben.", difficulty: "medium" });
 germanCurriculum[6] = [
   { title: "Rechtschreibstrategien", skill: "de-spelling", icon: "Ä", description: "Wortstämme und typische Stolperstellen prüfen.", explanation: "Verlängere Wörter, suche verwandte Wörter oder zerlege das Wort in seine Bestandteile.", difficulty: "medium" },
   { title: "Sieben Wortarten", skill: "de-wordclass", mode: "wordclass-six", icon: "W", description: "Auch Artikel, Pronomen, Konjunktionen und Adverbien erkennen.", explanation: "Bestimme die Funktion des markierten Wortes im Satz.", difficulty: "medium" },
@@ -231,6 +231,8 @@ const topicGrid = document.querySelector("#topic-grid");
 const topicsTitle = document.querySelector("#topics-title");
 const topicCount = document.querySelector("#topic-count");
 const completedCount = document.querySelector("#completed-count");
+const pointsCount = document.querySelector("#points-count");
+const pointsLabel = document.querySelector("#points-label");
 const coinCount = document.querySelector("#coin-count");
 const homeLink = document.querySelector("#home-link");
 const parentButton = document.querySelector("#parent-button");
@@ -301,6 +303,7 @@ const progress = {
   grade: Number.isInteger(saved.grade) && saved.grade >= 1 && saved.grade <= 6 ? saved.grade : 1,
   subject: saved.subject === "german" ? "german" : "math",
   completed: Number.isInteger(saved.completed) && saved.completed >= 0 ? saved.completed : 0,
+  points: Number.isSafeInteger(saved.points) && saved.points >= 0 ? saved.points : 0,
   topics: saved.topics && typeof saved.topics === "object" ? saved.topics : {},
   sessions: savedSessions.filter((session) =>
     session && ["math", "german"].includes(session.subject) &&
@@ -315,6 +318,104 @@ const progress = {
 syncPlatformUnlock();
 
 let activeLesson = null;
+let pointRewardCleanup = null;
+
+function clearPointReward() {
+  if (pointRewardCleanup) pointRewardCleanup();
+  pointRewardCleanup = null;
+  if (pointsCount) pointsCount.textContent = String(progress.points);
+  if (pointsLabel) pointsLabel.textContent = progress.points === 1 ? "Punkt" : "Punkte";
+}
+
+function animatePointReward(amount, correct) {
+  clearPointReward();
+  if (!document.body || !pointsCount || typeof requestAnimationFrame !== "function" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const illustration = document.querySelector(".task-illustration");
+  const total = document.querySelector(".points-total");
+  if (!illustration || !total) return;
+  const grade = progress.grade;
+  const before = progress.points - amount;
+  const layer = document.createElement("div");
+  layer.className = `point-reward${correct ? " is-success" : " is-effort"}`;
+  layer.dataset.grade = String(grade);
+  layer.setAttribute("aria-hidden", "true");
+  document.body.appendChild(layer);
+
+  let target = total.getBoundingClientRect();
+  let previewCount = null;
+  // Keep the destination visible when the header has scrolled off screen.
+  if (target.top < 0 || target.bottom > window.innerHeight) {
+    const preview = document.createElement("div");
+    preview.className = "points-total reward-total-preview";
+    const star = document.createElement("span");
+    star.textContent = "★";
+    previewCount = document.createElement("strong");
+    previewCount.textContent = String(before);
+    preview.appendChild(star);
+    preview.appendChild(previewCount);
+    layer.appendChild(preview);
+    target = preview.getBoundingClientRect();
+  }
+  const origin = illustration.getBoundingClientRect();
+  const x = Math.max(64, Math.min(window.innerWidth - 64, origin.left + origin.width / 2));
+  const y = Math.max(110, Math.min(window.innerHeight - 90, origin.top + origin.height / 2));
+  layer.style.setProperty("--reward-x", `${x}px`);
+  layer.style.setProperty("--reward-y", `${y}px`);
+  layer.style.setProperty("--flight-x", `${target.left + target.width / 2 - x}px`);
+  layer.style.setProperty("--flight-y", `${target.top + target.height / 2 - y}px`);
+
+  const badge = document.createElement("span");
+  badge.className = "reward-flying-points";
+  badge.textContent = `+${amount}`;
+  layer.appendChild(badge);
+  if (correct) {
+    const count = [0, 14, 12, 10, 9, 7, 6][grade];
+    for (let index = 0; index < count; index += 1) {
+      const star = document.createElement("span");
+      const angle = index / count * Math.PI * 2;
+      const distance = 40 + (index % 3) * 15;
+      star.className = "reward-sparkle";
+      star.textContent = index % 2 ? "✦" : "★";
+      star.style.setProperty("--spark-x", `${Math.cos(angle) * distance}px`);
+      star.style.setProperty("--spark-y", `${Math.sin(angle) * distance}px`);
+      star.style.setProperty("--spark-delay", `${index % 4 * 60}ms`);
+      star.style.setProperty("--spark-color", `var(--reward-color-${index % 3})`);
+      layer.appendChild(star);
+    }
+    illustration.classList.add("is-celebrating");
+    illustration.dataset.rewardGrade = String(grade);
+  }
+
+  let frame;
+  let start;
+  pointsCount.textContent = String(before);
+  if (pointsLabel) pointsLabel.textContent = before === 1 ? "Punkt" : "Punkte";
+  const cleanup = () => {
+    cancelAnimationFrame(frame);
+    layer.remove();
+    illustration.classList.remove("is-celebrating");
+    total.classList.remove("is-collecting");
+  };
+  pointRewardCleanup = cleanup;
+  const tick = (now) => {
+    if (start === undefined) start = now;
+    const elapsed = now - start;
+    const collected = Math.min(amount, Math.max(0, Math.floor((elapsed - 780) / 170) + 1));
+    const displayed = before + collected;
+    pointsCount.textContent = String(displayed);
+    if (pointsLabel) pointsLabel.textContent = displayed === 1 ? "Punkt" : "Punkte";
+    if (previewCount) previewCount.textContent = String(displayed);
+    total.classList.toggle("is-collecting", collected > 0);
+    if (elapsed < 1600) {
+      frame = requestAnimationFrame(tick);
+    } else {
+      clearPointReward();
+    }
+  };
+  frame = requestAnimationFrame(tick);
+}
 
 const questionHistoryStorageKey = "lernlabor-question-history-v1";
 const questionHistoryLimit = 256;
@@ -403,12 +504,15 @@ function topicProgressKey(subject, grade, index, topic) {
 }
 
 function renderDashboard() {
+  clearPointReward();
   dashboard.hidden = false;
   lessonView.hidden = true;
   parentReport.hidden = true;
   gradeSelect.value = String(progress.grade);
   subjectSelect.value = progress.subject;
   completedCount.textContent = String(progress.completed);
+  if (pointsCount) pointsCount.textContent = String(progress.points);
+  if (pointsLabel) pointsLabel.textContent = progress.points === 1 ? "Punkt" : "Punkte";
   if (coinCount) {
     const balance = getCoinBalance();
     if (balance !== null) {
@@ -456,6 +560,7 @@ function escapeHtml(value) {
 }
 
 function renderParentReport() {
+  clearPointReward();
   dashboard.hidden = true;
   lessonView.hidden = true;
   parentReport.hidden = false;
@@ -637,6 +742,128 @@ function makeFocusedMathQuestion(topic) {
   }
 }
 
+// Bewusst begrenzte Beispielwerte statt beliebiger Preise und Mengen.
+// Geld wird in Cent, Strecken in Metern und Farbe in Millilitern berechnet.
+const ratioScenarios = [
+  {
+    id: "bread", quantities: [3, 4, 5, 6], targets: [2, 7, 8, 10], rates: [40, 45, 50, 55, 60], divisor: 100, money: true, quantityUnit: "Brötchen", valueUnit: "€",
+    note: "ohne Mengenrabatt",
+    intro: (q, v) => `In einer Bäckerei kosten ${q} einfache Brötchen ${v} €.`,
+    forward: q => `Wie viel kosten ${q} Brötchen? (in €)`,
+    backward: v => `Wie viele Brötchen bekommst du für genau ${v} €?`
+  },
+  {
+    id: "apples", quantities: [2, 3, 4], targets: [1, 2, 3, 5], rates: [180, 220, 250, 280], divisor: 100, money: true, quantityUnit: "kg Äpfel", valueUnit: "€",
+    note: "ohne Mengenrabatt",
+    intro: (q, v) => `Am Obststand kosten ${q} kg Äpfel ${v} €.`,
+    forward: q => `Wie viel kosten ${q} kg Äpfel? (in €)`,
+    backward: v => `Wie viele Kilogramm Äpfel bekommst du für genau ${v} €?`
+  },
+  {
+    id: "fabric", quantities: [2, 3, 4], targets: [1, 2, 5, 6], rates: [600, 800, 1000, 1200], divisor: 100, money: true, quantityUnit: "m Stoff", valueUnit: "€",
+    note: "ohne Mengenrabatt",
+    intro: (q, v) => `Im Stoffladen kosten ${q} m Baumwollstoff ${v} €.`,
+    forward: q => `Wie viel kosten ${q} m dieses Stoffes? (in €)`,
+    backward: v => `Wie viele Meter dieses Stoffes bekommst du für genau ${v} €?`
+  },
+  {
+    id: "copies", quantities: [10, 20, 30, 40], targets: [5, 15, 25, 50], rates: [10, 15, 20], divisor: 100, money: true, quantityUnit: "Kopien", valueUnit: "€",
+    note: "ohne Grundgebühr oder Mengenrabatt",
+    intro: (q, v) => `Im Copyshop kosten ${q} Schwarzweißkopien ${v} €.`,
+    forward: q => `Wie viel kosten ${q} Kopien? (in €)`,
+    backward: v => `Wie viele Kopien bekommst du für genau ${v} €?`
+  },
+  {
+    id: "boat", quantities: [20, 30, 40], targets: [15, 25, 45, 60], rates: [30, 40, 50], divisor: 100, money: true, quantityUnit: "min Fahrzeit", valueUnit: "€",
+    note: "minutengenaue Abrechnung zu einem festen Minutentarif, ohne Grundgebühr oder Zeitrabatt",
+    intro: (q, v) => `Ein Tretboot kostet für ${q} Minuten ${v} €.`,
+    forward: q => `Wie viel kosten ${q} Minuten? (in €)`,
+    backward: v => `Wie viele Minuten kannst du für genau ${v} € fahren?`
+  },
+  {
+    id: "pancakes", quantities: [2, 4, 6], targets: [3, 5, 8], rates: [60, 75, 80, 100], quantityUnit: "Personen", valueUnit: "g Mehl",
+    intro: (q, v) => `Ein Pfannkuchenrezept für ${q} Personen enthält ${v} g Mehl. Die Portionen sollen gleich groß bleiben.`,
+    forward: q => `Wie viel Mehl brauchst du für ${q} Personen? (in g)`,
+    backward: v => `Für wie viele Personen reichen ${v} g Mehl?`
+  },
+  {
+    id: "rice", quantities: [2, 3, 4], targets: [1, 5, 6], rates: [60, 70, 75, 80], quantityUnit: "Personen", valueUnit: "g Reis",
+    intro: (q, v) => `Für ${q} Personen sind ${v} g ungekochter Reis als Beilage vorgesehen. Jede Person erhält dieselbe Portion.`,
+    forward: q => `Wie viel ungekochten Reis brauchst du für ${q} Personen? (in g)`,
+    backward: v => `Für wie viele Personen reichen ${v} g ungekochter Reis?`
+  },
+  {
+    id: "juice", quantities: [3, 4, 5], targets: [2, 6, 8], rates: [150, 200, 250], quantityUnit: "Gläser", valueUnit: "ml Saft",
+    intro: (q, v) => `${q} gleich gefüllte Gläser enthalten zusammen ${v} ml Saft. Alle Gläser sollen weiterhin gleich viel Saft enthalten.`,
+    forward: q => `Wie viel Saft brauchst du für ${q} Gläser? (in ml)`,
+    backward: v => `Wie viele Gläser kannst du mit ${v} ml Saft füllen?`
+  },
+  {
+    id: "walking", quantities: [20, 30, 45], targets: [10, 25, 50, 60], rates: [50, 60, 80], divisor: 1000, quantityUnit: "min Gehzeit", valueUnit: "km",
+    intro: (q, v) => `Beim Wandern legt Mia in ${q} Minuten ${v} km zurück. Sie geht ohne Pause mit gleichbleibendem Tempo.`,
+    forward: q => `Welche Strecke legt sie in ${q} Minuten zurück? (in km)`,
+    backward: v => `Wie viele Minuten braucht sie für ${v} km?`
+  },
+  {
+    id: "cycling", quantities: [10, 20, 30], targets: [15, 25, 40, 45], rates: [200, 250, 300], divisor: 1000, quantityUnit: "min Fahrzeit", valueUnit: "km",
+    intro: (q, v) => `Auf einer ebenen Strecke fährt Ben in ${q} Minuten ${v} km. Er fährt ohne Pause mit gleichbleibendem Tempo.`,
+    forward: q => `Welche Strecke fährt er in ${q} Minuten? (in km)`,
+    backward: v => `Wie viele Minuten braucht er für ${v} km?`
+  },
+  {
+    id: "water", quantities: [2, 3, 4], targets: [1, 5, 6], rates: [6, 8, 10, 12], quantityUnit: "min Füllzeit", valueUnit: "l Wasser",
+    intro: (q, v) => `Ein Gartenschlauch füllt in ${q} Minuten ${v} l Wasser in eine Regentonne. Pro Minute fließt gleich viel Wasser.`,
+    forward: q => `Wie viel Wasser fließt in ${q} Minuten in die Tonne? (in l)`,
+    backward: v => `Wie viele Minuten dauert es, bis ${v} l Wasser in die Tonne geflossen sind?`
+  },
+  {
+    id: "paint", quantities: [4, 8, 12], targets: [6, 10, 16, 20], rates: [100, 125, 150], divisor: 1000, quantityUnit: "m² Wandfläche", valueUnit: "l Farbe",
+    intro: (q, v) => `Für einen Anstrich von ${q} m² Wandfläche werden ${v} l Farbe eingeplant. Auf dem gleichen Untergrund wird pro Quadratmeter gleich viel Farbe benötigt.`,
+    forward: q => `Wie viel Farbe wird für ${q} m² eingeplant? (in l)`,
+    backward: v => `Wie viele Quadratmeter können mit ${v} l Farbe einmal gestrichen werden?`
+  },
+  {
+    id: "ribbon", quantities: [2, 4, 6], targets: [3, 5, 8], rates: [40, 50, 60, 75], quantityUnit: "Päckchen", valueUnit: "cm Geschenkband",
+    intro: (q, v) => `Für ${q} gleich große Päckchen werden insgesamt ${v} cm Geschenkband gebraucht. Jedes Päckchen bekommt gleich viel Band.`,
+    forward: q => `Wie viel Band brauchst du für ${q} Päckchen? (in cm)`,
+    backward: v => `Für wie viele Päckchen reichen ${v} cm Geschenkband?`
+  }
+];
+
+function formatRatioNumber(value, money = false) {
+  return (money ? value.toFixed(2) : String(Number(value.toFixed(3)))).replace(".", ",");
+}
+
+function makeRatioQuestion() {
+  const scenario = pickRandom(ratioScenarios);
+  const given = pickRandom(scenario.quantities);
+  const target = pickRandom(scenario.targets.filter(quantity => quantity !== given));
+  const rate = pickRandom(scenario.rates);
+  const divisor = scenario.divisor || 1;
+  const total = given * rate / divisor;
+  const targetValue = target * rate / divisor;
+  const backwards = Math.random() < 0.5;
+  const format = value => formatRatioNumber(value, scenario.money);
+  const answer = backwards ? target : targetValue;
+  const unit = backwards ? (target === 1 && scenario.quantityUnit === "Personen" ? "Person" : scenario.quantityUnit) : scenario.valueUnit;
+  const givenValue = format(total);
+  const requestedValue = format(targetValue);
+  return {
+    key: `ratio:${scenario.id}:${given}:${target}:${rate}:${backwards ? "quantity" : "value"}`,
+    ratioContext: scenario.id,
+    text: `${scenario.intro(given, givenValue)} ${backwards ? scenario.backward(requestedValue) : scenario.forward(target)}`,
+    note: scenario.note,
+    answer,
+    numericTolerance: 1e-9,
+    hint: backwards
+      ? `Rechne zuerst auf eine Einheit zurück: ${givenValue} : ${given}. Wie oft passt dieser Wert in ${requestedValue}?`
+      : `Rechne zuerst auf eine Einheit zurück: ${givenValue} : ${given}. Multipliziere das Ergebnis dann mit ${target}.`,
+    solution: backwards
+      ? `${givenValue} : ${given} = ${format(rate / divisor)} ${scenario.valueUnit} pro Einheit. ${requestedValue} : ${format(rate / divisor)} = ${answer} ${unit}.`
+      : `${givenValue} : ${given} = ${format(rate / divisor)} ${scenario.valueUnit} pro Einheit. ${format(rate / divisor)} × ${target} = ${format(answer)} ${unit}.`
+  };
+}
+
 function makeQuestion(topic) {
   const focused = makeFocusedMathQuestion(topic);
   if (focused) return focused;
@@ -729,12 +956,7 @@ function makeQuestion(topic) {
       const offset = randomInt(1, 12);
       return { text: `Löse die Gleichung: ${factor}x + ${offset} = ${factor * x + offset}. Was ist x?`, answer: x, hint: `Ziehe zuerst ${offset} auf beiden Seiten ab und teile dann durch ${factor}.`, solution: `x = (${factor * x + offset} − ${offset}) : ${factor} = ${x}` };
     }
-    case "ratio": {
-      const price = randomInt(2, 8);
-      const count = randomInt(2, 6);
-      const target = count * randomInt(2, 4);
-      return { text: `${count} gleiche Stifte kosten ${price * count} €. Wie viel kosten ${target} Stifte? (in €)`, answer: price * target, hint: `Finde zuerst den Preis für einen Stift.`, solution: `Ein Stift kostet ${price} €. ${target} Stifte kosten ${price * target} €.` };
-    }
+    case "ratio": return makeRatioQuestion();
     case "powers": {
       const root = randomInt(2, 15);
       return { text: `Was ist √${root * root}?`, answer: root, hint: "Welche Zahl mal sich selbst ergibt die Zahl unter der Wurzel?", solution: `√${root * root} = ${root}, denn ${root}² = ${root * root}.` };
@@ -1982,9 +2204,21 @@ function makeUniqueQuestions(topic, count) {
   }
   const recent = new Map((questionHistory[questionHistoryKey()] || []).map((identity, index) => [identity, index + 1]));
   // Unbekannte Aufgaben zuerst, danach die am längsten nicht gezeigten. Gleichstände mischen.
-  return shuffled([...candidates.values()])
-    .sort((left, right) => (recent.get(questionIdentity(left)) || 0) - (recent.get(questionIdentity(right)) || 0))
-    .slice(0, count);
+  const ranked = shuffled([...candidates.values()])
+    .sort((left, right) => (recent.get(questionIdentity(left)) || 0) - (recent.get(questionIdentity(right)) || 0));
+  if (progress.subject === "math" && topic.skill === "ratio") {
+    // Andere Zahlen allein reichen hier nicht: innerhalb einer Einheit zuerst
+    // unterschiedliche Alltagssituationen auswählen, unter Beachtung der Historie.
+    const contexts = new Set();
+    const varied = ranked.filter(question => {
+      if (contexts.has(question.ratioContext)) return false;
+      contexts.add(question.ratioContext);
+      return true;
+    });
+    const selected = new Set(varied);
+    return [...varied, ...ranked.filter(question => !selected.has(question))].slice(0, count);
+  }
+  return ranked.slice(0, count);
 }
 
 function buildErrorReport() {
@@ -2009,6 +2243,7 @@ function buildErrorReport() {
     options,
     "Frage:",
     question.text,
+    question.note ? `Hinweis: ${question.note}` : "",
     "",
     `Zuletzt eingegebene Antwort: ${submitted}`,
     `Als Lösung hinterlegt: ${expected}`,
@@ -2064,6 +2299,25 @@ function reportExerciseError(button) {
   });
 }
 
+// Decorative illustrations describe the topic, without giving away an answer.
+function taskIllustration(topic) {
+  if (topic.mode === "time") return "time";
+  if (["data", "mean"].includes(topic.mode)) return "data";
+  if (topic.mode === "volume") return "geometry";
+  if (topic.mode?.startsWith("fraction-") || topic.mode === "reduce") return "fractions";
+  if (topic.moneyContext || topic.mode === "coins") return "money";
+  if (topic.mode === "media-six") return "media";
+  const illustrations = {
+    shapes: "geometry", geometry: "geometry", units: "measure",
+    money: "money", fractions: "fractions", percent: "fractions",
+    probability: "data", ratio: "measure",
+    "de-reading": "reading", "de-spelling": "writing", "de-capitalization": "writing",
+    "de-punctuation": "writing", "de-wordclass": "words", "de-wordorder": "words",
+    "de-vocabulary": "words", "de-grammar": "words", "de-words": "words"
+  };
+  return illustrations[topic.skill] || "numbers";
+}
+
 function startLesson(topicIndex) {
   const topics = (progress.subject === "german" ? germanCurriculum : curriculum)[progress.grade];
   const topic = topics[topicIndex];
@@ -2076,6 +2330,7 @@ function startLesson(topicIndex) {
     questions,
     position: 0,
     correct: 0,
+    points: 0,
     firstAttempts: Array(questions.length).fill(null),
     submissions: Array(questions.length).fill(null),
     resolved: false
@@ -2084,11 +2339,12 @@ function startLesson(topicIndex) {
 }
 
 function renderLesson() {
+  clearPointReward();
   dashboard.hidden = true;
   lessonView.hidden = false;
   const { topic, questions, position } = activeLesson;
   const question = questions[position];
-  const answered = activeLesson.firstAttempts.filter((result) => result !== null).length;
+  const answered = position + (activeLesson.resolved ? 1 : 0);
   const subjectName = progress.subject === "german" ? "Deutsch" : "Mathe";
 
   lessonView.innerHTML = `
@@ -2098,11 +2354,15 @@ function renderLesson() {
       <h1>${topic.title}</h1>
       <p>Eine kurze Erklärung und dann übst du es Schritt für Schritt.</p>
     </header>
+    <div class="lesson-rewards">
+      <span class="lesson-points" id="lesson-points">★ ${activeLesson.points} ${activeLesson.points === 1 ? "Punkt" : "Punkte"} in dieser Einheit</span>
+      <p>Direkt richtig: +2 Punkte. Erst falsch: +1 Punkt fürs Probieren, dann +1 fürs Lösen.</p>
+    </div>
     <div class="lesson-progress" aria-label="Fortschritt">
-      <div class="lesson-progress-label"><span>Dein Fortschritt</span><span id="progress-count">${answered} von ${questions.length} Erstversuchen</span></div>
-      <div class="progress-track" id="progress-track" role="progressbar" aria-label="Beim ersten Versuch beantwortete Aufgaben" aria-valuemin="0" aria-valuemax="${questions.length}" aria-valuenow="${answered}">
+      <div class="lesson-progress-label"><span>Dein Fortschritt</span><span id="progress-count">${answered} von ${questions.length} gelöst</span></div>
+      <div class="progress-track" id="progress-track" role="progressbar" aria-label="Gelöste Aufgaben" aria-valuemin="0" aria-valuemax="${questions.length}" aria-valuenow="${answered}">
         ${activeLesson.firstAttempts.map((result, index) => {
-          const status = result === null ? "" : result ? " is-correct" : " is-incorrect";
+          const status = index < position || (index === position && activeLesson.resolved) ? " is-correct" : result === false ? " is-trying" : "";
           return `<span class="progress-segment${status}" data-question="${index}" aria-hidden="true"></span>`;
         }).join("")}
       </div>
@@ -2112,8 +2372,12 @@ function renderLesson() {
       <p>${topic.explanation}</p>
     </article>
     <article class="exercise-card">
-      <p class="exercise-count">AUFGABE ${position + 1} VON ${questions.length}</p>
-      <h2 class="question">${question.text}</h2>
+      <div class="exercise-topline">
+        <div><p class="exercise-count">AUFGABE ${position + 1} VON ${questions.length}</p><p class="exercise-encouragement">Schritt für Schritt zum Aha!</p></div>
+        <img class="task-illustration" src="illustrations/${taskIllustration(topic)}.svg" width="144" height="104" alt="" aria-hidden="true">
+      </div>
+      <h2 class="question${question.note ? " question-with-note" : ""}"${question.note ? ' aria-describedby="question-note"' : ""}>${question.text}${question.note ? '<sup class="question-note-marker" aria-hidden="true">*</sup>' : ""}</h2>
+      ${question.note ? `<p class="question-note" id="question-note">* ${escapeHtml(question.note)}</p>` : ""}
       ${question.options ? `
         <div class="options-list" id="options-list">
            ${question.options.map((o, i) => `<button class="option-button" data-choice="${escapeHtml(String(o))}">${String.fromCharCode(65+i)}) ${escapeHtml(String(o))}</button>`).join('')}
@@ -2192,6 +2456,14 @@ function checkAnswer(event, submittedAnswer) {
   activeLesson.submissions[activeLesson.position] = rawSubmitted;
 
   const answer = typeof question.answer === "number" ? parseAnswer(rawSubmitted) : rawSubmitted.trim().replace(/\s+/g, " ");
+  if (!rawSubmitted.trim() || (typeof answer === "number" && !Number.isFinite(answer))) {
+    feedback.className = "feedback incorrect";
+    feedback.textContent = typeof answer === "number"
+      ? "Gib bitte eine Zahl oder einen Bruch ein, zum Beispiel 3/4."
+      : "Gib bitte zuerst deine Antwort ein.";
+    if (input) input.focus();
+    return;
+  }
   const expectedAnswers = (Array.isArray(question.answer) ? question.answer : [question.answer]).map((expected) =>
     typeof expected === "string" && !question.caseSensitive ? expected.toLocaleLowerCase("de-DE") : expected
   );
@@ -2206,15 +2478,25 @@ function checkAnswer(event, submittedAnswer) {
   if (firstAttempt) {
     activeLesson.firstAttempts[activeLesson.position] = isCorrect;
     if (isCorrect) activeLesson.correct += 1;
-    updateLessonProgress();
+  }
+
+  const earnedPoints = firstAttempt ? (isCorrect ? 2 : 1) : (isCorrect ? 1 : 0);
+  if (earnedPoints) {
+    activeLesson.points = (activeLesson.points || 0) + earnedPoints;
+    progress.points += earnedPoints;
+    if (pointsCount) pointsCount.textContent = String(progress.points);
+    if (pointsLabel) pointsLabel.textContent = progress.points === 1 ? "Punkt" : "Punkte";
+    const lessonPoints = document.querySelector("#lesson-points");
+    if (lessonPoints) lessonPoints.textContent = `★ ${activeLesson.points} ${activeLesson.points === 1 ? "Punkt" : "Punkte"} in dieser Einheit`;
+    persistProgress();
   }
 
   if (isCorrect) {
     activeLesson.resolved = true;
     feedback.className = "feedback correct";
     feedback.textContent = firstAttempt
-      ? question.solution ? `Richtig! ${question.solution}` : "Richtig!"
-      : "Richtig gelöst! Für die Trefferquote zählt der erste Versuch.";
+      ? `Richtig! +2 Punkte.${question.solution ? ` ${question.solution}` : ""}`
+      : "Geschafft! +1 Punkt fürs Dranbleiben. Du hast jetzt beide Punkte für diese Aufgabe!";
     // hide/disable input or option buttons
     const submitBtn = document.querySelector("#answer-form button");
     if (submitBtn) submitBtn.hidden = true;
@@ -2233,29 +2515,31 @@ function checkAnswer(event, submittedAnswer) {
     if (hintBtn) hintBtn.hidden = true;
   } else {
     feedback.className = "feedback incorrect";
-    feedback.textContent = typeof answer === "number" && !Number.isFinite(answer)
-      ? "Gib bitte eine Zahl oder einen Bruch ein, zum Beispiel 3/4."
-      : "Noch nicht ganz. Schau dir den Tipp an und versuche es noch einmal.";
+    feedback.textContent = firstAttempt
+      ? "+1 Punkt fürs Probieren! Noch nicht ganz – mit dem Tipp findest du die Lösung und holst dir den zweiten Punkt."
+      : "Du schaffst das! Dein Punkt bleibt. Nutze den Tipp und hole dir den zweiten Punkt mit der richtigen Lösung.";
     if (input) input.select();
   }
+  updateLessonProgress();
+  if (earnedPoints) animatePointReward(earnedPoints, isCorrect);
 }
 
 function updateLessonProgress() {
   const { firstAttempts, position, questions } = activeLesson;
-  const answered = firstAttempts.filter((result) => result !== null).length;
-  const result = firstAttempts[position];
+  const answered = position + (activeLesson.resolved ? 1 : 0);
   const segment = document.querySelector(`.progress-segment[data-question="${position}"]`);
-  segment.classList.toggle("is-correct", result === true);
-  segment.classList.toggle("is-incorrect", result === false);
+  segment.classList.toggle("is-correct", activeLesson.resolved);
+  segment.classList.toggle("is-trying", firstAttempts[position] === false && !activeLesson.resolved);
 
   const progressCount = document.querySelector("#progress-count");
-  progressCount.textContent = `${answered} von ${questions.length} Erstversuchen`;
+  progressCount.textContent = `${answered} von ${questions.length} gelöst`;
 
   const progressTrack = document.querySelector("#progress-track");
   progressTrack.setAttribute("aria-valuenow", String(answered));
 }
 
 function nextQuestion() {
+  if (!activeLesson || !activeLesson.resolved || activeLesson.finished) return;
   const last = activeLesson.position === activeLesson.questions.length - 1;
   if (last) {
     finishLesson();
@@ -2267,6 +2551,9 @@ function nextQuestion() {
 }
 
 function finishLesson() {
+  if (activeLesson.finished) return;
+  clearPointReward();
+  activeLesson.finished = true;
   const { topic, topicIndex, questions, correct } = activeLesson;
   progress.completed += 1;
   const currentCoinBalance = getCoinBalance();
@@ -2278,6 +2565,7 @@ function finishLesson() {
     grade: progress.grade,
     topicTitle: topic.title,
     correct,
+    points: activeLesson.points || 0,
     total: questions.length,
     completedAt: new Date().toISOString()
   });
@@ -2296,7 +2584,8 @@ function finishLesson() {
       <p class="eyebrow">EINHEIT ABGESCHLOSSEN</p>
       <h2>Das hast du gut gemacht!</h2>
       <p>${message}</p>
-      <div class="summary-score">${correct} von ${questions.length} Aufgaben beim ersten Versuch richtig bei „${topic.title}“</div>
+      <div class="summary-score"><strong>+${activeLesson.points || 0} Punkte gesammelt!</strong><span>${progress.points} Punkte insgesamt</span></div>
+      <p>Alle ${questions.length} Aufgaben bei „${topic.title}“ geschafft. Dafür gibt es auch eine Münze für die Spiele!</p>
       <button class="primary-button" id="finish-button" type="button">Zur Themenübersicht</button>
     </div>
   `;
