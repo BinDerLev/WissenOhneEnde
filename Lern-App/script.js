@@ -328,124 +328,6 @@ const progress = {
 syncPlatformUnlock();
 
 let activeLesson = null;
-let pointRewardCleanup = null;
-let lessonAdvanceTimer = null;
-
-function clearPointReward() {
-  if (lessonAdvanceTimer !== null) {
-    clearTimeout(lessonAdvanceTimer);
-    lessonAdvanceTimer = null;
-  }
-  if (pointRewardCleanup) pointRewardCleanup();
-  pointRewardCleanup = null;
-  if (pointsCount) pointsCount.textContent = String(progress.points);
-  if (pointsLabel) pointsLabel.textContent = progress.points === 1 ? "Punkt" : "Punkte";
-  updateLessonPoints();
-}
-
-function updateLessonPoints(points = activeLesson?.points || 0) {
-  const lessonPoints = document.querySelector("#lesson-points");
-  if (lessonPoints) lessonPoints.textContent = `★ ${points} ${points === 1 ? "Punkt" : "Punkte"} in dieser Einheit`;
-}
-
-function animatePointReward(amount) {
-  clearPointReward();
-  const lesson = activeLesson;
-  const position = lesson.position;
-  const advance = () => {
-    if (activeLesson === lesson && activeLesson.position === position && !lessonView.hidden) nextQuestion();
-  };
-  const advanceWithoutAnimation = () => {
-    if (typeof window === "undefined") return;
-    lessonAdvanceTimer = setTimeout(() => {
-      lessonAdvanceTimer = null;
-      advance();
-    }, 900);
-  };
-  if (!document.body || !pointsCount || typeof requestAnimationFrame !== "function" ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    advanceWithoutAnimation();
-    return;
-  }
-
-  const illustration = document.querySelector(".task-illustration");
-  const total = document.querySelector(".points-total");
-  if (!illustration || !total) {
-    advanceWithoutAnimation();
-    return;
-  }
-  const grade = progress.grade;
-  const before = progress.points - amount;
-  const layer = document.createElement("div");
-  layer.className = "point-reward is-success";
-  layer.dataset.grade = String(grade);
-  layer.setAttribute("aria-hidden", "true");
-  document.body.appendChild(layer);
-
-  const target = total.getBoundingClientRect();
-  const origin = illustration.getBoundingClientRect();
-  const x = Math.max(64, Math.min(window.innerWidth - 64, origin.left + origin.width / 2));
-  const y = Math.max(110, Math.min(window.innerHeight - 90, origin.top + origin.height / 2));
-  layer.style.setProperty("--reward-x", `${x}px`);
-  layer.style.setProperty("--reward-y", `${y}px`);
-  layer.style.setProperty("--flight-x", `${target.left + target.width / 2 - x}px`);
-  layer.style.setProperty("--flight-y", `${target.top + target.height / 2 - y}px`);
-
-  const badge = document.createElement("span");
-  badge.className = "reward-flying-points";
-  badge.textContent = `+${amount}`;
-  layer.appendChild(badge);
-  const count = [0, 14, 12, 10, 9, 7, 6][grade];
-  for (let index = 0; index < count; index += 1) {
-    const star = document.createElement("span");
-    const angle = index / count * Math.PI * 2;
-    const distance = 40 + (index % 3) * 15;
-    star.className = "reward-sparkle";
-    star.textContent = index % 2 ? "✦" : "★";
-    star.style.setProperty("--spark-x", `${Math.cos(angle) * distance}px`);
-    star.style.setProperty("--spark-y", `${Math.sin(angle) * distance}px`);
-    star.style.setProperty("--spark-delay", `${index % 4 * 60}ms`);
-    star.style.setProperty("--spark-color", `var(--reward-color-${index % 3})`);
-    layer.appendChild(star);
-  }
-  illustration.classList.add("is-celebrating");
-  illustration.dataset.rewardGrade = String(grade);
-
-  let frame;
-  let start;
-  const lessonBefore = activeLesson.points - amount;
-  pointsCount.textContent = String(before);
-  if (pointsLabel) pointsLabel.textContent = before === 1 ? "Punkt" : "Punkte";
-  updateLessonPoints(lessonBefore);
-  const cleanup = () => {
-    cancelAnimationFrame(frame);
-    layer.remove();
-    illustration.classList.remove("is-celebrating");
-    total.classList.remove("is-collecting");
-  };
-  pointRewardCleanup = cleanup;
-  const tick = (now) => {
-    if (start === undefined) start = now;
-    const elapsed = now - start;
-    const collected = Math.min(amount, Math.floor(elapsed / 170));
-    const displayed = before + collected;
-    pointsCount.textContent = String(displayed);
-    if (pointsLabel) pointsLabel.textContent = displayed === 1 ? "Punkt" : "Punkte";
-    updateLessonPoints(lessonBefore + collected);
-    total.classList.toggle("is-collecting", collected > 0);
-    if (elapsed < amount * 170 + 340) {
-      frame = requestAnimationFrame(tick);
-    } else {
-      clearPointReward();
-      advance();
-    }
-  };
-  // Count only after the flying badge has actually reached its destination.
-  badge.addEventListener("animationend", (event) => {
-    if (event.target !== badge || event.animationName !== "points-fly" || pointRewardCleanup !== cleanup) return;
-    frame = requestAnimationFrame(tick);
-  }, { once: true });
-}
 
 const questionHistoryStorageKey = "lernlabor-question-history-v1";
 const questionHistoryLimit = 256;
@@ -535,9 +417,9 @@ function topicProgressKey(subject, grade, index, topic) {
 
 function renderDashboard() {
   stopEnglishAudio();
-  clearPointReward();
   dashboard.hidden = false;
   lessonView.hidden = true;
+  lessonView.className = "lesson-view";
   parentReport.hidden = true;
   gradeSelect.value = String(progress.grade);
   subjectSelect.value = progress.subject;
@@ -594,7 +476,6 @@ function escapeHtml(value) {
 
 function renderParentReport() {
   stopEnglishAudio();
-  clearPointReward();
   dashboard.hidden = true;
   lessonView.hidden = true;
   parentReport.hidden = false;
@@ -2327,31 +2208,11 @@ function reportExerciseError(button) {
       }, 2500);
     }
     if (!copied) {
-      const hintText = document.querySelector("#hint-text");
-      hintText.textContent = `Kopieren ist hier nicht möglich. Markiere den folgenden Text und kopiere ihn manuell:\n\n${buildErrorReport()}`;
-      hintText.hidden = false;
+      if (!button.isConnected) return;
+      document.querySelector("#exercise-report-text").value = buildErrorReport();
+      showLessonPanel("report");
     }
   });
-}
-
-// Decorative illustrations describe the topic, without giving away an answer.
-function taskIllustration(topic) {
-  if (topic.skill?.startsWith("en-")) return topic.skill === "en-writing" ? "writing" : topic.skill === "en-words" ? "words" : "reading";
-  if (topic.mode === "time") return "time";
-  if (["data", "mean"].includes(topic.mode)) return "data";
-  if (topic.mode === "volume") return "geometry";
-  if (topic.mode?.startsWith("fraction-") || topic.mode === "reduce") return "fractions";
-  if (topic.moneyContext || topic.mode === "coins") return "money";
-  if (topic.mode === "media-six") return "media";
-  const illustrations = {
-    shapes: "geometry", geometry: "geometry", units: "measure",
-    money: "money", fractions: "fractions", percent: "fractions",
-    probability: "data", ratio: "measure",
-    "de-reading": "reading", "de-spelling": "writing", "de-capitalization": "writing",
-    "de-punctuation": "writing", "de-wordclass": "words", "de-wordorder": "words",
-    "de-vocabulary": "words", "de-grammar": "words", "de-words": "words"
-  };
-  return illustrations[topic.skill] || "numbers";
 }
 
 function startLesson(topicIndex) {
@@ -2364,6 +2225,7 @@ function startLesson(topicIndex) {
     topic,
     topicIndex,
     questions,
+    started: !topic.explanation?.trim(),
     position: 0,
     correct: 0,
     points: 0,
@@ -2376,111 +2238,189 @@ function startLesson(topicIndex) {
 
 function renderLesson() {
   stopEnglishAudio();
-  clearPointReward();
+  englishLastAudio = null;
   dashboard.hidden = true;
   lessonView.hidden = false;
   const { topic, questions, position } = activeLesson;
   const question = questions[position];
   const answered = position + (activeLesson.resolved ? 1 : 0);
   const subjectName = subjectNames[progress.subject];
-  const taskImage = progress.subject === "english" && typeof getEnglishTaskImage === "function" ? getEnglishTaskImage(topic, question) : null;
+  const isEnglish = progress.subject === "english";
+
+  if (!activeLesson.started) {
+    const explanation = isEnglish
+      ? renderEnglishText(topic.explanation, topic.english?.explanation)
+      : escapeHtml(topic.explanation);
+    lessonView.className = "lesson-view is-intro";
+    lessonView.innerHTML = `
+      <button class="back-button" type="button" id="back-button"><span aria-hidden="true">←</span> Alle Themen</button>
+      <section class="lesson-intro-card" aria-labelledby="lesson-intro-title">
+        <p class="eyebrow">KLASSE ${progress.grade} · ${subjectName.toLocaleUpperCase("de-DE")} ÜBEN</p>
+        <h1 id="lesson-intro-title" tabindex="-1">${progress.subject === "english" ? renderEnglishText(topic.title, topic.english?.title) : escapeHtml(topic.title)}</h1>
+        <div class="lesson-intro-explanation">
+          <p class="card-kicker">Kurz erklärt</p>
+          <p>${explanation}</p>
+        </div>
+        <p class="lesson-intro-meta">${questions.length} Aufgaben · Beim ersten Versuch richtig: +2 Punkte, später richtig: +1 Punkt.</p>
+        <button class="primary-button lesson-start-button" id="start-exercises-button" type="button">Zu den Übungen <span aria-hidden="true">→</span></button>
+      </section>
+    `;
+    document.querySelector("#back-button").addEventListener("click", renderDashboard);
+    document.querySelector("#start-exercises-button").addEventListener("click", () => {
+      activeLesson.started = true;
+      renderLesson();
+    });
+    document.querySelector("#lesson-intro-title").focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+    return;
+  }
+  lessonView.className = "lesson-view is-practice";
+  const taskImage = isEnglish && typeof getEnglishTaskImage === "function" ? getEnglishTaskImage(topic, question) : null;
 
   lessonView.innerHTML = `
-    <button class="back-button" type="button" id="back-button"><span aria-hidden="true">←</span> Alle Themen</button>
-    <header class="lesson-heading">
-      <p class="eyebrow">KLASSE ${progress.grade} · ${subjectName.toLocaleUpperCase("de-DE")} ÜBEN</p>
-      <h1>${progress.subject === "english" ? renderEnglishText(topic.title, topic.english?.title) : topic.title}</h1>
-      <p>Eine kurze Erklärung und dann übst du es Schritt für Schritt.</p>
-    </header>
-    <div class="lesson-rewards">
-      <span class="lesson-points" id="lesson-points">★ ${activeLesson.points} ${activeLesson.points === 1 ? "Punkt" : "Punkte"} in dieser Einheit</span>
-      <p>Beim ersten Versuch richtig: +2 Punkte. Später richtig: +1 Punkt. Du darfst es beliebig oft versuchen.</p>
-    </div>
-    <div class="lesson-progress" aria-label="Fortschritt">
-      <div class="lesson-progress-label"><span>Dein Fortschritt</span><span id="progress-count">${answered} von ${questions.length} gelöst</span></div>
-      <div class="progress-track" id="progress-track" role="progressbar" aria-label="Gelöste Aufgaben" aria-valuemin="0" aria-valuemax="${questions.length}" aria-valuenow="${answered}">
-        ${activeLesson.firstAttempts.map((result, index) => {
-          const status = index < position || (index === position && activeLesson.resolved) ? " is-correct" : result === false ? " is-trying" : "";
-          return `<span class="progress-segment${status}" data-question="${index}" aria-hidden="true"></span>`;
-        }).join("")}
+    <div class="lesson-toolbar">
+      <button class="back-button" type="button" id="back-button" aria-label="Zur Themenübersicht"><span aria-hidden="true">←</span></button>
+      <div class="lesson-progress">
+        <p class="lesson-step">Aufgabe ${position + 1} von ${questions.length}</p>
+        <div class="progress-track" id="progress-track" role="progressbar" aria-label="Gelöste Aufgaben" aria-valuemin="0" aria-valuemax="${questions.length}" aria-valuenow="${answered}">
+          ${activeLesson.firstAttempts.map((result, index) => {
+            const status = index < position || (index === position && activeLesson.resolved) ? " is-correct" : result === false ? " is-trying" : "";
+            return `<span class="progress-segment${status}" data-question="${index}" aria-hidden="true"></span>`;
+          }).join("")}
+        </div>
       </div>
     </div>
-    <article class="explanation-card">
-      <p class="card-kicker">Kurz erklärt</p>
-      <p>${progress.subject === "english" ? renderEnglishText(topic.explanation, topic.english?.explanation) : topic.explanation}</p>
-    </article>
     <article class="exercise-card">
-      <div class="exercise-topline">
-        <div><p class="exercise-count">AUFGABE ${position + 1} VON ${questions.length}</p><p class="exercise-encouragement">Schritt für Schritt zum Aha!</p></div>
-        ${taskImage
-          ? `<img class="task-illustration english-task-illustration" src="${escapeHtml(taskImage.src)}?v=20261114-reviewed" width="112" height="112" alt="${escapeHtml(taskImage.alt)}">`
-          : `<img class="task-illustration" src="illustrations/${taskIllustration(topic)}.svg" width="144" height="104" alt="" aria-hidden="true">`}
+      <div class="exercise-prompt" data-lesson-panel="prompt">
+        ${taskImage ? `<img class="task-illustration" src="${escapeHtml(taskImage.src)}?v=20261118-bagfix1" width="112" height="112" alt="${escapeHtml(taskImage.alt)}">` : ""}
+        <h2 id="exercise-question" tabindex="-1" class="question${question.note ? " question-with-note" : ""}"${question.note ? ' aria-describedby="question-note"' : ""}>${progress.subject === "english" ? renderEnglishText(question.text, question.english?.text, true, question) : escapeHtml(question.text)}${question.note ? '<sup class="question-note-marker" aria-hidden="true">*</sup>' : ""}</h2>
+        ${question.note ? `<p class="question-note" id="question-note">* ${escapeHtml(question.note)}</p>` : ""}
+        ${question.audioText || question.modelText ? `
+          <div class="english-audio">
+            <button class="secondary-button" type="button" id="english-audio-button">${question.audioText ? "▶ Hörtext abspielen" : "▶ Anhören und nachsprechen"}</button>
+            <p class="section-copy" id="audio-status" role="status">${question.audioText ? "" : "Deine Aussprache wird nicht automatisch bewertet."}</p>
+            ${question.audioText ? '<button class="hint-button" data-lesson-open="transcript" type="button">Hörtext mitlesen</button>' : ""}
+          </div>
+        ` : ""}
       </div>
-      <h2 class="question${question.note ? " question-with-note" : ""}"${question.note ? ' aria-describedby="question-note"' : ""}>${progress.subject === "english" ? renderEnglishText(question.text, question.english?.text, true, question) : escapeHtml(question.text)}${question.note ? '<sup class="question-note-marker" aria-hidden="true">*</sup>' : ""}</h2>
-      ${question.note ? `<p class="question-note" id="question-note">* ${escapeHtml(question.note)}</p>` : ""}
-      ${question.audioText || question.modelText ? `
-        <div class="english-audio">
-          <button class="secondary-button" type="button" id="english-audio-button">${question.audioText ? "▶ Hörtext abspielen" : "▶ Anhören und nachsprechen"}</button>
-          <p class="section-copy" id="audio-status" role="status">${englishVoiceLabel()}${question.audioText ? "Höre zuerst zu. Du kannst den Text mehrmals abspielen." : "Sprich den englischen Text nach. Deine Aussprache wird nicht automatisch bewertet."}</p>
-          ${question.audioText ? `<details class="audio-transcript"><summary>Hörtext zum Mitlesen öffnen</summary><p lang="en">${renderEnglishText(question.audioText, [question.audioText], true, question)}</p></details>` : ""}
-        </div>
-      ` : ""}
-      ${progress.subject === "english" && !question.audioText && !question.modelText ? `<p class="section-copy english-audio-help" id="audio-status" role="status">${englishVoiceLabel()}Tippe auf englische Wörter oder 🔊. Beim Auswählen wird die englische Antwort vorgelesen.</p>` : ""}
-      ${question.options ? `
-        <div class="options-list" id="options-list" role="group" aria-label="Wähle deine Antwort">
-           ${question.options.map((o, i) => {
-             const choice = String(o);
-             const passages = progress.subject === "english" ? question.english?.choices[choice] || [] : [];
-             const button = `<button class="option-button${passages.length ? " has-audio" : ""}" type="button" data-choice="${escapeHtml(choice)}"><span class="option-letter" aria-hidden="true">${String.fromCharCode(65+i)}</span><span class="option-text">${passages.length ? renderEnglishText(choice, passages, false, question) : escapeHtml(choice)}</span><span class="option-status" aria-hidden="true">→</span></button>`;
-             return passages.length ? `<div class="option-row">${button}${renderEnglishChoiceAudio(choice, passages)}</div>` : button;
-           }).join('')}
-        </div>
-      ` : `
-        <form class="answer-form" id="answer-form">
-           <label class="sr-only" for="answer-input">Deine Antwort</label>
-           <input class="answer-input" id="answer-input" name="answer" type="text" inputmode="${progress.subject === "math" && !question.allowFraction ? "decimal" : "text"}" autocomplete="off" placeholder="Deine Antwort" required>
-           <button class="primary-button" type="submit">Prüfen</button>
-        </form>
-      `}
-      <p class="feedback" id="feedback" aria-live="polite"></p>
-      <div class="exercise-actions">
-        <div class="exercise-actions-left">
-          <button class="hint-button" id="hint-button" type="button">Tipp ansehen</button>
-          <button class="hint-button" id="report-button" type="button">Fehler melden</button>
-        </div>
-        <span class="auto-advance-note" id="auto-advance-note" hidden>Danach geht’s automatisch weiter …</span>
+      <div class="exercise-answer" data-lesson-panel="answer">
+        <h2 class="answer-title" tabindex="-1" hidden>${question.options ? "Wähle deine Antwort" : "Gib deine Antwort ein"}</h2>
+        ${question.options ? `
+          <div class="options-list" id="options-list" role="group" aria-label="Wähle deine Antwort">
+             ${question.options.map((o, i) => {
+               const choice = String(o);
+               const passages = progress.subject === "english" ? question.english?.choices[choice] || [] : [];
+               const button = `<button class="option-button${passages.length ? " has-audio" : ""}" type="button" data-choice="${escapeHtml(choice)}"><span class="option-letter" aria-hidden="true">${String.fromCharCode(65+i)}</span><span class="option-text">${passages.length ? renderEnglishText(choice, passages, false, question) : escapeHtml(choice)}</span><span class="option-status" aria-hidden="true">→</span></button>`;
+               return passages.length ? `<div class="option-row">${button}${renderEnglishChoiceAudio(choice, passages)}</div>` : button;
+             }).join('')}
+          </div>
+        ` : `
+          <form class="answer-form" id="answer-form">
+             <label class="sr-only" for="answer-input">Deine Antwort</label>
+             <input class="answer-input" id="answer-input" name="answer" type="text" inputmode="${progress.subject === "math" && !question.allowFraction ? "decimal" : "text"}" autocomplete="off" placeholder="Deine Antwort" required>
+             <button class="primary-button" type="submit">Prüfen</button>
+          </form>
+        `}
+        <p class="feedback incorrect" id="retry-feedback" role="status"></p>
       </div>
-      <p class="hint-text" id="hint-text" hidden>${progress.subject === "english" ? renderEnglishText(question.hint, question.english?.hint) : question.hint}</p>
+      ${question.hint ? `<section class="lesson-extra" data-lesson-panel="hint" hidden>
+        <h2 tabindex="-1">Tipp</h2>
+        <p>${isEnglish ? renderEnglishText(question.hint, question.english?.hint) : escapeHtml(question.hint)}</p>
+      </section>` : ""}
+      ${question.audioText ? `<section class="lesson-extra" data-lesson-panel="transcript" hidden>
+        <h2 tabindex="-1">Hörtext</h2>
+        <p lang="en">${renderEnglishText(question.audioText, [question.audioText], true)}</p>
+      </section>` : ""}
+      ${isEnglish ? `<section class="lesson-extra" data-lesson-panel="audio-report" hidden>
+        <h2 tabindex="-1">Audio melden</h2>
+        ${renderEnglishAudioReport()}
+      </section>` : ""}
+      <section class="lesson-extra" data-lesson-panel="report" hidden>
+        <h2 tabindex="-1">Fehlerbericht</h2>
+        <label for="exercise-report-text">Bericht zum Kopieren</label>
+        <textarea id="exercise-report-text" readonly rows="4"></textarea>
+      </section>
     </article>
+    <div class="exercise-actions">
+      <div class="exercise-actions-left" id="exercise-tools">
+        ${question.hint ? '<button class="hint-button" data-lesson-open="hint" type="button">Tipp</button>' : ""}
+        <button class="hint-button" id="report-button" type="button">Fehler melden</button>
+        ${isEnglish ? '<button class="hint-button" data-lesson-open="audio-report" type="button">Audio melden</button>' : ""}
+      </div>
+      <button class="secondary-button" id="lesson-return" type="button" hidden>← Zur Aufgabe</button>
+      <button class="primary-button" id="lesson-switch" type="button" hidden>Zur Antwort →</button>
+    </div>
   `;
 
+  // Show each illustration only once within the prompt.
+  const shownImages = new Set();
+  lessonView.querySelectorAll(".exercise-prompt .english-sentence-image").forEach(image => {
+    const asset = image.getAttribute("src").split("?")[0];
+    if (shownImages.has(asset)) image.remove();
+    else shownImages.add(asset);
+  });
   document.querySelector("#back-button").addEventListener("click", renderDashboard);
+  if (isEnglish) {
+    document.querySelector('#audio-report-button').addEventListener('click', reportEnglishAudio);
+    document.querySelector("#audio-report-panel").hidden = false;
+  }
   if (question.audioText || question.modelText) {
     document.querySelector("#english-audio-button").addEventListener("click", () => speakEnglish(question.audioText || question.modelText));
   }
   const answerForm = document.querySelector("#answer-form");
   if (answerForm) answerForm.addEventListener("submit", checkAnswer);
-  // options buttons
   const optionsList = document.getElementById('options-list');
   if (optionsList) {
     optionsList.querySelectorAll('.option-button').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const choice = e.currentTarget.getAttribute('data-choice');
-        checkAnswer(null, choice);
+        checkAnswer(null, choice, e.currentTarget);
       });
     });
   }
-  document.querySelector("#hint-button").addEventListener("click", () => {
-    const hint = document.querySelector("#hint-text");
-    hint.hidden = !hint.hidden;
-    document.querySelector("#hint-button").textContent = hint.hidden ? "Tipp ansehen" : "Tipp verbergen";
+  lessonView.querySelectorAll("[data-lesson-open]").forEach(button => {
+    button.addEventListener("click", () => showLessonPanel(button.dataset.lessonOpen));
   });
-  document.querySelector("#report-button").addEventListener("click", (event) => {
-    reportExerciseError(event.currentTarget);
+  document.querySelector("#lesson-return").addEventListener("click", () => showLessonPanel(activeLesson.taskPanel));
+  document.querySelector("#lesson-switch").addEventListener("click", () => {
+    showLessonPanel(activeLesson.taskPanel === "answer" ? "prompt" : "answer");
   });
-  const answerInputEl = document.querySelector("#answer-input");
-  if (answerInputEl) answerInputEl.focus();
+  document.querySelector("#report-button").addEventListener("click", event => reportExerciseError(event.currentTarget));
+  activeLesson.taskPanel = question.audioText || question.modelText ? "prompt" : "combined";
+  showLessonPanel(activeLesson.taskPanel);
+  fitLessonTask();
+  window.scrollTo(0, 0);
 }
+
+function showLessonPanel(panel) {
+  const isTask = ["combined", "prompt", "answer"].includes(panel);
+  if (isTask) activeLesson.taskPanel = panel;
+  activeLesson.visiblePanel = panel;
+
+  lessonView.querySelectorAll("[data-lesson-panel]").forEach(element => {
+    const name = element.dataset.lessonPanel;
+    element.hidden = name !== panel && !(panel === "combined" && ["prompt", "answer"].includes(name));
+  });
+  lessonView.querySelector(".answer-title").hidden = panel !== "answer";
+  lessonView.querySelector("#exercise-tools").hidden = !isTask;
+  lessonView.querySelector("#lesson-return").hidden = isTask;
+  const switchButton = lessonView.querySelector("#lesson-switch");
+  switchButton.hidden = !isTask || panel === "combined";
+  switchButton.textContent = panel === "answer" ? "← Aufgabe ansehen" : "Zur Antwort →";
+  lessonView.querySelector("[data-lesson-panel]:not([hidden]) h2")?.focus({ preventScroll: true });
+}
+
+function fitLessonTask(preferredPanel = "prompt") {
+  if (lessonView.hidden || activeLesson?.visiblePanel !== "combined") return;
+  // Leave the current input visible when a mobile keyboard resizes the viewport.
+  if (document.activeElement?.id === "answer-input") return;
+  if (lessonView.getBoundingClientRect().height > window.innerHeight + 1) {
+    showLessonPanel(preferredPanel);
+  }
+}
+
+window.addEventListener("resize", () => fitLessonTask());
+
 function parseAnswer(value) {
   const normalized = value.trim().replace(",", ".");
   if (/^-?\d+(?:\.\d+)?\s*\/\s*-?\d+(?:\.\d+)?$/.test(normalized)) {
@@ -2490,12 +2430,12 @@ function parseAnswer(value) {
   return /^-?\d+(?:\.\d+)?$/.test(normalized) ? Number(normalized) : Number.NaN;
 }
 
-function checkAnswer(event, submittedAnswer) {
+function checkAnswer(event, submittedAnswer, choiceButton) {
   if (event && event.preventDefault) event.preventDefault();
   if (activeLesson.resolved) return;
 
   const input = document.querySelector("#answer-input");
-  const feedback = document.querySelector("#feedback");
+  const retryFeedback = document.querySelector("#retry-feedback");
   const question = activeLesson.questions[activeLesson.position];
   const firstAttempt = activeLesson.firstAttempts[activeLesson.position] === null;
 
@@ -2512,8 +2452,7 @@ function checkAnswer(event, submittedAnswer) {
 
   const answer = typeof question.answer === "number" ? parseAnswer(rawSubmitted) : rawSubmitted.trim().replace(/\s+/g, " ");
   if (!rawSubmitted.trim() || (typeof answer === "number" && !Number.isFinite(answer))) {
-    feedback.className = "feedback incorrect";
-    feedback.textContent = typeof answer === "number"
+    retryFeedback.textContent = typeof answer === "number"
       ? "Gib bitte eine Zahl oder einen Bruch ein, zum Beispiel 3/4."
       : "Gib bitte zuerst deine Antwort ein.";
     if (input) input.focus();
@@ -2547,7 +2486,6 @@ function checkAnswer(event, submittedAnswer) {
     progress.points += earnedPoints;
     if (pointsCount) pointsCount.textContent = String(progress.points);
     if (pointsLabel) pointsLabel.textContent = progress.points === 1 ? "Punkt" : "Punkte";
-    updateLessonPoints();
     persistProgress();
   }
 
@@ -2566,33 +2504,18 @@ function checkAnswer(event, submittedAnswer) {
 
   if (isCorrect) {
     activeLesson.resolved = true;
-    feedback.className = "feedback correct";
-    feedback.textContent = firstAttempt
-      ? `Richtig! +2 Punkte.${question.solution ? ` ${question.solution}` : ""}`
-      : "Geschafft! +1 Punkt fürs Dranbleiben. Du hast die Aufgabe richtig gelöst!";
-    if (progress.subject === "english" && question.english?.answer.length) {
-      const solution = question.english.answer[0];
-      feedback.innerHTML = `${escapeHtml(feedback.textContent)} <span class="english-solution">${renderEnglishText(solution, [solution], true, question)}</span>`;
-    }
-    // hide/disable input or option buttons
-    const submitBtn = document.querySelector("#answer-form button");
-    if (submitBtn) submitBtn.hidden = true;
-    // Eingabefeld bleibt fokusierbar (nur schreibgeschützt), damit ein erneutes Enter die nächste Aufgabe lädt
-    if (input) {
-      input.readOnly = true;
-      input.focus();
-    }
-    const advanceNote = document.querySelector("#auto-advance-note");
-    if (advanceNote) advanceNote.hidden = false;
-    const hintBtn = document.querySelector("#hint-button");
-    if (hintBtn) hintBtn.hidden = true;
+    retryFeedback.textContent = "";
+    const origin = choiceButton || event?.submitter || input;
+    lessonView.querySelector(".exercise-card").inert = true;
+    lessonView.querySelector(".exercise-actions").inert = true;
+    updateLessonProgress();
+    animateLessonPoints(earnedPoints, origin);
   } else {
-    feedback.className = "feedback incorrect";
-    feedback.textContent = "Noch nicht ganz. Nutze den Tipp und versuche es weiter – du hast beliebig viele Versuche. Für die richtige Lösung bekommst du einen Punkt!";
+    retryFeedback.textContent = "Noch nicht ganz. Versuch es noch einmal.";
     if (input) input.select();
+    fitLessonTask("answer");
+    updateLessonProgress();
   }
-  updateLessonProgress();
-  if (earnedPoints) animatePointReward(earnedPoints);
 }
 
 function updateLessonProgress() {
@@ -2602,19 +2525,54 @@ function updateLessonProgress() {
   segment.classList.toggle("is-correct", activeLesson.resolved);
   segment.classList.toggle("is-trying", firstAttempts[position] === false && !activeLesson.resolved);
 
-  const progressCount = document.querySelector("#progress-count");
-  progressCount.textContent = `${answered} von ${questions.length} gelöst`;
-
   const progressTrack = document.querySelector("#progress-track");
   progressTrack.setAttribute("aria-valuenow", String(answered));
 }
 
-function nextQuestion() {
-  if (!activeLesson || !activeLesson.resolved || activeLesson.finished || pointRewardCleanup || lessonAdvanceTimer !== null) return;
-  if (englishPlayback) {
-    englishAudioAdvance = () => nextQuestion();
+function animateLessonPoints(points, origin) {
+  const lesson = activeLesson;
+  const advance = () => {
+    if (activeLesson !== lesson || lessonView.hidden) return;
+    // Let an English answer finish playing while the current exercise is visible.
+    if (englishPlayback) englishAudioAdvance = nextQuestion;
+    else nextQuestion();
+  };
+
+  const target = lessonView.querySelector(".lesson-progress");
+  if (!origin || !target || typeof target.animate !== "function" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    advance();
     return;
   }
+
+  const from = origin.getBoundingClientRect();
+  const to = target.getBoundingClientRect();
+  const x = from.left + from.width / 2;
+  const y = from.top + from.height / 2;
+  const dx = to.left + to.width / 2 - x;
+  const dy = to.top + to.height / 2 - y;
+  const badge = document.createElement("span");
+  badge.className = "lesson-point-flight";
+  badge.setAttribute("aria-hidden", "true");
+  badge.textContent = `★ +${points}`;
+  badge.style.left = `${x}px`;
+  badge.style.top = `${y}px`;
+  lessonView.append(badge);
+
+  const animation = badge.animate([
+    { transform: "translate(-50%, -50%) scale(.7)", opacity: 0 },
+    { transform: "translate(-50%, calc(-50% - 18px)) scale(1.1)", opacity: 1, offset: 0.25 },
+    { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(.45)`, opacity: 0 }
+  ], { duration: 720, easing: "ease-in-out" });
+
+  animation.finished.then(() => {
+    badge.remove();
+    advance();
+  }, () => badge.remove());
+}
+
+function nextQuestion() {
+  if (!activeLesson || !activeLesson.resolved || activeLesson.finished) return;
   const last = activeLesson.position === activeLesson.questions.length - 1;
   if (last) {
     finishLesson();
@@ -2628,8 +2586,8 @@ function nextQuestion() {
 function finishLesson() {
   if (activeLesson.finished) return;
   stopEnglishAudio();
-  clearPointReward();
   activeLesson.finished = true;
+  lessonView.className = "lesson-view is-summary";
   const { topic, topicIndex, questions, correct } = activeLesson;
   progress.completed += 1;
   const currentCoinBalance = getCoinBalance();
@@ -2679,7 +2637,7 @@ function finishLesson() {
   document.querySelector("#finish-button").addEventListener("click", renderDashboard);
   completedCount.textContent = String(progress.completed);
   document.querySelector(".summary-card")?.focus({ preventScroll: true });
-  lessonView.scrollIntoView?.({ behavior: typeof window !== "undefined" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "smooth" : "auto", block: "start" });
+  window.scrollTo(0, 0);
 }
 
 gradeSelect.addEventListener("change", () => {
@@ -2703,18 +2661,6 @@ homeLink.addEventListener("click", (event) => {
   renderDashboard();
 });
 
-// Enter im gelösten Zustand springt zur nächsten Aufgabe (wie „Nächste Aufgabe“)
-function handleEnterKeyAdvance(event) {
-  if (event.key !== "Enter" || event.shiftKey) return;
-  if (!activeLesson || !activeLesson.resolved || lessonView.hidden) return;
-  if (!document.querySelector("#answer-form") && !document.getElementById("options-list")) return;
-  const focusedElement = document.activeElement;
-  const inputFocused = focusedElement && focusedElement.id === "answer-input";
-  if (focusedElement && focusedElement !== document.body && !inputFocused) return;
-  event.preventDefault();
-  nextQuestion();
-}
-document.addEventListener("keydown", handleEnterKeyAdvance);
 lessonView.addEventListener("click", handleEnglishSpeechClick);
 
 renderDashboard();

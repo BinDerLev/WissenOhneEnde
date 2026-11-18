@@ -43,6 +43,14 @@ Ist sie aktiviert, werden nach erfolgreicher Übernahme ausschließlich die erse
 nicht mehr referenzierten Originaldateien gelöscht. Bereits geöffnete Lern-App-Seiten
 müssen danach neu geladen werden.
 
+In englischen LernLabor-Übungen kannst du die zuletzt angehörte Aufnahme mit
+**Audio melden** als fehlerhaft markieren. Der angezeigte Text zeigt, welche
+Aufnahme gemeldet wird; bei mehreren nacheinander gesprochenen Teilen gilt die
+Meldung für den zuletzt gestarteten Teil. Mit lokalem Backend wird die Meldung
+direkt im Projekt gespeichert. Ohne Backend bleibt sie im Browser gespeichert
+und wird beim Öffnen von Audio Review unter derselben Adresse im selben Browser
+eingelesen. Audio Review neu laden und nach „Falsch“ filtern, um Meldungen zu bearbeiten.
+
 Abgelehnte aktuelle Aufnahmen gezielt ersetzen:
 
 ```sh

@@ -1,5 +1,61 @@
 let englishPlayback = null;
 let englishAudioAdvance = null;
+let englishLastAudio = null;
+const englishAudioReportsPending = new Set();
+const englishAudioReportedFiles = new Set();
+const englishAudioReviewKey = 'lernlabor-audio-reviews-v1';
+
+function renderEnglishAudioReport() {
+  return `<div class="english-audio-report" id="audio-report-panel" hidden><button class="hint-button" type="button" id="audio-report-button" disabled>Audio melden</button><span id="audio-report-target">Höre eine Aufnahme an, um sie zu melden.</span><p id="audio-report-status" role="status"></p></div>`;
+}
+
+function updateEnglishAudioReport(message = '') {
+  const button = document.querySelector('#audio-report-button');
+  if (!button) return;
+  let reported = englishAudioReportedFiles.has(englishLastAudio?.file);
+  try {
+    const reviews = JSON.parse(localStorage.getItem(englishAudioReviewKey) || '{}');
+    reported ||= reviews?.[englishLastAudio?.file]?.status === 'bad';
+  } catch {}
+  button.disabled = !englishLastAudio || reported || englishAudioReportsPending.has(englishLastAudio.file);
+  button.textContent = reported ? 'Audio gemeldet' : 'Audio melden';
+  button.setAttribute('aria-label', englishLastAudio ? `Audio melden: ${englishLastAudio.text}` : 'Zuletzt gehörte Aufnahme melden');
+  const target = document.querySelector('#audio-report-target');
+  if (target) target.textContent = englishLastAudio ? `Zuletzt angehört: ${englishLastAudio.text}` : 'Höre eine Aufnahme an, um sie zu melden.';
+  const status = document.querySelector('#audio-report-status');
+  if (status) status.textContent = message;
+}
+
+async function reportEnglishAudio() {
+  if (!englishLastAudio || englishAudioReportsPending.has(englishLastAudio.file)) return;
+  const clip = {...englishLastAudio};
+  englishAudioReportsPending.add(clip.file);
+  updateEnglishAudioReport('Audio wird gemeldet …');
+  let savedLocally = false;
+  const review = {...clip,status:'bad',note:'In LernLabor als fehlerhaft gemeldet.',updatedAt:new Date().toISOString()};
+  try {
+    const stored = JSON.parse(localStorage.getItem(englishAudioReviewKey) || '{}');
+    if (!stored || Array.isArray(stored) || typeof stored !== 'object') throw Error('Ungültige lokale Bewertungen.');
+    if (typeof stored[clip.file]?.note === 'string' && stored[clip.file].note) review.note = stored[clip.file].note;
+    stored[clip.file] = review;
+    localStorage.setItem(englishAudioReviewKey, JSON.stringify(stored));
+    savedLocally = true;
+  } catch {}
+  let message;
+  try {
+    const response = await fetch('/api/review', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:clip.file,review})});
+    if (!response.ok) throw Error('Backend nicht erreichbar');
+    englishAudioReportedFiles.add(clip.file);
+    message = 'Audio gemeldet. Nach Neuladen von Audio Review erscheint diese Aufnahme als schlecht.';
+  } catch {
+    message = savedLocally
+      ? 'Audio auf diesem Gerät gemeldet. Öffne Audio Review im selben Browser, um die Meldung zu bearbeiten.'
+      : 'Audio konnte nicht gemeldet werden. Bitte versuche es erneut.';
+  } finally {
+    englishAudioReportsPending.delete(clip.file);
+  }
+  if (englishLastAudio?.file === clip.file) updateEnglishAudioReport(message);
+}
 
 function englishVoiceLabel() {
   return typeof englishAudioVoice !== "undefined" ? `Englische Stimme: ${englishAudioVoice.name}. ` : "";
@@ -71,6 +127,8 @@ function speakEnglish(textOrParts) {
       finish();
     };
     const file = typeof englishAudioManifest !== "undefined" ? englishAudioManifest[text] : null;
+    englishLastAudio = file ? {text,file} : null;
+    updateEnglishAudioReport();
     if (file && typeof window !== "undefined" && window.Audio) {
       try {
         const audio = new window.Audio(file);
