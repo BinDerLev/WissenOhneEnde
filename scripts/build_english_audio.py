@@ -19,10 +19,12 @@ _engine = None
 _voice = None
 _app = None
 _encoder = None
+_force = False
+_spoken_overrides = {}
 
 
-def initialise(model_dir, voice, app, encoder):
-    global _engine, _voice, _app, _encoder
+def initialise(model_dir, voice, app, encoder, force=False, spoken_overrides=None):
+    global _engine, _voice, _app, _encoder, _force, _spoken_overrides
     import onnxruntime as ort
     from kokoro_onnx import Kokoro
     options = ort.SessionOptions()
@@ -33,7 +35,8 @@ def initialise(model_dir, voice, app, encoder):
     session = ort.InferenceSession(str(Path(model_dir) / "kokoro-v1.0.onnx"), sess_options=options, providers=["CPUExecutionProvider"])
     session.disable_fallback()
     _engine = Kokoro.from_session(session, str(Path(model_dir) / "voices-v1.0.bin"))
-    _voice, _app, _encoder = voice, Path(app), encoder
+    _voice, _app, _encoder, _force = voice, Path(app), encoder, force
+    _spoken_overrides = spoken_overrides or {}
 
 
 def generate(item):
@@ -41,10 +44,13 @@ def generate(item):
     import soundfile as sf
     text, relative_path = item
     destination = _app / relative_path
-    if destination.is_file() and destination.stat().st_size > 500:
+    if not _force and destination.is_file() and destination.stat().st_size > 500:
         return text
-    spoken = re.sub(r"_{2,}", " blank ", text).replace("/", ", ")
-    if text == "PE":
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    spoken = re.sub(r"[()]", " ", _spoken_overrides.get(text, text))
+    spoken = re.sub(r"\s+", " ", spoken).strip()
+    spoken = re.sub(r"_{2,}", " blank ", spoken).replace("/", ", ")
+    if text == "PE" and text not in _spoken_overrides:
         spoken = "P. E."
     # Do not use a German phonemizer or a device's default voice.
     language = _voice["language"].lower()
@@ -66,9 +72,13 @@ def main():
     parser.add_argument("--app", required=True)
     parser.add_argument("--model-dir", default=str(Path(tempfile.gettempdir()) / "lernlabor-kokoro-model"))
     parser.add_argument("--workers", type=int, default=3)
+    parser.add_argument("--force", action="store_true", help="Regenerate clips even when a cached MP3 exists.")
     args = parser.parse_args()
     catalogue = json.loads(Path(args.catalogue).read_text())
     voice = catalogue["voice"]
+    spoken_overrides = catalogue.get("spokenOverrides", {})
+    if not isinstance(spoken_overrides, dict) or any(not isinstance(value, str) or not value.strip() or len(value) > 2000 for value in spoken_overrides.values()):
+        raise SystemExit("Invalid spoken text override in catalogue.")
     for filename, checksum in [("kokoro-v1.0.onnx", voice["modelSha256"]), ("voices-v1.0.bin", voice["voicesSha256"])]:
         source = Path(args.model_dir) / filename
         if not source.exists():
@@ -82,12 +92,14 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     items = list(catalogue["manifest"].items())
     cached = [item for item in items if (Path(args.app) / item[1]).is_file() and (Path(args.app) / item[1]).stat().st_size > 500]
-    remaining = [item for item in items if item not in cached]
+    remaining = items if args.force else [item for item in items if item not in cached]
+    if args.force:
+        cached = []
     completed = len(cached)
     start = time.monotonic()
     print(f"{completed}/{len(items)} clips cached; generating {voice['name']} locally with full-precision Kokoro.", flush=True)
     with concurrent.futures.ProcessPoolExecutor(max_workers=max(1, min(args.workers, 4)), initializer=initialise,
-            initargs=(args.model_dir, voice, args.app, encoder)) as executor:
+            initargs=(args.model_dir, voice, args.app, encoder, args.force, spoken_overrides)) as executor:
         futures = [executor.submit(generate, item) for item in remaining]
         for future in concurrent.futures.as_completed(futures):
             future.result()

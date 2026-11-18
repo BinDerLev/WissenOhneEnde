@@ -26,3 +26,7 @@ Thumbs.db
 # Project build leftovers
 coverage/
 .cache/
+
+# Local English audio-review backend data
+Lern-App/.audio-review-data.json
+Lern-App/.audio-review-data.json.pending

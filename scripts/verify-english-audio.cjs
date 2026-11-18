@@ -11,14 +11,14 @@ const context = vm.createContext({});
 for (const file of ["english.js", "english-speech.js", "english-audio-manifest.js"]) {
   new vm.Script(fs.readFileSync(path.join(app, file), "utf8")).runInContext(context);
 }
-const { manifest, voice, texts } = vm.runInContext("({ manifest: englishAudioManifest, voice: englishAudioVoice, texts: collectEnglishAudioTexts() })", context);
+const { manifest, voice, texts, metadata } = vm.runInContext("({ manifest: englishAudioManifest, voice: englishAudioVoice, texts: collectEnglishAudioTexts(), metadata: typeof englishAudioMetadata === 'undefined' ? {} : englishAudioMetadata })", context);
 assert.match(voice.language, /^en-/);
 assert.equal(Object.keys(manifest).length, texts.length, "manifest must match the entire English catalogue");
 let bytes = 0;
 for (const text of texts) {
   assert.doesNotMatch(text, /[äöüßÄÖÜ]|\b(?:und|nicht|Schreibe|Wähle|Ergänze|wird|sind)\b/, `German text leaked: ${text}`);
   assert.equal(voice.engine, "Kokoro 82M");
-  const expected = crypto.createHash("sha256").update(`${voice.signature}:${text}`).digest("hex").slice(0, 24);
+  const expected = crypto.createHash("sha256").update(`${(metadata[text]?.voice || voice).signature}:${text}${metadata[text]?.revision ? `:${metadata[text].revision}` : ""}`).digest("hex").slice(0, 24);
   assert.equal(manifest[text], `audio/english/${expected}.mp3`, "recordings must use the chosen voice and exact text");
   const buffer = fs.readFileSync(path.join(app, manifest[text]));
   assert.ok(buffer.length > 500, `empty/truncated clip: ${text}`);

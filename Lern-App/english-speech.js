@@ -4,10 +4,6 @@ function englishAudioKey(text) {
   return String(text).normalize("NFC").replace(/[’‘]/g, "'").replace(/\s+/g, " ").trim();
 }
 
-function englishSpokenWords(text) {
-  return text.match(/[A-Za-z]+(?:['’][A-Za-z]+)*(?:-[A-Za-z]+)*|\d+(?::\d+)?/g) || [];
-}
-
 function setEnglishSpeech(grade, mode, index, text = [], choices = []) {
   const card = englishPools[grade][mode][index];
   card.english = {
@@ -176,7 +172,6 @@ function collectEnglishAudioTexts() {
     const key = englishAudioKey(typeof text === "string" ? text : text.text);
     if (!key) return;
     texts.add(key);
-    for (const word of englishSpokenWords(key)) texts.add(englishAudioKey(word));
     // Sentence illustrations also expose sentence-level listening controls.
     // Record natural complete sentences rather than joining individual words.
     for (const sentence of key.match(/[^.!?]+(?:[.!?]+|$)/g) || []) {
