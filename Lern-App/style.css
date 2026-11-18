@@ -10,7 +10,6 @@
 
 .Link-im-error{
   color: red;
-  text-decoration: underline;
   cursor: pointer;
   background-color: #f3b6bb;
   border: 1px solid #f3b6bb;
@@ -553,10 +552,15 @@ body:has(#lesson:not([hidden])) {
   width: 100%;
   max-width: none;
   min-height: 100svh;
-  min-height: 100dvh;
   flex-direction: column;
   padding: clamp(12px, 3vw, 28px);
   padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+@supports (min-height: 100dvh) {
+  #lesson:not([hidden]) {
+    min-height: 100dvh;
+  }
 }
 
 .lesson-view.is-intro,
@@ -1193,6 +1197,10 @@ body:has(#lesson:not([hidden])) {
 }
 
 .completion-spark {
+  --spark-color: #e9b550;
+  --spark-delay: 0ms;
+  --spark-x: 0px;
+  --spark-y: 0px;
   position: absolute;
   left: 50%;
   top: 50%;

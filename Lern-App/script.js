@@ -749,6 +749,10 @@ function formatRatioNumber(value, money = false) {
   return (money ? value.toFixed(2) : String(Number(value.toFixed(3)))).replace(".", ",");
 }
 
+function formatEuro(value) {
+  return `${value.toFixed(2).replace(".", ",")} €`;
+}
+
 function makeRatioQuestion() {
   const scenario = pickRandom(ratioScenarios);
   const given = pickRandom(scenario.quantities);
@@ -822,7 +826,7 @@ function makeQuestion(topic) {
     case "money":
       a = randomInt(2, 8);
       b = randomInt(2, 9);
-      return { text: `Ein Heft kostet ${a} €. Wie viel kosten ${b} Hefte? (in €)`, answer: a * b, hint: `Addiere den Preis ${b} Mal oder multipliziere.`, solution: `${a} × ${b} € = ${a * b} €` };
+      return { text: `Ein Heft kostet ${formatEuro(a)}. Wie viel kosten ${b} Hefte? (in €)`, answer: a * b, hint: `Addiere den Preis ${b} Mal oder multipliziere.`, solution: `${a} × ${formatEuro(a)} = ${formatEuro(a * b)}` };
     case "fractions": {
       const denominator = progress.grade <= 4 ? pickRandom([2, 4]) : pickRandom([2, 3, 4, 5]);
       const multiplier = randomInt(2, 10);
@@ -839,7 +843,8 @@ function makeQuestion(topic) {
       const right = (subtract ? Math.min(x, y) : y) / 10;
       const answer = Math.round((subtract ? left - right : left + right) * 10) / 10;
       const operator = subtract ? "−" : "+";
-      return { text: `${topic.moneyContext ? "Rechne mit Geldbeträgen (in €). " : ""}Wie viel ist ${left.toFixed(1).replace(".", ",")} ${operator} ${right.toFixed(1).replace(".", ",")}?`, answer, hint: "Stelle die Kommas untereinander.", solution: `${left.toFixed(1).replace(".", ",")} ${operator} ${right.toFixed(1).replace(".", ",")} = ${answer.toFixed(1).replace(".", ",")}` };
+      const format = topic.moneyContext ? formatEuro : value => value.toFixed(1).replace(".", ",");
+      return { text: `${topic.moneyContext ? "Rechne mit Geldbeträgen (in €). " : ""}Wie viel ist ${format(left)} ${operator} ${format(right)}?`, answer, hint: "Stelle die Kommas untereinander.", solution: `${format(left)} ${operator} ${format(right)} = ${format(answer)}` };
     }
     case "geometry":
       a = randomInt(2, 12);
@@ -2218,8 +2223,7 @@ function reportExerciseError(button) {
 function startLesson(topicIndex) {
   const topics = currentTopics();
   const topic = topics[topicIndex];
-  const count = exercisesPerLesson;
-  const questions = makeUniqueQuestions(topic, count);
+  const questions = makeUniqueQuestions(topic, exercisesPerLesson);
   rememberQuestions(questions);
   activeLesson = {
     topic,
@@ -2392,6 +2396,9 @@ function renderLesson() {
   document.querySelector("#report-button").addEventListener("click", event => reportExerciseError(event.currentTarget));
   activeLesson.taskPanel = question.audioText || question.modelText ? "prompt" : "combined";
   showLessonPanel(activeLesson.taskPanel);
+  if (progress.subject === "math" && position > 0) {
+    lessonView.querySelector("#answer-input")?.focus({ preventScroll: true });
+  }
   fitLessonTask();
   window.scrollTo(0, 0);
 }
@@ -2523,7 +2530,7 @@ function checkAnswer(event, submittedAnswer, choiceButton) {
 }
 
 function updateLessonProgress() {
-  const { firstAttempts, position, questions } = activeLesson;
+  const { firstAttempts, position } = activeLesson;
   const answered = position + (activeLesson.resolved ? 1 : 0);
   const segment = document.querySelector(`.progress-segment[data-question="${position}"]`);
   const hadMistake = firstAttempts[position] === false;
