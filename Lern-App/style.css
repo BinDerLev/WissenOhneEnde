@@ -617,7 +617,7 @@ body:has(#lesson:not([hidden])) {
 
 .lesson-toolbar {
   display: grid;
-  grid-template-columns: 44px minmax(0, 360px) 44px;
+  grid-template-columns: minmax(72px, 1fr) minmax(0, 360px) minmax(72px, 1fr);
   justify-content: space-between;
   align-items: center;
   gap: clamp(8px, 2vw, 20px);
@@ -643,13 +643,45 @@ body:has(#lesson:not([hidden])) {
   box-shadow: 0 4px 18px rgb(53 59 48 / 6%);
 }
 
-.lesson-point-flight {
+.lesson-score {
+  justify-self: end;
+  padding: 6px 10px;
+  border: 1px solid #e7d6a6;
+  border-radius: 999px;
+  background: #fff5da;
+  color: #775b28;
+  font-size: 13px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.lesson-reward {
   position: fixed;
   z-index: 2;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+}
+
+.lesson-reward-spark {
+  position: absolute;
+  color: #cb8f29;
+  font-size: 20px;
+  line-height: 1;
+  text-shadow: 0 0 8px #fff5da;
+}
+
+.lesson-reward-spark:nth-child(3n) {
+  color: #578773;
+}
+
+.lesson-point-flight {
+  position: absolute;
   padding: 8px 15px;
   border: 1px solid #f3d487;
   border-radius: 999px;
-  background: #fff0c9;
+  background: linear-gradient(145deg, #fff6ce, #f2bd55);
   box-shadow: 0 6px 20px rgb(119 91 40 / 18%);
   color: #775b28;
   font-size: 22px;

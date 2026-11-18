@@ -2284,10 +2284,14 @@ function renderLesson() {
         <p class="lesson-step">Aufgabe ${position + 1} von ${questions.length}</p>
         <div class="progress-track" id="progress-track" role="progressbar" aria-label="Gelöste Aufgaben" aria-valuemin="0" aria-valuemax="${questions.length}" aria-valuenow="${answered}">
           ${activeLesson.firstAttempts.map((result, index) => {
-            const status = index < position || (index === position && activeLesson.resolved) ? " is-correct" : result === false ? " is-trying" : "";
+            const solved = index < answered;
+            const status = result === false ? " is-trying" : solved ? " is-correct" : "";
             return `<span class="progress-segment${status}" data-question="${index}" aria-hidden="true"></span>`;
           }).join("")}
         </div>
+      </div>
+      <div class="lesson-score" id="lesson-score" role="status" aria-atomic="true">
+        <span aria-hidden="true">★</span> <span id="lesson-score-value">${progress.points}</span><span class="sr-only"> Punkte insgesamt</span>
       </div>
     </div>
     <article class="exercise-card">
@@ -2522,25 +2526,28 @@ function updateLessonProgress() {
   const { firstAttempts, position, questions } = activeLesson;
   const answered = position + (activeLesson.resolved ? 1 : 0);
   const segment = document.querySelector(`.progress-segment[data-question="${position}"]`);
-  segment.classList.toggle("is-correct", activeLesson.resolved);
-  segment.classList.toggle("is-trying", firstAttempts[position] === false && !activeLesson.resolved);
+  const hadMistake = firstAttempts[position] === false;
+  segment.classList.toggle("is-correct", activeLesson.resolved && !hadMistake);
+  segment.classList.toggle("is-trying", hadMistake);
 
   const progressTrack = document.querySelector("#progress-track");
   progressTrack.setAttribute("aria-valuenow", String(answered));
 }
 
-function animateLessonPoints(points, origin) {
+async function animateLessonPoints(points, origin) {
   const lesson = activeLesson;
+  const target = document.querySelector("#lesson-score");
+  const score = document.querySelector("#lesson-score-value");
+  const isCurrentLesson = () => activeLesson === lesson && !lessonView.hidden && target?.isConnected;
   const advance = () => {
-    if (activeLesson !== lesson || lessonView.hidden) return;
-    // Let an English answer finish playing while the current exercise is visible.
+    // Let the English answer finish playing before loading the next task.
     if (englishPlayback) englishAudioAdvance = nextQuestion;
     else nextQuestion();
   };
 
-  const target = lessonView.querySelector(".lesson-progress");
-  if (!origin || !target || typeof target.animate !== "function" ||
+  if (!origin || typeof target?.animate !== "function" ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (score) score.textContent = String(progress.points);
     advance();
     return;
   }
@@ -2551,24 +2558,52 @@ function animateLessonPoints(points, origin) {
   const y = from.top + from.height / 2;
   const dx = to.left + to.width / 2 - x;
   const dy = to.top + to.height / 2 - y;
+  const layer = document.createElement("div");
+  layer.className = "lesson-reward";
+  layer.setAttribute("aria-hidden", "true");
+
   const badge = document.createElement("span");
   badge.className = "lesson-point-flight";
-  badge.setAttribute("aria-hidden", "true");
   badge.textContent = `★ +${points}`;
   badge.style.left = `${x}px`;
   badge.style.top = `${y}px`;
-  lessonView.append(badge);
+  layer.append(badge);
+  lessonView.append(layer);
 
-  const animation = badge.animate([
-    { transform: "translate(-50%, -50%) scale(.7)", opacity: 0 },
-    { transform: "translate(-50%, calc(-50% - 18px)) scale(1.1)", opacity: 1, offset: 0.25 },
-    { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(.45)`, opacity: 0 }
-  ], { duration: 720, easing: "ease-in-out" });
+  for (let index = 0; index < 12; index++) {
+    const angle = index / 12 * Math.PI * 2;
+    const distance = 42 + (index % 3) * 16;
+    const sparkle = document.createElement("span");
+    sparkle.className = "lesson-reward-spark";
+    sparkle.textContent = index % 2 ? "✦" : "★";
+    sparkle.style.left = `${x}px`;
+    sparkle.style.top = `${y}px`;
+    layer.append(sparkle);
+    sparkle.animate([
+      { transform: "translate(-50%, -50%) scale(.2)", opacity: 0 },
+      { opacity: 1, offset: 0.25 },
+      { transform: `translate(calc(-50% + ${Math.cos(angle) * distance}px), calc(-50% + ${Math.sin(angle) * distance}px)) scale(.35)`, opacity: 0 }
+    ], { duration: 530, delay: index % 3 * 35, easing: "ease-out", fill: "both" });
+  }
 
-  animation.finished.then(() => {
-    badge.remove();
-    advance();
-  }, () => badge.remove());
+  const flight = badge.animate([
+    { transform: "translate(-50%, -50%) scale(.6)", opacity: 0 },
+    { transform: "translate(-50%, calc(-50% - 24px)) scale(1.25)", opacity: 1, offset: 0.3 },
+    { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(.35)`, opacity: 0.85 }
+  ], { duration: 820, easing: "ease-in-out" });
+
+  await flight.finished.catch(() => {});
+  layer.remove();
+  if (!isCurrentLesson()) return;
+
+  score.textContent = String(progress.points);
+  const impact = target.animate([
+    { transform: "scale(1)", boxShadow: "0 0 0 0 #e9b54f88" },
+    { transform: "scale(1.18)", boxShadow: "0 0 0 7px #e9b54f55", offset: 0.35 },
+    { transform: "scale(1)", boxShadow: "0 0 0 13px #e9b54f00" }
+  ], { duration: 280, easing: "ease-out" });
+  await impact.finished.catch(() => {});
+  if (isCurrentLesson()) advance();
 }
 
 function nextQuestion() {
