@@ -494,6 +494,7 @@ h1 {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.55;
+  margin: 0 0 1em 0;
 }
 
 .topic-start {
@@ -913,7 +914,6 @@ body:has(#lesson:not([hidden])) {
   gap: 13px;
   width: 100%;
   min-height: 70px;
-  padding: 9px 12px;
   border: 2px solid #e0e8e7;
   border-radius: 16px;
   background: linear-gradient(110deg, #fffefa, #f5f8f7);
