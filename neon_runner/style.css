@@ -65,6 +65,10 @@ body::after {
     display: none;
 }
 
+.touch-duck-button {
+    display: none;
+}
+
 .touch-jump-button:focus-visible,
 .btn:focus-visible {
     outline: 3px solid var(--cyan);
@@ -213,13 +217,15 @@ canvas {
     display: block;
     width: 100%;
     height: auto;
-    border: 1px solid rgba(98, 244, 255, 0.58);
-    border-radius: 18px;
+    border: 1px solid rgba(98, 244, 255, 0.72);
+    border-radius: 16px;
     background: linear-gradient(180deg, #080d20 0%, #11132f 62%, #1a2040 100%);
     box-shadow:
-        0 0 0 5px rgba(98, 244, 255, 0.035),
-        0 14px 38px rgba(0, 0, 0, 0.28),
-        inset 0 0 36px rgba(98, 244, 255, 0.08);
+        0 0 0 1px rgba(255, 89, 199, 0.2),
+        0 0 0 6px rgba(98, 244, 255, 0.035),
+        0 18px 46px rgba(0, 0, 0, 0.38),
+        0 0 34px rgba(98, 244, 255, 0.10),
+        inset 0 0 42px rgba(98, 244, 255, 0.06);
 }
 
 .controls {
@@ -351,11 +357,18 @@ canvas {
 }
 
 @media (max-width: 520px), (pointer: coarse) {
-    .touch-jump-button {
-        display: block;
-        width: min(100%, 340px);
-        min-height: 50px;
+    .touch-controls {
+        display: flex;
+        gap: 10px;
+        width: min(100%, 440px);
         margin: 16px auto 0;
+    }
+
+    .touch-jump-button,
+    .touch-duck-button {
+        display: block;
+        flex: 1;
+        min-height: 50px;
         border: 1px solid rgba(98, 244, 255, 0.62);
         border-radius: 14px;
         background: linear-gradient(100deg, rgba(98, 244, 255, 0.18), rgba(167, 131, 255, 0.2));
@@ -365,6 +378,13 @@ canvas {
         letter-spacing: 0.08em;
         text-transform: uppercase;
         touch-action: manipulation;
+        user-select: none;
+    }
+
+    .touch-duck-button {
+        border-color: rgba(255, 89, 199, 0.58);
+        background: linear-gradient(100deg, rgba(255, 89, 199, 0.17), rgba(167, 131, 255, 0.2));
+        color: #ff9bdc;
     }
 
     canvas {
