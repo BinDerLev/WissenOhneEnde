@@ -70,7 +70,7 @@ const curriculum = {
     ],
     3: [
       { title: "Einmaleins‑Training", skill: "multiply", icon: "×", description: "Schnelle Übungen zum Einmaleins vertiefen.", explanation: "Trainiere kleine Reihen (2er, 3er, 5er, 10er) mit kurzen Aufgaben und Wiederholungen.", difficulty: "easy" },
-      { title: "Sachtextaufgaben", skill: "money", icon: "€", description: "Texte lesen und passende Rechenwege finden.", explanation: "Lies die Aufgabe genau, markiere Zahlen und entscheide, ob du addieren, multiplizieren oder teilen musst.", difficulty: "easy" },
+      { title: "Sachtextaufgaben", skill: "money", wordProblems: true, icon: "€", description: "Alltagsaufgaben lesen und passende Rechenwege finden.", explanation: "Lies die Aufgabe genau. Was ist gegeben, was wird gesucht? Entscheide dann, ob du plus, minus, mal oder geteilt rechnest.", difficulty: "easy" },
       { title: "Kopfrechnen bis 100", skill: "add", icon: "+", description: "Plus- und Minusaufgaben im Kopf lösen.", explanation: "Zerlege Zahlen in Zehner und Einer und rechne Schritt für Schritt.", difficulty: "easy" },
       { title: "Bruchteile kennenlernen", skill: "fractions", icon: "½", description: "Einfache Anteile von kleinen Mengen bestimmen.", explanation: "Teile eine Menge in gleich große Gruppen und zähle die gesuchten Teile.", difficulty: "easy" }
     ],
@@ -565,6 +565,112 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// Bereiche gehören zur jeweiligen Situation, damit die Zahlen zum Gegenstand passen.
+const purchaseScenarios = [
+  ["Beim Bäcker kostet ein Brötchen", "Brötchen", [0.4, 0.5, 0.6], 10],
+  ["Eine Kugel Eis kostet", "Kugeln", [1.5, 2, 2.5], 5],
+  ["Beim Schulfest kostet ein Stück Kuchen", "Stücke", [1, 1.5, 2], 8],
+  ["Eine Postkarte kostet", "Postkarten", [1, 1.5, 2], 6],
+  ["Ein Heft kostet", "Hefte", [1, 1.5, 2, 3], 9],
+  ["Im Schwimmbad kostet eine Kinderkarte", "Kinderkarten", [3, 4, 5], 6],
+  ["Ein Bündel Radieschen kostet", "Bündel", [1, 1.5, 2], 4],
+  ["Auf dem Flohmarkt kostet ein gebrauchtes Buch", "Bücher", [2, 3, 4, 5], 5],
+  ["Im Stadion kostet eine Brezel", "Brezeln", [2, 2.5, 3], 6],
+  ["Eine Tulpe kostet", "Tulpen", [1, 1.5, 2], 10]
+];
+
+const everydayWordProblems = [
+  ["savings", 12, 25, 3, 10, "+", (a, b) => `Mila hat ${a} € gespart. Zum Geburtstag bekommt sie ${b} € dazu und legt das Geld zur Seite. Wie viel Geld hat sie jetzt gespart? (in €)`],
+  ["bus", 12, 24, 4, 15, "+", (a, b) => `Im Bus sind ${a} Personen. An der nächsten Haltestelle steigen ${b} Personen ein. Niemand steigt aus. Wie viele Personen sind jetzt im Bus?`],
+  ["collecting", 12, 30, 4, 15, "+", (a, b) => `Beim Müllsammeln findet die Klasse am Vormittag ${a} Plastikflaschen und am Nachmittag ${b}. Wie viele Flaschen sammelt sie an diesem Tag?`],
+  ["library", 15, 40, 3, 12, "−", (a, b) => `Auf dem Bücherwagen liegen ${a} Bücher. Die Bibliothekarin stellt ${b} davon ins Regal. Wie viele Bücher liegen noch auf dem Wagen?`],
+  ["change", 10, 10, 3, 9, "−", (a, b) => `Leo bezahlt ein Springseil für ${b} € mit einem ${a}-Euro-Schein. Wie viel Geld bekommt er zurück? (in €)`],
+  ["album", 24, 48, 10, 23, "−", (a, b) => `In Ninas Sammelalbum ist Platz für ${a} Bilder. Sie hat schon ${b} Bilder eingeklebt. Wie viele Plätze sind noch frei?`],
+  ["muffins", 3, 8, 2, 4, ":", (a, b) => `Sam verteilt ${a * b} Muffins gleichmäßig auf ${b} Teller. Wie viele Muffins liegen auf jedem Teller?`],
+  ["team", 3, 6, 2, 5, ":", (a, b) => `Beim Sport werden ${a * b} Kinder in ${b} gleich große Gruppen eingeteilt. Wie viele Kinder sind in jeder Gruppe?`],
+  ["seeds", 3, 7, 2, 6, ":", (a, b) => `Die Garten-AG hat ${a * b} Bohnensamen. In jedes Tütchen kommen ${b} Samen. Wie viele Tütchen werden gefüllt?`, "Teile die Gesamtzahl durch die Anzahl der Samen pro Tütchen."],
+  ["garden", 3, 6, 4, 8, "×", (a, b) => `In einem Beet stehen ${a} Reihen mit je ${b} Erdbeerpflanzen. Wie viele Erdbeerpflanzen stehen im Beet?`],
+  ["party", 2, 6, 2, 8, "×", (a, b) => `Für ein Fest hängen Kinder an jede von ${a} Schnüren genau ${b} Wimpel. Wie viele Wimpel hängen sie insgesamt auf?`],
+  ["bike", 2, 8, 2, 2, "×", (a, b) => `Vor der Schule stehen ${a} Fahrräder. Jedes hat ${b} Räder. Wie viele Räder sind es insgesamt?`],
+  ["snack", 2, 6, 1, 3, "×", (a, b) => `Beim Schulfest kauft Eda ${a} Stücke Kuchen für je ${b} €. Wie viel bezahlt sie insgesamt? (in €)`, "Multipliziere die Anzahl der Stücke mit dem Preis eines Stücks."]
+];
+
+function makeEverydayWordProblem() {
+  const [mathContext, minA, maxA, minB, maxB, operator, prompt, specificHint] = pickRandom(everydayWordProblems);
+  const a = randomInt(minA, maxA);
+  const b = randomInt(minB, maxB);
+  const steps = {
+    "+": [a, b, a + b, "Zähle beide Anzahlen zusammen."],
+    "−": [a, b, a - b, "Ziehe den kleineren Wert vom größeren ab."],
+    "×": [a, b, a * b, "Multipliziere die Zahl der Gruppen mit der Anzahl pro Gruppe."],
+    ":": [a * b, b, a, "Teile die Gesamtzahl durch die Anzahl der Gruppen."]
+  };
+  const [left, right, answer, hint] = steps[operator];
+  return { mathContext, mathOperation: operator, text: prompt(a, b), answer, hint: specificHint || hint, solution: `${left} ${operator} ${right} = ${answer}` };
+}
+
+function makePurchaseQuestion() {
+  const [intro, items, prices, maxCount] = pickRandom(purchaseScenarios);
+  const price = pickRandom(prices);
+  const count = randomInt(2, maxCount);
+  const answer = Math.round(price * 100) * count / 100;
+  return {
+    mathContext: intro,
+    text: `${intro} ${formatEuro(price)}. Wie viel kosten ${count} ${items}? (in €)`,
+    answer,
+    numericTolerance: 1e-9,
+    hint: `Addiere den Preis ${count}-mal oder multipliziere ihn mit ${count}.`,
+    solution: `${count} × ${formatEuro(price)} = ${formatEuro(answer)}`
+  };
+}
+
+const timeScenarios = [
+  ["Der Zoobesuch", 9, 14, 2, 4], ["Das Schulfest", 10, 16, 2, 4],
+  ["Der Kinofilm", 13, 18, 1, 2], ["Das Fußballtraining", 14, 17, 1, 2],
+  ["Die Wanderung", 8, 14, 1, 4], ["Der Flohmarkt", 8, 11, 2, 5],
+  ["Die Zugfahrt", 6, 17, 1, 4], ["Das Basteln in der Bücherei", 10, 16, 1, 2],
+  ["Die Geburtstagsfeier", 12, 16, 2, 4], ["Das Schwimmtraining", 8, 17, 1, 1]
+];
+
+const coinScenarios = [
+  ["In deinem Portemonnaie sind", [10, 20, 5], [4, 2, 4]],
+  ["Im Sparschwein klimpern", [50, 10, 2], [1, 4, 5]],
+  ["In der Klassenkasse liegen", [20, 10, 2], [3, 3, 5]],
+  ["Nach dem Flohmarkt zählst du", [20, 5, 1], [3, 6, 6]],
+  ["Im Münzfach der Spielzeugkasse liegen", [10, 5, 2], [5, 7, 7]],
+  ["Auf dem Küchentisch liegen", [50, 5, 1], [1, 7, 8]],
+  ["Im Stoffbeutel findest du", [10, 2, 1], [6, 8, 8]],
+  ["Du zählst in deiner Jackentasche", [5, 2, 1], [8, 8, 8]],
+  ["Auf der Ablage neben der Tür liegen", [20, 5, 2], [3, 5, 6]],
+  ["In einer kleinen Spardose sind", [50, 20, 5], [1, 2, 2]]
+];
+
+const surveyScenarios = [
+  ["Obst für die Pause", "Äpfel", "Birnen"],
+  ["Ziel für den Klassenausflug", "den Zoo", "das Museum"],
+  ["Spiel für die Sportstunde", "Völkerball", "Staffellauf"],
+  ["Bastelaktion", "Papierflieger", "Masken"],
+  ["Farbe für das Klassenplakat", "Blau", "Grün"],
+  ["Thema für ein Plakat", "Vulkane", "Wale"],
+  ["Film für das Schulkino", "einen Tierfilm", "einen Zeichentrickfilm"],
+  ["Aktion für das Schulfest", "Schatzsuche", "Dosenwerfen"],
+  ["Pflanzen für den Schulgarten", "Sonnenblumen", "Erdbeeren"],
+  ["Tier für das Klassenmaskottchen", "einen Fuchs", "einen Pinguin"]
+];
+
+const boxes = [
+  ["Eine Brotdose", 16, 22, 10, 14, 4, 7],
+  ["Eine Teeschachtel", 12, 16, 6, 9, 6, 9],
+  ["Ein Schuhkarton", 28, 36, 17, 23, 10, 14],
+  ["Eine Aufbewahrungsbox", 32, 45, 21, 28, 14, 22],
+  ["Eine rechteckige Backform", 24, 32, 12, 16, 5, 8],
+  ["Ein kleines Aquarium", 35, 50, 22, 30, 25, 35],
+  ["Ein rechteckiger Pflanzkasten", 38, 50, 16, 23, 14, 20],
+  ["Eine Paketbox", 20, 30, 13, 18, 8, 14],
+  ["Ein Werkzeugkasten", 32, 42, 16, 24, 10, 16],
+  ["Eine Schublade", 34, 48, 25, 32, 8, 14]
+];
+
 function makeFocusedMathQuestion(topic) {
   if (!topic.mode) return null;
   const grade = progress.grade;
@@ -601,8 +707,12 @@ function makeFocusedMathQuestion(topic) {
       return { text: `Berechne ${(result * divisor / 10).toFixed(1).replace(".", ",")} ÷ ${divisor}.`, answer: result / 10, numericTolerance: 1e-9, hint: topic.explanation };
     }
     case "volume": {
-      const height = randomInt(2, 12);
-      return { key: `volume:${[a, b, height].sort((left, right) => left - right).join(":")}`, text: `Ein Quader ist ${a} cm lang, ${b} cm breit und ${height} cm hoch. Wie groß ist sein Volumen in cm³?`, answer: a * b * height, hint: topic.explanation };
+      const [object, minLength, maxLength, minWidth, maxWidth, minHeight, maxHeight] = pickRandom(boxes);
+      const length = randomInt(minLength, maxLength);
+      const width = randomInt(minWidth, maxWidth);
+      const height = randomInt(minHeight, maxHeight);
+      const answer = length * width * height;
+      return { mathContext: object, text: `${object} ist quaderförmig. Die Innenmaße sind ${length} cm (Länge), ${width} cm (Breite) und ${height} cm (Höhe). Wie groß ist das Innenvolumen in cm³?`, answer, hint: topic.explanation, solution: `${length} × ${width} × ${height} = ${answer} cm³` };
     }
     case "mean": {
       const c = randomInt(1, 30);
@@ -633,15 +743,18 @@ function makeFocusedMathQuestion(topic) {
       return { text: `Wie viel ist ${divisor * result} ÷ ${divisor}?`, answer: result, hint: `Welche Zahl ergibt mal ${divisor} den Wert ${divisor * result}?` };
     }
     case "coins": {
-      const tens = randomInt(1, 4);
-      const twenties = randomInt(1, 2);
-      const fives = randomInt(1, 4);
-      return { text: `Du hast ${tens} Münzen zu 10 Cent, ${twenties} Münzen zu 20 Cent und ${fives} Münzen zu 5 Cent. Wie viele Cent sind das zusammen?`, answer: tens * 10 + twenties * 20 + fives * 5, hint: "Berechne erst den Wert jeder Münzsorte. Addiere dann die drei Beträge." };
+      const [intro, values, maxima] = pickRandom(coinScenarios);
+      const counts = maxima.map(max => randomInt(1, max));
+      const coins = values.map((value, index) => `${counts[index]} ${counts[index] === 1 ? "Münze" : "Münzen"} zu ${value} Cent`);
+      const answer = values.reduce((sum, value, index) => sum + value * counts[index], 0);
+      return { mathContext: intro, text: `${intro} ${coins[0]}, ${coins[1]} und ${coins[2]}. Wie viele Cent sind das zusammen?`, answer, hint: "Berechne erst den Wert jeder Münzsorte. Addiere dann die drei Beträge." };
     }
     case "time": {
-      const start = randomInt(6, 16);
-      const duration = randomInt(1, 5);
-      return { text: `Ein Ausflug beginnt um ${start}:00 Uhr und endet um ${start + duration}:00 Uhr. Wie viele Stunden dauert er?`, answer: duration, hint: "Zähle die vollen Stunden zwischen Beginn und Ende." };
+      const [activity, earliest, latest, minDuration, maxDuration] = pickRandom(timeScenarios);
+      const start = randomInt(earliest, latest);
+      const duration = randomInt(minDuration, maxDuration);
+      const end = start + duration;
+      return { mathContext: activity, text: `${activity} beginnt um ${start}:00 Uhr und endet um ${end}:00 Uhr. Wie viele Stunden liegen dazwischen?`, answer: duration, hint: "Zähle die vollen Stunden zwischen Beginn und Ende.", solution: `${end} − ${start} = ${duration} Stunden` };
     }
     case "fraction-compare": {
       const denominator = randomInt(3, 12);
@@ -650,8 +763,12 @@ function makeFocusedMathQuestion(topic) {
       return { key: `fraction-compare:${numerator}:${denominator}`, text: `Welcher Zähler gehört zum größeren Bruch: ${pair[0]}/${denominator} oder ${pair[1]}/${denominator}? Gib nur den Zähler ein.`, answer: numerator + 1, hint: "Bei gleichem Nenner ist der Bruch mit dem größeren Zähler größer." };
     }
     case "data": {
+      const [survey, first, second] = pickRandom(surveyScenarios);
+      const total = grade === 1 ? randomInt(16, 20) : randomInt(18, 30);
+      const votes = randomInt(4, total - 4);
+      const otherVotes = total - votes;
       const difference = Math.random() < 0.5;
-      return { text: `Bei einer Umfrage wählen ${a} Kinder Äpfel und ${a + b} Kinder Birnen. ${difference ? "Wie viele Kinder mehr wählen Birnen als Äpfel?" : "Wie viele Kinder haben insgesamt abgestimmt?"}`, answer: difference ? b : 2 * a + b, hint: difference ? "Berechne den Unterschied der beiden Anzahlen." : "Addiere die beiden Anzahlen." };
+      return { mathContext: survey, text: `Die Klasse stimmt ab: ${survey}. Jedes Kind hat eine Stimme. ${votes} Kinder wählen ${first} und ${otherVotes} Kinder wählen ${second}. ${difference ? "Um wie viele Stimmen unterscheiden sich die beiden Ergebnisse?" : "Wie viele Kinder haben insgesamt abgestimmt?"}`, answer: difference ? Math.abs(votes - otherVotes) : total, hint: difference ? "Ziehe die kleinere Stimmenzahl von der größeren ab." : "Addiere die beiden Anzahlen." };
     }
     default: return null;
   }
@@ -769,7 +886,7 @@ function makeRatioQuestion() {
   const requestedValue = format(targetValue);
   return {
     key: `ratio:${scenario.id}:${given}:${target}:${rate}:${backwards ? "quantity" : "value"}`,
-    ratioContext: scenario.id,
+    mathContext: scenario.id,
     text: `${scenario.intro(given, givenValue)} ${backwards ? scenario.backward(requestedValue) : scenario.forward(target)}`,
     note: scenario.note,
     answer,
@@ -780,6 +897,94 @@ function makeRatioQuestion() {
     solution: backwards
       ? `${givenValue} : ${given} = ${format(rate / divisor)} ${scenario.valueUnit} pro Einheit. ${requestedValue} : ${format(rate / divisor)} = ${answer} ${unit}.`
       : `${givenValue} : ${given} = ${format(rate / divisor)} ${scenario.valueUnit} pro Einheit. ${format(rate / divisor)} × ${target} = ${format(answer)} ${unit}.`
+  };
+}
+
+const fractionScenarios = [
+  [12, 40, n => `Auf einem Tisch liegen ${n} Legosteine.`, "der Steine sind blau. Wie viele blaue Steine sind das?"],
+  [12, 30, n => `In einer Klasse sind ${n} Kinder.`, "der Kinder kommen zu Fuß zur Schule. Wie viele sind das?"],
+  [8, 24, n => `Ein Blech enthält ${n} Kekse.`, "der Kekse haben Schokostückchen. Wie viele sind das?"],
+  [8, 20, n => `In einem Beet wachsen ${n} Tulpen.`, "der Tulpen sind rot. Wie viele sind das?"],
+  [12, 35, n => `Für ein Spiel bastelt die Klasse ${n} Bildkarten.`, "der Karten zeigen Tiere. Wie viele sind das?"],
+  [12, 40, n => `Ein Wollfaden ist ${n} cm lang.`, "des Fadens werden abgeschnitten. Wie lang ist das abgeschnittene Stück in cm?"],
+  [16, 40, n => `Auf einem Fahrradparkplatz gibt es ${n} Stellplätze.`, "der Stellplätze sind belegt. Wie viele sind das?"],
+  [12, 40, n => `In der Schulbücherei stehen ${n} Bücher in einem Regal.`, "der Bücher sind Sachbücher. Wie viele sind das?"],
+  [8, 24, n => `Auf der Tafel hängen ${n} Magnete.`, "der Magnete sind rund. Wie viele sind das?"],
+  [12, 32, n => `Im Supermarkt stehen ${n} Joghurtbecher in einer Kiste.`, "der Becher enthalten Erdbeerjoghurt. Wie viele sind das?"]
+];
+
+const rectangleScenarios = [
+  ["Ein rechteckiges Foto", "cm", 13, 18, 9, 12],
+  ["Eine rechteckige Postkarte", "cm", 14, 16, 9, 11],
+  ["Ein rechteckiges Schneidebrett", "cm", 25, 35, 15, 22],
+  ["Eine rechteckige Spielkarte", "cm", 8, 10, 5, 7],
+  ["Ein rechteckiges Blumenbeet", "m", 3, 7, 1, 2],
+  ["Ein rechteckiger Teppich", "m", 3, 5, 1, 2],
+  ["Ein rechteckiger Hühnerauslauf", "m", 5, 9, 2, 4],
+  ["Ein rechteckiger Sandkasten", "m", 3, 5, 1, 3],
+  ["Ein rechteckiger Bilderrahmen", "cm", 20, 30, 15, 19],
+  ["Eine rechteckige Picknickdecke", "m", 2, 3, 1, 2]
+];
+
+const lengthScenarios = [
+  ["Ein Springseil", 2, 3], ["Eine Schnur zum Basteln", 2, 5],
+  ["Ein Gartenschlauch", 10, 20], ["Ein Regalbrett", 1, 1],
+  ["Ein Balken für ein Baumhaus", 2, 4], ["Ein Tisch für das Schulfest", 2, 3],
+  ["Ein Verlängerungskabel", 3, 10], ["Ein kleiner Lieferwagen", 4, 6],
+  ["Eine Bahn im Schwimmbad", 25, 25], ["Eine kurze Laufstrecke", 30, 50],
+  ["Eine Girlande", 2, 5], ["Eine Werkbank", 1, 2]
+];
+
+const percentScenarios = [
+  ["bike", [120, 160, 200, 240, 300], (n, p) => `Ein Fahrrad kostet ${n} €. Der Laden gibt ${p} % Rabatt. Um wie viele Euro sinkt der Preis?`],
+  ["backpack", [20, 40, 60], (n, p) => `Ein Rucksack kostet ${n} €. Im Angebot ist er ${p} % günstiger. Wie viele Euro sparst du?`],
+  ["books", [20, 40, 60, 80], (n, p) => `Die Bücherei hat ${n} neue Bücher. ${p} % davon sind Comics. Wie viele Comics sind neu?`],
+  ["trail", [200, 400, 600, 800], (n, p) => `Ein Rundweg ist ${n} m lang. ${p} % des Weges führen über Holzstege. Wie viele Meter sind das?`],
+  ["audience", [40, 60, 80, 100], (n, p) => `Ein kleiner Theatersaal hat ${n} Plätze. ${p} % der Plätze sind belegt. Wie viele Plätze sind belegt?`],
+  ["seeds", [20, 40, 60, 80], (n, p) => `Eine Garten-AG sät ${n} Samen aus. ${p} % davon keimen in der ersten Woche. Wie viele Samen keimen in dieser Woche?`],
+  ["juice", [200, 400, 600, 800, 1000], (n, p) => `Ein Krug enthält ${n} ml Apfelschorle. ${p} % davon sind Apfelsaft. Wie viele Milliliter Apfelsaft sind im Krug?`],
+  ["tickets", [40, 60, 80, 100], (n, p) => `Für ein Schulkonzert gibt es ${n} Eintrittskarten. ${p} % davon wurden am ersten Tag verkauft. Wie viele Karten wurden an diesem Tag verkauft?`],
+  ["basketball", [20, 40, 60], (n, p) => `Am Basketballkorb macht ein Kind ${n} Würfe. ${p} % davon treffen. Wie viele Treffer sind das?`],
+  ["water", [80, 100, 120], (n, p) => `Eine Regentonne fasst ${n} l. Sie ist zu ${p} % gefüllt. Wie viele Liter Wasser sind in der Tonne?`]
+];
+
+const moneyCalculationScenarios = {
+  add: [
+    ["bakery", 7, 15, 12, 35, (a, b) => `Beim Bäcker kostet ein Laugenbrötchen ${a} und ein Stück Kuchen ${b}. Wie viel kosten beide zusammen?`],
+    ["market", 10, 28, 15, 36, (a, b) => `Auf dem Wochenmarkt kosten die Möhren ${a} und die Äpfel ${b}. Wie viel kostet der Einkauf?`],
+    ["school", 10, 35, 8, 25, (a, b) => `Für die Schule kauft Ina einen Block für ${a} und einen Bleistift für ${b}. Wie viel bezahlt sie?`],
+    ["cinema", 60, 95, 25, 58, (a, b) => `Eine Kinokarte kostet ${a}, eine kleine Tüte Popcorn ${b}. Wie viel kostet beides zusammen?`],
+    ["fair", 10, 28, 8, 22, (a, b) => `Beim Schulfest kostet ein Sandwich ${a} und ein Becher Saft ${b}. Wie viel kosten beide zusammen?`],
+    ["flea-market", 15, 45, 30, 85, (a, b) => `Auf dem Flohmarkt kauft Cem ein Buch für ${a} und ein Puzzle für ${b}. Wie viel bezahlt er?`],
+    ["flowers", 18, 36, 22, 50, (a, b) => `Eine Sonnenblume kostet ${a} und eine Rose ${b}. Wie viel kosten beide zusammen?`],
+    ["savings", 15, 55, 25, 70, (a, b) => `Nele legt diese Woche ${a} und nächste Woche ${b} in ihr Sparschwein. Wie viel legt sie in den zwei Wochen hinein?`],
+    ["post", 10, 24, 9, 12, (a, b) => `Eine Urlaubskarte kostet ${a}. Die Briefmarke kostet ${b}. Wie viel kostet beides zusammen?`]
+  ],
+  subtract: [
+    ["ice", 50, 50, 15, 29, (a, b) => `Ein Eis kostet ${b}. Tarek bezahlt mit einem Schein über ${a}. Wie viel Wechselgeld bekommt er?`],
+    ["museum", 100, 100, 35, 79, (a, b) => `Für das Museum hat Lina ${a} dabei. Die Eintrittskarte kostet ${b}. Wie viel Geld bleibt ihr?`],
+    ["craft", 100, 150, 45, 85, (a, b) => `Die Bastelgruppe hat ${a} für Material eingeplant. Das Material kostet ${b}. Wie viel Geld bleibt übrig?`],
+    ["pool", 50, 50, 28, 47, (a, b) => `Ein Kind zahlt am Schwimmbad ${a} für eine Karte, die ${b} kostet. Wie viel Rückgeld erhält es?`],
+    ["flea-market", 60, 95, 20, 55, (a, b) => `Beim Flohmarkt nimmt Ben ${a} ein. Für die Standgebühr zahlt er ${b}. Wie viel bleibt ihm von den Einnahmen?`],
+    ["savings", 70, 100, 20, 55, (a, b) => `Ein Spiel kostet ${a}. Jule hat schon ${b} dafür gespart. Wie viel Geld fehlt ihr noch?`],
+    ["fruit", 20, 40, 10, 19, (a, b) => `Eine Schale Erdbeeren kostet ${a}, ein Apfel ${b}. Wie viel mehr kostet die Schale Erdbeeren?`],
+    ["post", 50, 50, 12, 28, (a, b) => `Eine Postkarte mit Briefmarke kostet ${b}. Ali bezahlt mit einem Schein über ${a}. Wie viel Geld bekommt er zurück?`],
+    ["zoo", 60, 85, 20, 45, (a, b) => `Eine Kinderkarte für den Tierpark kostet ${a}. Mit einem Gutschein werden ${b} vom Preis abgezogen. Wie viel kostet die Karte mit Gutschein?`]
+  ]
+};
+
+function makeMoneyCalculation(subtract) {
+  const [mathContext, minLeft, maxLeft, minRight, maxRight, prompt] = pickRandom(moneyCalculationScenarios[subtract ? "subtract" : "add"]);
+  const left = randomInt(minLeft, maxLeft);
+  const right = randomInt(minRight, maxRight);
+  const answer = (subtract ? left - right : left + right) / 10;
+  return {
+    mathContext,
+    text: `${prompt(formatEuro(left / 10), formatEuro(right / 10))} (in €)`,
+    answer,
+    numericTolerance: 1e-9,
+    hint: "Stelle die Kommas untereinander.",
+    solution: `${formatEuro(left / 10)} ${subtract ? "−" : "+"} ${formatEuro(right / 10)} = ${formatEuro(answer)}`
   };
 }
 
@@ -824,47 +1029,60 @@ function makeQuestion(topic) {
       b = randomInt(2, topic.written ? 99 : 10);
       return { text: `Wie viel ist ${a} × ${b}?`, answer: a * b, hint: `Du kannst ${a} Gruppen mit je ${b} zählen.`, solution: `${a} × ${b} = ${a * b}` };
     case "money":
-      a = randomInt(2, 8);
-      b = randomInt(2, 9);
-      return { text: `Ein Heft kostet ${formatEuro(a)}. Wie viel kosten ${b} Hefte? (in €)`, answer: a * b, hint: `Addiere den Preis ${b} Mal oder multipliziere.`, solution: `${a} × ${formatEuro(a)} = ${formatEuro(a * b)}` };
+      return topic.wordProblems ? makeEverydayWordProblem() : makePurchaseQuestion();
     case "fractions": {
+      const [min, max, intro, task] = pickRandom(fractionScenarios);
       const denominator = progress.grade <= 4 ? pickRandom([2, 4]) : pickRandom([2, 3, 4, 5]);
-      const multiplier = randomInt(2, 10);
+      const multiplier = randomInt(Math.ceil(min / denominator), Math.floor(max / denominator));
       const numerator = randomInt(1, denominator - 1);
       const whole = denominator * multiplier;
       const answer = numerator * multiplier;
-      return { text: `${progress.grade <= 4 ? "Eine Strecke ist " + whole + " cm lang. " : ""}Wie viel ist ${numerator}/${denominator} von ${whole}?${progress.grade <= 4 ? " Gib die Länge in cm an." : ""}`, answer, hint: `Teile ${whole} zuerst durch ${denominator}.`, solution: `${whole} : ${denominator} × ${numerator} = ${answer}` };
+      return { mathContext: task, text: `${intro(whole)} ${numerator}/${denominator} ${task}`, answer, hint: `Teile ${whole} zuerst durch ${denominator}.`, solution: `${whole} : ${denominator} × ${numerator} = ${answer}` };
     }
     case "decimal": {
+      const subtract = topic.operation === "subtract";
+      if (topic.moneyContext) return makeMoneyCalculation(subtract);
       const x = randomInt(10, 99);
       const y = randomInt(10, 99);
-      const subtract = topic.operation === "subtract";
       const left = (subtract ? Math.max(x, y) : x) / 10;
       const right = (subtract ? Math.min(x, y) : y) / 10;
       const answer = Math.round((subtract ? left - right : left + right) * 10) / 10;
       const operator = subtract ? "−" : "+";
-      const format = topic.moneyContext ? formatEuro : value => value.toFixed(1).replace(".", ",");
-      return { text: `${topic.moneyContext ? "Rechne mit Geldbeträgen (in €). " : ""}Wie viel ist ${format(left)} ${operator} ${format(right)}?`, answer, hint: "Stelle die Kommas untereinander.", solution: `${format(left)} ${operator} ${format(right)} = ${format(answer)}` };
+      const format = value => value.toFixed(1).replace(".", ",");
+      return { text: `Wie viel ist ${format(left)} ${operator} ${format(right)}?`, answer, hint: "Stelle die Kommas untereinander.", solution: `${format(left)} ${operator} ${format(right)} = ${format(answer)}` };
     }
-    case "geometry":
-      a = randomInt(2, 12);
-      b = randomInt(2, 12);
-      if (topic.measure === "perimeter" || (topic.measure !== "area" && Math.random() < 0.5)) {
-        return { text: `Ein Rechteck ist ${a} cm lang und ${b} cm breit. Wie groß ist sein Umfang in cm?`, answer: 2 * (a + b), hint: "Der Umfang ist die Summe aller vier Seiten.", solution: `2 × (${a} + ${b}) = ${2 * (a + b)} cm` };
-      }
-      return { text: `Ein Rechteck ist ${a} cm lang und ${b} cm breit. Wie groß ist seine Fläche in cm²?`, answer: a * b, hint: "Fläche = Länge × Breite.", solution: `${a} × ${b} = ${a * b} cm²` };
+    case "geometry": {
+      const [object, unit, minLength, maxLength, minWidth, maxWidth] = pickRandom(rectangleScenarios);
+      const length = randomInt(minLength, maxLength);
+      const width = randomInt(minWidth, maxWidth);
+      const perimeter = topic.measure === "perimeter" || (topic.measure !== "area" && Math.random() < 0.5);
+      const answer = perimeter ? 2 * (length + width) : length * width;
+      const resultUnit = perimeter ? unit : `${unit}²`;
+      const calculation = perimeter ? `2 × (${length} + ${width})` : `${length} × ${width}`;
+      return {
+        mathContext: object,
+        text: `${object} ist ${length} ${unit} lang und ${width} ${unit} breit. Wie groß ist ${perimeter ? "der Umfang" : "die Fläche"} in ${resultUnit}?`,
+        answer,
+        hint: perimeter ? "Der Umfang ist die Summe aller vier Seiten." : "Multipliziere die Länge mit der Breite.",
+        solution: `${calculation} = ${answer} ${resultUnit}`
+      };
+    }
     case "units": {
-      const meters = randomInt(1, progress.grade <= 2 ? 20 : 100);
+      const scenarios = progress.grade <= 2 ? lengthScenarios.filter(([, min]) => min <= 20) : lengthScenarios;
+      const [object, min, max] = pickRandom(scenarios);
+      const meters = randomInt(min, progress.grade <= 2 ? Math.min(max, 20) : max);
+      const centimeters = meters * 100;
       if (Math.random() < 0.5) {
-        return { text: `Wie viele Meter sind ${meters * 100} Zentimeter?`, answer: meters, hint: "100 Zentimeter sind ein Meter. Teile die Zentimeterzahl durch 100.", solution: `${meters * 100} : 100 = ${meters} m` };
+        return { mathContext: object, text: `${object} ist ${centimeters} Zentimeter lang. Wie viele Meter sind das?`, answer: meters, hint: "100 Zentimeter sind ein Meter. Teile die Zentimeterzahl durch 100.", solution: `${centimeters} : 100 = ${meters} m` };
       }
-      return { text: `Wie viele Zentimeter sind ${meters} Meter?`, answer: meters * 100, hint: "Ein Meter besteht aus 100 Zentimetern.", solution: `${meters} × 100 = ${meters * 100} cm` };
+      return { mathContext: object, text: `${object} ist ${meters} Meter lang. Wie viele Zentimeter sind das?`, answer: centimeters, hint: "Ein Meter besteht aus 100 Zentimetern.", solution: `${meters} × 100 = ${centimeters} cm` };
     }
     case "percent": {
-      const percent = [10, 20, 25, 50][randomInt(0, 3)];
-      const whole = randomInt(2, 20) * 20;
+      const [mathContext, totals, prompt] = pickRandom(percentScenarios);
+      const percent = pickRandom([10, 20, 25, 50]);
+      const whole = pickRandom(totals);
       const answer = whole * percent / 100;
-      return { text: `Wie viel sind ${percent} % von ${whole}?`, answer, hint: percent === 25 ? "25 % ist ein Viertel." : percent === 50 ? "50 % ist die Hälfte." : "Prozent bedeutet „von hundert“.", solution: `${whole} × ${percent} : 100 = ${answer}` };
+      return { mathContext, text: prompt(whole, percent), answer, hint: percent === 25 ? "25 % ist ein Viertel." : percent === 50 ? "50 % ist die Hälfte." : "Prozent bedeutet „von hundert“.", solution: `${whole} × ${percent} : 100 = ${answer}` };
     }
     case "negative":
       a = randomInt(-15, 15);
@@ -2126,19 +2344,26 @@ function makeUniqueQuestions(topic, count) {
   // Unbekannte Aufgaben zuerst, danach die am längsten nicht gezeigten. Gleichstände mischen.
   const ranked = shuffled([...candidates.values()])
     .sort((left, right) => (recent.get(questionIdentity(left)) || 0) - (recent.get(questionIdentity(right)) || 0));
-  if (progress.subject === "math" && topic.skill === "ratio") {
-    // Andere Zahlen allein reichen hier nicht: innerhalb einer Einheit zuerst
-    // unterschiedliche Alltagssituationen auswählen, unter Beachtung der Historie.
-    const contexts = new Set();
-    const varied = ranked.filter(question => {
-      if (contexts.has(question.ratioContext)) return false;
-      contexts.add(question.ratioContext);
-      return true;
-    });
-    const selected = new Set(varied);
-    return [...varied, ...ranked.filter(question => !selected.has(question))].slice(0, count);
+  if (!ranked.some(question => question.mathContext)) return ranked.slice(0, count);
+
+  // Bei gemischten Sachaufgaben erst die Rechenarten abdecken, danach
+  // verschiedene Situationen. Innerhalb jeder Auswahl gilt die Historie weiter.
+  const operations = new Set();
+  const contexts = new Set();
+  const selected = new Set();
+  for (const question of ranked) {
+    if (!question.mathOperation || operations.has(question.mathOperation)) continue;
+    operations.add(question.mathOperation);
+    contexts.add(question.mathContext);
+    selected.add(question);
   }
-  return ranked.slice(0, count);
+  for (const question of ranked) {
+    if (contexts.has(question.mathContext)) continue;
+    contexts.add(question.mathContext);
+    selected.add(question);
+  }
+  for (const question of ranked) selected.add(question);
+  return [...selected].slice(0, count);
 }
 
 function buildErrorReport() {

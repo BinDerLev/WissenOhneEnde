@@ -30,6 +30,8 @@ const state = {
     animationFrame: null,
     obstacles: [],
     pickups: [],
+    particles: [],
+    shake: 0,
     flashTimer: 0,
     lastTimestamp: 0,
 };
@@ -81,6 +83,8 @@ function resetState() {
     state.flashTimer = 0;
     state.obstacles = [];
     state.pickups = [];
+    state.particles = [];
+    state.shake = 0;
     state.lastTimestamp = 0;
     pauseBtn.disabled = true;
     pauseBtn.textContent = 'Pause';
@@ -161,6 +165,21 @@ function endGame() {
     window.GameRoundSession.finish();
 }
 
+function burst(x, y, color, count = 12) {
+    for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 70 + Math.random() * 210;
+        state.particles.push({
+            x, y, color,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 0.35 + Math.random() * 0.45,
+            maxLife: 0.8,
+            size: 2 + Math.random() * 4,
+        });
+    }
+}
+
 function gameLoop(timestamp) {
     if (!state.running) {
         state.animationFrame = null;
@@ -186,6 +205,16 @@ function update(delta) {
     state.time += delta;
     state.score += delta * 16 + state.speed * delta * 0.012;
     state.speed = Math.min(maxSpeed, state.speed + delta * 7);
+    state.shake = Math.max(0, state.shake - delta * 24);
+
+    for (let i = state.particles.length - 1; i >= 0; i--) {
+        const particle = state.particles[i];
+        particle.life -= delta;
+        particle.x += particle.vx * delta;
+        particle.y += particle.vy * delta;
+        particle.vy += 420 * delta;
+        if (particle.life <= 0) state.particles.splice(i, 1);
+    }
 
     state.spawnTimer -= delta;
     if (state.spawnTimer <= 0) {
@@ -239,8 +268,11 @@ function update(delta) {
                 if (state.shielded) {
                     state.shielded = false;
                     state.score += 50;
+                    burst(player.x + player.width / 2, player.y + player.height / 2, '#62f4ff', 20);
                 } else {
                     state.lives -= 1;
+                    burst(player.x + player.width / 2, player.y + player.height / 2, '#ff5d83', 16);
+                    state.shake = 8;
                 }
                 player.invulnerable = 1.2;
                 state.obstacles.splice(i, 1);
@@ -272,6 +304,7 @@ function update(delta) {
         };
 
         if (rectsIntersect(player, pickupRect)) {
+            burst(pickup.x, pickup.y, pickup.type === 'shield' ? '#62f4ff' : '#ffe27a', 14);
             if (pickup.type === 'shield') {
                 state.shielded = true;
                 state.score += 15;
@@ -625,16 +658,57 @@ function drawPauseOverlay() {
 }
 
 function draw() {
+    ctx.save();
+    if (state.shake > 0) {
+        ctx.translate((Math.random() - 0.5) * state.shake, (Math.random() - 0.5) * state.shake);
+    }
     drawBackground();
 
     state.obstacles.forEach(drawObstacle);
     state.pickups.forEach(drawPickup);
+    state.particles.forEach((particle) => {
+        ctx.globalAlpha = Math.max(0, particle.life / particle.maxLife);
+        ctx.fillStyle = particle.color;
+        ctx.shadowColor = particle.color;
+        ctx.shadowBlur = 12;
+        ctx.fillRect(particle.x, particle.y, particle.size, particle.size);
+    });
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
     drawPlayer();
     drawPauseOverlay();
     drawGameOverOverlay();
+    if (!state.running && !state.over) {
+        ctx.fillStyle = 'rgba(5, 11, 27, 0.3)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#edf7ff';
+        ctx.font = '800 42px Arial';
+        ctx.shadowColor = '#62f4ff';
+        ctx.shadowBlur = 18;
+        ctx.fillText('BEREIT?', canvas.width / 2, canvas.height / 2 - 8);
+        ctx.shadowBlur = 0;
+        ctx.font = '600 19px Arial';
+        ctx.fillStyle = '#b8c8e8';
+        ctx.fillText('Springen oder Start drücken', canvas.width / 2, canvas.height / 2 + 30);
+    }
+    ctx.restore();
 }
 
 document.addEventListener('keydown', (event) => {
+    if (event.code === 'KeyP' || event.code === 'Escape') {
+        if (state.running) {
+            event.preventDefault();
+            togglePause();
+        }
+        return;
+    }
+    if (event.code === 'KeyR' && (state.over || !state.running)) {
+        event.preventDefault();
+        resetState();
+        startGame();
+        return;
+    }
     if (['ArrowUp', 'KeyW', 'Space'].includes(event.code)) {
         event.preventDefault();
         if (event.repeat) return;

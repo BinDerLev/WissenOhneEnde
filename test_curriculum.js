@@ -73,10 +73,16 @@ function createElement() {
       return selector === "h3" ? { textContent: "Testspiel" } : null;
     },
     getBoundingClientRect() {
-      return { left: 0, top: 0 };
+      return { left: 0, top: 0, width: 100, height: 100 };
     },
     appendChild(child) {
       this.children.push(child);
+    },
+    append(child) {
+      this.appendChild(child);
+    },
+    animate() {
+      return { finished: new Promise(() => {}) };
     },
     remove() {},
     focus() {},
@@ -90,6 +96,8 @@ function createLearningContext(storageValues = {}) {
     if (!elements.has(selector)) elements.set(selector, createElement());
     return elements.get(selector);
   };
+  const lesson = getElement("#lesson");
+  lesson.querySelector = getElement;
   const keydownListeners = [];
   const document = {
     createElement: () => createElement(),
@@ -110,6 +118,12 @@ function createLearningContext(storageValues = {}) {
   const context = vm.createContext({
     console: { log() {}, warn() {}, error() {} },
     document,
+    window: {
+      innerHeight: 800,
+      addEventListener() {},
+      scrollTo() {},
+      matchMedia: () => ({ matches: false })
+    },
     localStorage,
     Date,
     Intl,
@@ -787,6 +801,36 @@ function assertNumericQuestionMatchesTask(skill, question) {
     assert.ok(Math.abs(germanNumber(displayedResult[1]) - expected) < 1e-9, `ratio solution has wrong result: ${question.solution}`);
     return;
   }
+  if (skill === "money" && question.mathOperation) {
+    const cases = [
+      [/jetzt gespart|jetzt im Bus|sammelt sie an diesem Tag/, (a, b) => a + b],
+      [/noch auf dem Wagen|noch frei/, (a, b) => a - b],
+      [/Geld bekommt er zurück/, (a, b) => b - a],
+      [/gleichmäßig|gleich große Gruppen|Wie viele Tütchen/, (a, b) => a / b],
+      [/Wie viele Erdbeerpflanzen|Wie viele Wimpel|Wie viele Räder|Wie viel bezahlt sie insgesamt/, (a, b) => a * b]
+    ];
+    const rule = cases.find(([pattern]) => pattern.test(question.text));
+    assert.ok(rule, question.text);
+    const values = question.text.match(/\d+/g).map(Number);
+    assert.equal(values.length, 2, question.text);
+    const answer = rule[1](...values);
+    assert.equal(question.answer, answer, question.text);
+    const [, left, operator, right, result] = question.solution.match(/^(\d+) ([+−×:]) (\d+) = (\d+)$/);
+    const calculate = { "+": (a, b) => a + b, "−": (a, b) => a - b, "×": (a, b) => a * b, ":": (a, b) => a / b };
+    assert.deepEqual([Number(left), Number(right)].sort(), values.sort(), question.solution);
+    assert.equal(calculate[operator](Number(left), Number(right)), answer, question.solution);
+    assert.equal(Number(result), answer, question.solution);
+    return;
+  }
+  if (skill === "decimal" && question.mathContext) {
+    const money = [...question.text.matchAll(/(\d+,\d{2}) €/g)].map(([, value]) => germanNumber(value));
+    assert.equal(money.length, 2, question.text);
+    const subtract = /Wechselgeld|Geld bleibt ihr|Geld bleibt übrig|Rückgeld|von den Einnahmen|fehlt ihr noch|Wie viel mehr|Geld bekommt er zurück|mit Gutschein/.test(question.text);
+    const expected = Math.round((subtract ? Math.abs(money[0] - money[1]) : money[0] + money[1]) * 100) / 100;
+    assert.equal(question.answer, expected, question.text);
+    assert.ok(question.solution.endsWith(`= ${expected.toFixed(2).replace(".", ",")} €`), question.solution);
+    return;
+  }
   const patterns = {
     "fraction-add": { expression: /Berechne (\d+)\/(\d+) \+ (\d+)\/(\d+)/, calculate: ([, a, b, c, d]) => Number(a) / Number(b) + Number(c) / Number(d) },
     "fraction-subtract": { expression: /Berechne (\d+)\/(\d+) − (\d+)\/(\d+)/, calculate: ([, a, b, c, d]) => Number(a) / Number(b) - Number(c) / Number(d) },
@@ -798,7 +842,7 @@ function assertNumericQuestionMatchesTask(skill, question) {
     },
     "decimal-multiply": { expression: /Berechne (\d+,\d) × (\d+,\d)/, calculate: ([, a, b]) => germanNumber(a) * germanNumber(b) },
     "decimal-divide": { expression: /Berechne (\d+,\d) ÷ (\d+)/, calculate: ([, a, b]) => germanNumber(a) / Number(b) },
-    volume: { expression: /Quader ist (\d+) cm lang, (\d+) cm breit und (\d+) cm hoch/, calculate: ([, a, b, c]) => Number(a) * Number(b) * Number(c) },
+    volume: { expression: /Innenmaße sind (\d+) cm \(Länge\), (\d+) cm \(Breite\) und (\d+) cm \(Höhe\)/, calculate: ([, a, b, c]) => Number(a) * Number(b) * Number(c) },
     mean: { expression: /Mittel von (\d+), (\d+) und (\d+)/, calculate: ([, a, b, c]) => (Number(a) + Number(b) + Number(c)) / 3 },
     term: { expression: /Berechne (\d+) \+ (\d+) × (\d+)/, calculate: ([, a, b, c]) => Number(a) + Number(b) * Number(c) },
     "double-half": {
@@ -822,8 +866,8 @@ function assertNumericQuestionMatchesTask(skill, question) {
       calculate: ([, dividend, divisor]) => Number(dividend) / Number(divisor)
     },
     coins: {
-      expression: /(\d+) Münzen zu 10 Cent, (\d+) Münzen zu 20 Cent und (\d+) Münzen zu 5 Cent/,
-      calculate: ([, tens, twenties, fives]) => Number(tens) * 10 + Number(twenties) * 20 + Number(fives) * 5
+      expression: /(\d+) Münzen? zu (\d+) Cent, (\d+) Münzen? zu (\d+) Cent und (\d+) Münzen? zu (\d+) Cent/,
+      calculate: ([, a, x, b, y, c, z]) => a * x + b * y + c * z
     },
     time: {
       expression: /beginnt um (\d+):00 Uhr und endet um (\d+):00 Uhr/,
@@ -834,8 +878,8 @@ function assertNumericQuestionMatchesTask(skill, question) {
       calculate: ([, a, b, c, d]) => Number(a) / Number(b) > Number(c) / Number(d) ? Number(a) : Number(c)
     },
     data: {
-      expression: /wählen (\d+) Kinder Äpfel und (\d+) Kinder Birnen\. (.*)/,
-      calculate: ([, apples, pears, task]) => task.includes("mehr") ? Number(pears) - Number(apples) : Number(apples) + Number(pears)
+      expression: /(\d+) Kinder wählen .+ und (\d+) Kinder wählen .+?\. (.*)/,
+      calculate: ([, first, second, task]) => task.includes("unterscheiden") ? Math.abs(first - second) : Number(first) + Number(second)
     },
     add: {
       expression: /Wie viel ist (-?\d+) ([+−]) (-?\d+)\?/,
@@ -854,30 +898,30 @@ function assertNumericQuestionMatchesTask(skill, question) {
       calculate: ([, left, right]) => Number(left) * Number(right)
     },
     money: {
-      expression: /Ein Heft kostet (\d+) €. Wie viel kosten (\d+) Hefte/,
-      calculate: ([, price, count]) => Number(price) * Number(count)
+      expression: /kostet (?:.*? )?(\d+,\d{2}) €\. Wie viel kosten (\d+) /,
+      calculate: ([, price, count]) => Math.round(germanNumber(price) * 100) * count / 100
     },
     fractions: {
-      expression: /Wie viel ist (\d+)\/(\d+) von (\d+)\?/,
-      calculate: ([, numerator, denominator, whole]) => Number(numerator) * Number(whole) / Number(denominator)
+      expression: /(\d+)[^.]+\. (\d+)\/(\d+) /,
+      calculate: ([, whole, numerator, denominator]) => Number(numerator) * Number(whole) / Number(denominator)
     },
     decimal: {
       expression: /Wie viel ist (\d+,\d) ([+−]) (\d+,\d)\?/,
       calculate: ([, left, operator, right]) => Math.round((operator === "+" ? germanNumber(left) + germanNumber(right) : germanNumber(left) - germanNumber(right)) * 10) / 10
     },
     geometry: {
-      expression: /Ein Rechteck ist (\d+) cm lang und (\d+) cm breit\. Wie groß ist (sein Umfang in cm|seine Fläche in cm²)\?/,
-      calculate: ([, length, width, measure]) => measure.startsWith("sein Umfang")
+      expression: /ist (\d+) (cm|m) lang und (\d+) \2 breit\. Wie groß ist (der Umfang in \2|die Fläche in \2²)\?/,
+      calculate: ([, length, , width, measure]) => measure.startsWith("der Umfang")
         ? 2 * (Number(length) + Number(width))
         : Number(length) * Number(width)
     },
     units: {
-      expression: /Wie viele (Zentimeter|Meter) sind (\d+) (Meter|Zentimeter)\?/,
-      calculate: ([, target, amount]) => target === "Zentimeter" ? Number(amount) * 100 : Number(amount) / 100
+      expression: /ist (\d+) (Meter|Zentimeter) lang\. Wie viele (Zentimeter|Meter) sind das\?/,
+      calculate: ([, amount, source, target]) => source === target ? NaN : target === "Zentimeter" ? Number(amount) * 100 : Number(amount) / 100
     },
     percent: {
-      expression: /Wie viel sind (\d+) % von (\d+)\?/,
-      calculate: ([, percentage, whole]) => Number(percentage) * Number(whole) / 100
+      expression: /(\d+)[^.]+\. [^.]*?(\d+) %/,
+      calculate: ([, whole, percentage]) => Number(percentage) * Number(whole) / 100
     },
     negative: {
       expression: /Wie viel ist (-?\d+) \+ \((-?\d+)\)\?/,
@@ -922,7 +966,7 @@ function assertNumericQuestionMatchesTask(skill, question) {
   if (question.solution) {
     const displayedAnswer = Number.isInteger(expected)
       ? String(expected)
-      : skill === "trig"
+      : skill === "trig" || skill === "money"
         ? expected.toFixed(2).replace(".", ",")
         : expected.toFixed(1).replace(".", ",");
     assert.ok(
@@ -1429,6 +1473,61 @@ test("pressing Enter after a correct answer advances to the next exercise", () =
   assert.equal(vm.runInContext("activeLesson.position", context), 1, "Enter must not skip an unresolved exercise");
 });
 
+test("math word-problem lessons show eight different situations across the curriculum", () => {
+  const { context } = createLearningContext();
+  useDeterministicRandom(context, 0x2911);
+  const topics = vm.runInContext("curriculum", context);
+  const contextualSkills = new Set(["time", "coins", "data", "money", "fractions", "geometry", "units", "percent", "volume", "ratio"]);
+  for (const [grade, gradeTopics] of Object.entries(topics)) {
+    vm.runInContext(`progress.subject = "math"; progress.grade = ${Number(grade)};`, context);
+    for (const [index, topic] of gradeTopics.entries()) {
+      const skill = topic.mode || topic.skill;
+      if (!contextualSkills.has(skill) && !topic.moneyContext) continue;
+      const seen = new Set();
+      for (let round = 0; round < 3; round += 1) {
+        const label = `Grade ${grade}, ${topic.title}, round ${round + 1}`;
+        context.startLesson(index);
+        const questions = vm.runInContext("activeLesson.questions", context);
+        assert.equal(questions.length, 8, label);
+        assert.ok(questions.every(question => question.mathContext), label);
+        assert.equal(new Set(questions.map(question => question.mathContext)).size, 8, label);
+        if (topic.wordProblems) {
+          assert.deepEqual(new Set(questions.map(question => question.mathOperation)), new Set(["+", "−", "×", ":"]), label);
+        }
+        for (const question of questions) {
+          assertNumericQuestionMatchesTask(skill, question);
+          if (skill === "coins") assert.ok(question.answer <= 100, question.text);
+          if (grade === "1") assert.ok(question.answer <= 20, question.text);
+          seen.add(question.mathContext);
+        }
+      }
+      assert.ok(seen.size > 8, `${topic.title} repeats the same situations every round`);
+    }
+  }
+});
+
+test("the reported notebook answer and cent-exact purchase answers use the normal input check", () => {
+  const { context } = createLearningContext();
+  useDeterministicRandom(context, 1927);
+  vm.runInContext('progress.subject = "math"; progress.grade = 3; startLesson(5); activeLesson.started = true; renderLesson();', context);
+  const generated = vm.runInContext("Array.from({ length: 50 }, () => makeQuestion(curriculum[3][5])).find(question => question.answer % 1 !== 0)", context);
+  assert.ok(generated, "the purchase generator must produce amounts with cents");
+  const notebook = { text: "Ein Heft kostet 3,00 €. Wie viel kosten 9 Hefte? (in €)", answer: 27 };
+  assertNumericQuestionMatchesTask("money", notebook);
+  for (const [question, input, correct] of [
+    [notebook, "27", true],
+    [notebook, "27,00", true],
+    [generated, String(generated.answer).replace(".", ","), true],
+    [generated, (generated.answer + 0.01).toFixed(2), false]
+  ]) {
+    context.questionToCheck = question;
+    vm.runInContext("activeLesson.questions[0] = questionToCheck; activeLesson.firstAttempts[0] = null; activeLesson.resolved = false; renderLesson();", context);
+    context.document.querySelector("#answer-input").value = input;
+    context.checkAnswer(null);
+    assert.equal(vm.runInContext("activeLesson.firstAttempts[0]", context), correct);
+  }
+});
+
 test("ratio lessons mix eight contexts and avoid repeated content across three rounds", () => {
   for (const seed of [1, 42, 20261113, 0xdeadbeef]) {
     const { context } = createLearningContext();
@@ -1438,7 +1537,7 @@ test("ratio lessons mix eight contexts and avoid repeated content across three r
     for (let round = 0; round < 3; round += 1) {
       const questions = context.makeUniqueQuestions({ skill: "ratio" }, 8);
       assert.equal(questions.length, 8);
-      assert.equal(new Set(questions.map(question => question.ratioContext)).size, 8, "different numbers must not crowd out different everyday situations");
+      assert.equal(new Set(questions.map(question => question.mathContext)).size, 8, "different numbers must not crowd out different everyday situations");
       for (const question of questions) {
         assertNumericQuestionMatchesTask("ratio", question);
         const identity = context.questionIdentity(question);
@@ -1480,8 +1579,8 @@ test("ratio scenarios use bounded everyday quantities, plausible example rates a
     assertNumericQuestionMatchesTask("ratio", question);
     assert.ok(!/Stift/.test(question.text));
     const [givenQuantity, givenValue, target] = question.text.match(/\d+(?:,\d+)?/g).map(germanNumber);
-    const rule = limits[question.ratioContext];
-    assert.ok(rule, `unreviewed ratio scenario: ${question.ratioContext}`);
+    const rule = limits[question.mathContext];
+    assert.ok(rule, `unreviewed ratio scenario: ${question.mathContext}`);
     assert.match(question.text, rule.noun);
     const backwards = /(?:Für wie viele|Wie viele) /.test(question.text);
     const targetQuantity = backwards ? question.answer : target;
@@ -1499,7 +1598,7 @@ test("ratio scenarios use bounded everyday quantities, plausible example rates a
     } else {
       assert.match(question.text, /gleich|dieselbe/);
     }
-    seen.add(`${question.ratioContext}:${backwards ? "quantity" : "value"}`);
+    seen.add(`${question.mathContext}:${backwards ? "quantity" : "value"}`);
     if (targetQuantity > givenQuantity) larger++;
     if (targetQuantity < givenQuantity) smaller++;
     if (!Number.isInteger(targetQuantity / givenQuantity) && !Number.isInteger(givenQuantity / targetQuantity)) nonIntegralScale++;
